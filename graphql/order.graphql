@@ -1,0 +1,218 @@
+query sendOTPGuestOrder($verify: VerifyGuestOrderInput!) {
+  sendOTPGuestOrder(input: $verify)
+}
+query verifyOTPGuestOrder($verify: CustomerDetailsInput!) {
+  verifyOTPGuestOrder(input: $verify) {
+    success
+    customer {
+      firstName
+      lastName
+      email
+      phone
+    }
+  }
+}
+
+mutation CreateOrder($createOrder: CreateOrderInput!) {
+  createOrder(input: $createOrder) {
+    success
+    message
+    orderId
+  }
+}
+
+query fetchCustomerOrders {
+  fetchCustomerOrders {
+    _id
+    createdAt
+    orderType
+    orderId
+    totalAmount
+    items {
+      qty
+      itemPrice
+      itemId {
+        name
+        desc
+      }
+      modifierGroups {
+        # mgId {
+        #   _id
+        #   pricingType
+        #   price
+        # }
+        selectedModifiers {
+          modifierName
+          modifierPrice
+          qty
+        }
+      }
+    }
+    # orderType
+    # loyaltyTransactions {
+    #   transactionType
+    #   points
+    # }
+    # taxRate
+    # taxRateName
+    # paymentMethod
+  }
+}
+
+query fetchOrderById($id: ID!) {
+  fetchCustomerOrderById(orderId: $id) {
+    _id
+    orderId
+    orderType
+    taxPercent
+    specialRemark
+    tipPercent
+    tipAmount
+    thirdPartyTip
+    deliveryAmount
+    refundAmount
+    deliveryAddress {
+      addressLine1
+      state {
+        stateId
+        stateName
+      }
+      city
+      zipcode
+      coordinate {
+        coordinates
+      }
+      place {
+        placeId
+        displayName
+      }
+    }
+    paymentMethod
+    appliedDiscount {
+      discountType
+      discountAmount
+      loyaltyData {
+        loyaltyPointsRedeemed
+        redeemType
+        redeemItem {
+          itemName
+          itemPrice
+          itemId
+        }
+        redeemDiscount {
+          discountType
+          discountValue
+        }
+      }
+      promoData {
+        code
+        discountType
+        discountValue
+        discountItemId
+        discountItemName
+        uptoAmount
+      }
+    }
+    createdAt
+    pickUpDateAndTime
+    deliveryDateAndTime
+    items {
+      itemPrice
+      itemRemarks
+      qty
+      itemName
+      modifierGroups {
+        mgName
+        price
+        selectedModifiers {
+          modifierName
+          modifierPrice
+          qty
+        }
+      }
+    }
+    taxAmount
+    grossAmount
+    subTotalAmount
+    finalAmount
+    discountAmount
+    platformFees
+    createdAt
+    paymentMethod
+    status
+
+    guestData {
+      phone
+    }
+    orderType
+    customerInfo {
+      name
+      email
+      phone
+    }
+    restaurantInfo {
+      name
+      email
+      phone
+      address {
+        addressLine1
+        state {
+          stateName
+        }
+        city
+        zipcode
+        place {
+          displayName
+        }
+      }
+    }
+    loyaltyTransactions {
+      transactionType
+      points
+    }
+  }
+}
+
+query CreateCheckoutPaymentIntent {
+  createCheckoutPaymentIntent {
+    cs
+    id
+  }
+}
+
+query validateDelivery($input: ValidateDeliveryInput!) {
+  validateDelivery(input: $input)
+}
+
+query fetchDeliveryFee {
+  fetchDeliveryFee
+}
+
+query getStripeAccountId {
+  getStripeAccountId
+}
+query fetchProcessingFee {
+  fetchProcessingFee
+}
+
+query updateCartTip($tipPercent: Float!) {
+  updateCartTip(tipPercent: $tipPercent)
+}
+
+query GetPaymentStatus($paymentIntentId: String!, $paymentCs: String!) {
+  getPaymentStatus(paymentIntentId: $paymentIntentId, paymentCs: $paymentCs)
+}
+
+mutation createOrderWithoutPayment(
+  $createOrder: CreateOrderWihoutPaymentInput!
+) {
+  createOrderWithoutPayment(input: $createOrder) {
+    success
+    message
+    orderId
+  }
+}
+
+query checkDeliveryAvailable {
+  checkDeliveryAvailable
+}

@@ -1,0 +1,43 @@
+query meCustomer {
+  meCustomer {
+    _id
+    firstName
+    lastName
+    email
+    phone
+    dob
+    accountPreferences {
+      sms
+      email
+    }
+    loyaltyWallet {
+      balance
+    }
+  }
+}
+
+mutation UpdateCustomerDetails($input: UpdateCustomerDetailsInput!) {
+  updateCustomerDetails(input: $input) {
+    _id
+  }
+}
+
+query customerSignUp($input: CustomerSignupInput!) {
+  customerSignUp(input: $input)
+}
+
+query customerSignUpVerification($input: CustomerSignupVerificationInput!) {
+  customerSignUpVerification(input: $input)
+}
+
+query customerLogin($input: String!) {
+  customerLogin(input: $input)
+}
+
+query customerLoginVerification($contact: String!, $otp: String!) {
+  customerLoginVerification(input: { contact: $contact, otp: $otp })
+}
+
+query customerLogout {
+  customerLogout
+}

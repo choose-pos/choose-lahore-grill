@@ -1,0 +1,145 @@
+query GetCmsDetails {
+  getCmsDetails {
+    _id
+    themeConfig {
+      theme
+      background
+      primary
+      secondary
+      text
+    }
+    domainConfig {
+      website
+    }
+    onlineOrderingConfig {
+      websiteLink
+      primaryTextColor
+    }
+    heroSection {
+      show
+      navTitle
+      heroItems {
+        _id
+        image {
+          desktop
+          mobile
+        }
+        title
+        caption
+        button {
+          title
+          link
+          textColor
+        }
+      }
+    }
+    menuSection {
+      show
+      navTitle
+      sectionTitle
+      items {
+        item {
+          _id
+        }
+        title
+        description
+        image
+      }
+    }
+    contentSection {
+      show
+      navTitle
+      sectionTitle
+      sectionContent
+    }
+    gridSection {
+      show
+      navTitle
+      sectionTitle
+      grid1 {
+        title
+        image
+        description
+      }
+      grid2 {
+        title
+        image
+        description
+      }
+      grid3 {
+        title
+        image
+        description
+      }
+    }
+    contentWithImageSection {
+      show
+      navTitle
+      contentItems {
+        _id
+        sectionTitle
+        sectionContent
+        image {
+          desktop
+          mobile
+        }
+        side
+      }
+    }
+    reviewSection {
+      show
+      navTitle
+      reviews {
+        _id
+        content
+        name
+      }
+    }
+    websiteSeo {
+      pageTitle
+      metaDescription
+    }
+  }
+}
+
+query GetCmsRestaurantDetails {
+  getCmsRestaurantDetails {
+    _id
+    name
+    brandingLogo
+    address {
+      addressLine1
+      addressLine2
+      city
+      state {
+        stateName
+      }
+      city
+      zipcode
+      coordinate {
+        coordinates
+      }
+      place {
+        displayName
+      }
+    }
+    availability {
+      day
+      hours {
+        start
+        end
+      }
+      active
+    }
+    email
+    phone
+    socialInfo {
+      facebook
+      instagram
+    }
+  }
+}
+
+mutation cmsContactUs($input: CmsContactInput!) {
+  cmsContactUs(input: $input)
+}

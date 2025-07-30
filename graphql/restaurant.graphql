@@ -1,0 +1,191 @@
+query GetCustomerRestaurantDetails {
+  getCustomerRestaurantDetails {
+    name
+    _id
+    restaurantConfigs {
+      pickup
+      allowTips
+      onlineOrdering
+      scheduleOrders
+    }
+    fulfillmentConfig {
+      prepTime
+      deliveryTime
+      largeOrderTreshold
+      largeOrderExtraTime
+    }
+    deliveryConfig {
+      provideDelivery
+      deliveryZone {
+        minimumOrderValue
+        _id
+        provider
+        costCovered
+        radius
+      }
+    }
+    timezone {
+      timezoneName
+    }
+    onlineOrderTimingConfig {
+      startAfterMinutes
+      endBeforeMinutes
+    }
+    address {
+      addressLine1
+      addressLine2
+      state {
+        stateName
+        stateId
+      }
+      city
+      zipcode
+      coordinate {
+        coordinates
+      }
+      place {
+        placeId
+        displayName
+      }
+    }
+    brandingLogo
+    website
+    socialInfo {
+      facebook
+      instagram
+    }
+    availability {
+      day
+      hours {
+        start
+        end
+      }
+      active
+    }
+    category
+    beverageCategory
+    foodType
+    dineInCapacity
+    type
+    meatType
+    taxRates {
+      name
+      _id
+      salesTax
+    }
+  }
+}
+
+query getCustomerCategoriesAndItems(
+  $ItemOptionSelected: [ItemOptionsEnum!]
+  $searchText: String
+) {
+  getCustomerCategoriesAndItems(
+    ItemOptionSelected: $ItemOptionSelected
+    searchText: $searchText
+  ) {
+    _id
+    name
+    desc
+    availability {
+      day
+      hours {
+        start
+        end
+      }
+      active
+    }
+    items {
+      desc
+      name
+      image
+      price
+      options {
+        displayName
+        type
+        _id
+        status
+      }
+      modifierGroup {
+        name
+      }
+      orderLimitTracker
+      priceOptions {
+        menuType
+        price
+      }
+      _id
+      status
+      visibility {
+        menuType
+        status
+      }
+      availability {
+        day
+        hours {
+          start
+          end
+        }
+        active
+      }
+    }
+
+    createdAt
+    updatedAt
+  }
+}
+
+query getCustomerItem($id: String!) {
+  getCustomerItem(id: $id) {
+    id
+    name
+    desc
+    price
+    image
+    upSellItems {
+      itemId
+      name
+      desc
+      price
+      image
+    }
+    options {
+      displayName
+      _id
+      type
+      desc
+      status
+    }
+    availability {
+      _id
+      day
+      hours {
+        start
+        end
+      }
+      active
+    }
+    modifierGroups {
+      id
+      name
+      optional
+      multiSelect
+      desc
+      price
+      minSelections
+      maxSelections
+      pricingType
+      allowMultiSelctSingleModsInGroup
+      maxSelctSingleModsInGroup
+      isMaxSelctSingleModsInGroupUnlimited
+      modifiers {
+        id
+        name
+        desc
+        preSelect
+        price
+        isItem
+      }
+    }
+  }
+}

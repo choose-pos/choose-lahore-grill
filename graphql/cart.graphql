@@ -1,0 +1,116 @@
+mutation AddToCart($items: [CartItemInput!]!) {
+  addToCart(items: $items)
+}
+
+mutation DeleteCartItem($id: String!) {
+  deleteCartItem(id: $id)
+}
+
+mutation IncreaseItemQty($id: String!) {
+  increaseItemQty(id: $id)
+}
+
+mutation DecreaseItemQty($id: String!) {
+  decreaseItemQty(id: $id)
+}
+
+mutation UpdateCartItem($input: UpdateCartItemInput!) {
+  updateCartItem(input: $input)
+}
+
+mutation ClearCart {
+  clearCart
+}
+
+query FetchCartItems {
+  fetchCartItems {
+    message
+    cartData {
+      _id
+      qty
+      itemId {
+        image
+        _id
+        name
+        price
+        priceOptions {
+          menuType
+          price
+        }
+      }
+      qty
+      remarks
+      modifierGroups {
+        mgId {
+          name
+          pricingType
+          price
+          _id
+        }
+        selectedModifiers {
+          qty
+          mid {
+            name
+            price
+            _id
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation updateCartDetails($input: UpdateCartDetailsInput!) {
+  updateCartDetails(input: $input)
+}
+
+query CalculateFinalAmount {
+  calculateFinalAmount
+}
+
+query fetchCartDetails {
+  fetchCartDetails {
+    _id
+    customerDetails {
+      firstName
+    }
+    orderType
+    delivery {
+      _id
+      addressLine1
+      addressLine2
+      state {
+        stateId
+        stateName
+      }
+      city
+      zipcode
+      coordinate {
+        type
+        coordinates
+      }
+      place {
+        placeId
+        displayName
+      }
+    }
+    amounts {
+      subTotalAmount
+      discountAmount
+      discountPercent
+      discountUpto
+      tipPercent
+    }
+    discountString
+    discountItemImage
+    discountCode
+    loyaltyType
+    loyaltyRedeemPoints
+    pickUpDateAndTime
+    deliveryDateAndTime
+  }
+}
+
+query fetchCartCount {
+  fetchCartCount
+}

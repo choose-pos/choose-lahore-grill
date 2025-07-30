@@ -1,0 +1,33 @@
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const Env = createEnv({
+  client: {
+    NEXT_PUBLIC_THEME: z.string().min(1),
+    NEXT_PUBLIC_BACKGROUND_COLOR: z.string().min(1),
+    NEXT_PUBLIC_PRIMARY_COLOR: z.string().min(1),
+    NEXT_PUBLIC_SECONDARY_COLOR: z.string().min(1),
+    NEXT_PUBLIC_TEXT_COLOR: z.string().min(1),
+    NEXT_PUBLIC_ORDERING_PRIMARY_TEXT_COLOR: z.string().min(1),
+    NEXT_PUBLIC_RESTAURANT_ID: z.string().min(1),
+    NEXT_PUBLIC_DOMAIN: z.string().url(),
+    NEXT_PUBLIC_SERVER_BASE_URL: z.string().url(),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
+    NEXT_PUBLIC_TRACKING_URL: z.string().min(1),
+  },
+  runtimeEnv: {
+    NEXT_PUBLIC_THEME: process.env.NEXT_PUBLIC_THEME,
+    NEXT_PUBLIC_BACKGROUND_COLOR: process.env.NEXT_PUBLIC_BACKGROUND_COLOR,
+    NEXT_PUBLIC_PRIMARY_COLOR: process.env.NEXT_PUBLIC_PRIMARY_COLOR,
+    NEXT_PUBLIC_SECONDARY_COLOR: process.env.NEXT_PUBLIC_SECONDARY_COLOR,
+    NEXT_PUBLIC_TEXT_COLOR: process.env.NEXT_PUBLIC_TEXT_COLOR,
+    NEXT_PUBLIC_ORDERING_PRIMARY_TEXT_COLOR:
+      process.env.NEXT_PUBLIC_ORDERING_PRIMARY_TEXT_COLOR,
+    NEXT_PUBLIC_RESTAURANT_ID: process.env.NEXT_PUBLIC_RESTAURANT_ID,
+    NEXT_PUBLIC_DOMAIN: process.env.NEXT_PUBLIC_DOMAIN,
+    NEXT_PUBLIC_SERVER_BASE_URL: process.env.NEXT_PUBLIC_SERVER_BASE_URL,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_TRACKING_URL: process.env.NEXT_PUBLIC_TRACKING_URL,
+  },
+});

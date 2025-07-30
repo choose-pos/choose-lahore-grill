@@ -1,0 +1,76 @@
+# mutation createGiftCard($input: CreateGiftCardInput!) {
+#   createGiftCard(input: $input) {
+#     code
+#   }
+# }
+
+mutation ValidatePromoCode($code: String!) {
+  validatePromoCode(code: $code) {
+    _id
+    code
+    discountValue
+    promoCodeDiscountType
+    startDate
+    uptoAmount
+    endDate
+    discountItem {
+      name
+      price
+      image
+    }
+  }
+}
+
+# For Gift Cards
+# mutation ValidateGiftCard($code: String!) {
+#   validateGiftCard(code: $code) {
+#     _id
+#     code
+#     amount
+#     expiryDate
+#     isActive
+#   }
+# }
+
+# query fetchCustomerGiftCards {
+#   fetchCustomerGiftCards {
+#     _id
+#     code
+#     expiryDate
+#     isActive
+#     usedBy {
+#       firstName
+#       lastName
+#       email
+#     }
+#     usedAt
+#     updatedAt
+#   }
+# }
+
+
+query fetchVisiblePromoCodes{
+  fetchVisiblePromoCodes{
+    _id
+    code
+    description
+    isActive
+    minCartValue
+    promoCodeDiscountType
+    discountValue
+    couponUsageType
+    uptoAmount
+    discountItem{
+      name
+      desc
+      price
+      priceOptions{
+        menuType
+        price
+      }
+      
+    }
+    
+  }
+}
+

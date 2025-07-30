@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bawarchiatlanta.bawarchiatlanta",
+      "sha256_cert_fingerprints": [
+        "68:F1:AE:36:22:68:D5:FA:DA:76:B3:DB:CC:4C:BE:A2:F8:66:AB:F5:1C:0B:36:9F:70:CE:21:E1:2A:50:F8:A8"
+      ]
+    }
+  }
+]

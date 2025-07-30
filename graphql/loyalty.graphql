@@ -1,0 +1,56 @@
+# query fetchLoyaltyRules {
+#   fetchLoyaltyRules {
+#     _id
+#     type
+#     isLoyaltyTypeActive
+#     rewardPoints
+#   }
+# }
+
+query fetchLoyaltyCustomerRules {
+  fetchLoyaltyCustomerRules {
+    signUpRewardActive
+    signUpRewardValue
+    onOrderRewardActive
+    onOrderRewardValue
+    onBirthdayRewardActive
+    onBirthdayRewardValue
+    programName
+    programDesc
+  }
+}
+
+query fetchRestaurantRedeemOffers {
+  fetchRestaurantRedeemOffers {
+    pointsRedemptions {
+      _id
+
+      pointsThreshold
+      discountType
+      discountValue
+      uptoAmount
+    }
+    itemRedemptions {
+      _id
+      item {
+        image
+        name
+        _id
+        price
+      }
+      pointsThreshold
+    }
+  }
+}
+
+query fetchCustomerLoyaltyWallet {
+  fetchCustomerLoyaltyWallet {
+    _id
+    balance
+    lifeTimePointsEarned
+  }
+}
+
+mutation validateLoyaltyRedemptionOnCart($input: LoyaltyInput!) {
+  validateLoyaltyRedemptionOnCart(input: $input)
+}

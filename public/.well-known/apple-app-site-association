@@ -1,0 +1,25 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "6LW3D5Y97D.com.bawarchiatlanta.bawarchiatlanta"
+        ],
+        "paths": [
+          "*"
+        ],
+        "components": [
+          {
+            "/": "/*"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "6LW3D5Y97D.com.bawarchiatlanta.bawarchiatlanta"
+    ]
+  }
+}

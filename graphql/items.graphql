@@ -1,0 +1,14 @@
+# query getCustomerRestaurantItems($id: String!) {
+#   getCustomerRestaurantItems(id: $id) {
+#     items {
+#       _id
+#       name
+#       desc
+#       image
+#       visibility {
+#         menuType
+#         status
+#       }
+#     }
+#   }
+# }
