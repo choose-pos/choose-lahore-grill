@@ -12,25 +12,28 @@ import PartyClient from "./PartyClient";
 export const revalidate = 86400; // 1 day
 
 export const metadata: Metadata = {
-  title: "Groups and Parties | Saffron",
+  title:
+    "Banquet Hall in Marietta – Lahore Grill | Elegant Venue for All Occasions",
   description:
-    "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+    "Lahore Grill’s banquet hall in Marietta blends elegance with tradition. Ideal for weddings, birthdays, and cultural events, with full halal catering and warm hospitality.",
   openGraph: {
-    title: "Groups and Parties | Saffron",
+    title:
+      "Banquet Hall in Marietta – Lahore Grill | Elegant Venue for All Occasions",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Lahore Grill’s banquet hall in Marietta blends elegance with tradition. Ideal for weddings, birthdays, and cultural events, with full halal catering and warm hospitality.",
     images: [{ url: "/Saffron.jpg" }],
     type: "article",
   },
   twitter: {
     card: "summary",
-    title: "Groups and Parties | Saffron",
+    title:
+      "Banquet Hall in Marietta – Lahore Grill | Elegant Venue for All Occasions",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Lahore Grill’s banquet hall in Marietta blends elegance with tradition. Ideal for weddings, birthdays, and cultural events, with full halal catering and warm hospitality.",
     images: ["/Saffron.jpg"],
   },
   alternates: {
-    canonical: "https://saffroncary.com/parties",
+    canonical: "https://lahoregrill.com/parties",
   },
 };
 

@@ -11,25 +11,28 @@ import CateringPageClient from "./CateringPage";
 export const revalidate = 86400; // 1 day
 
 export const metadata: Metadata = {
-  title: "Best Indian Catering in Cary, North Carolina",
+  title:
+    "Catering in Marietta –  Lahore Grill Pakistani, Indian & Halal Restaurant",
   description:
-    "Experience premium Indian catering tailored for every occasion—crafted with passion, authenticity, and trusted culinary excellence.",
+    "Bring the bold flavors of Pakistan to your event with Lahore Grill’s halal catering in Marietta, Atlanta. Perfect for weddings, mehndis, office lunches & more. Freshly cooked, custom packages, and timely delivery.",
   openGraph: {
-    title: "Best Indian Catering in Cary, North Carolina",
+    title:
+      "Catering in Marietta –  Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
-      "Experience premium Indian catering tailored for every occasion—crafted with passion, authenticity, and trusted culinary excellence.",
+      "Bring the bold flavors of Pakistan to your event with Lahore Grill’s halal catering in Marietta, Atlanta. Perfect for weddings, mehndis, office lunches & more. Freshly cooked, custom packages, and timely delivery.",
     images: [{ url: "/Saffron.jpg" }],
     type: "article",
   },
   twitter: {
     card: "summary",
-    title: "Best Indian Catering in Cary, North Carolina",
+    title:
+      "Catering in Marietta –  Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
-      "Experience premium Indian catering tailored for every occasion—crafted with passion, authenticity, and trusted culinary excellence.",
+      "Bring the bold flavors of Pakistan to your event with Lahore Grill’s halal catering in Marietta, Atlanta. Perfect for weddings, mehndis, office lunches & more. Freshly cooked, custom packages, and timely delivery.",
     images: ["/Saffron.jpg"],
   },
   alternates: {
-    canonical: "https://saffroncary.com/catering",
+    canonical: "https://lahoregrill.com/catering",
   },
 };
 

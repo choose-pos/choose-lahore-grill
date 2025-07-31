@@ -12,25 +12,27 @@ import PartyClient from "./contact";
 export const revalidate = 86400; // 1 day
 
 export const metadata: Metadata = {
-  title: "Groups and Parties | Saffron",
+  title: "Contact Lahore Grill Marietta – Get in Touch for Orders & Inquiries",
   description:
-    "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+    "Contact Lahore Grill in Marietta, Atlanta. Call, email, or fill out our form for quick assistance.",
   openGraph: {
-    title: "Groups and Parties | Saffron",
+    title:
+      "Contact Lahore Grill Marietta – Get in Touch for Orders & Inquiries",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Contact Lahore Grill in Marietta, Atlanta. Call, email, or fill out our form for quick assistance.",
     images: [{ url: "/Saffron.jpg" }],
     type: "article",
   },
   twitter: {
     card: "summary",
-    title: "Groups and Parties | Saffron",
+    title:
+      "Contact Lahore Grill Marietta – Get in Touch for Orders & Inquiries",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Contact Lahore Grill in Marietta, Atlanta. Call, email, or fill out our form for quick assistance.",
     images: ["/Saffron.jpg"],
   },
   alternates: {
-    canonical: "https://saffroncary.com/parties",
+    canonical: "https://lahoregrill.com/contact",
   },
 };
 

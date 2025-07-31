@@ -126,7 +126,7 @@ const GetInTouch: React.FC<IAddressSectionProps> = ({
           id="contact"
           className="relative w-full flex flex-col items-start justify-center px-6 py-16  overflow-hidden max-w-7xl mx-auto"
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-secondary text-bg1 text-start mb-8">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-secondary text-bg1 w-full text-center mb-8">
             Get in Touch
           </h2>
           <form

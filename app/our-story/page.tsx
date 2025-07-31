@@ -11,25 +11,28 @@ import OurStoryClient from "./OurStoryClient";
 export const revalidate = 86400; // 1 day
 
 export const metadata: Metadata = {
-  title: "Our Story | Saffron",
+  title:
+    "Our Story – Lahore Grill Marietta | Authentic Pakistani Cuisine Since 2008",
   description:
-    "Discover the journey of Saffron culinary passion and commitment to authentic Indian cuisine.",
+    "Discover the journey of Lahore Grill – bringing traditional Lahori flavors to Marietta, Atlanta since 2008. Rooted in heritage, crafted with love, and served with halal authenticity.",
   openGraph: {
-    title: "Our Story | Saffron",
+    title:
+      "Our Story – Lahore Grill Marietta | Authentic Pakistani Cuisine Since 2008",
     description:
-      "Discover the story behind culinary passion and commitment to authentic Indian cuisine.",
+      "Discover the journey of Lahore Grill – bringing traditional Lahori flavors to Marietta, Atlanta since 2008. Rooted in heritage, crafted with love, and served with halal authenticity.",
     images: [{ url: "/Saffron.jpg" }],
     type: "article",
   },
   twitter: {
     card: "summary",
-    title: "Our Story | Saffron",
+    title:
+      "Our Story – Lahore Grill Marietta | Authentic Pakistani Cuisine Since 2008",
     description:
-      "Learn about the journey and inspiration behind Saffron restaurant.",
+      "Discover the journey of Lahore Grill – bringing traditional Lahori flavors to Marietta, Atlanta since 2008. Rooted in heritage, crafted with love, and served with halal authenticity.",
     images: ["/Saffron.jpg"],
   },
   alternates: {
-    canonical: "https://saffroncary.com/our-story/",
+    canonical: "https://lahoregrill.com/our-story",
   },
 };
 

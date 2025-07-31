@@ -12,25 +12,28 @@ import PartyClient from "./EventClinet";
 export const revalidate = 86400; // 1 day
 
 export const metadata: Metadata = {
-  title: "Groups and Parties | Saffron",
+  title:
+    "Events in Marietta – Lahore Grill Pakistani, Indian & Halal Restaurant",
   description:
-    "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+    "Plan your perfect event with Lahore Grill in Marietta, Atlanta. From mehndis to corporate parties, enjoy authentic halal Pakistani food and seamless event catering services.",
   openGraph: {
-    title: "Groups and Parties | Saffron",
+    title:
+      "Events in Marietta – Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Plan your perfect event with Lahore Grill in Marietta, Atlanta. From mehndis to corporate parties, enjoy authentic halal Pakistani food and seamless event catering services.",
     images: [{ url: "/Saffron.jpg" }],
     type: "article",
   },
   twitter: {
     card: "summary",
-    title: "Groups and Parties | Saffron",
+    title:
+      "Events in Marietta – Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Plan your perfect event with Lahore Grill in Marietta, Atlanta. From mehndis to corporate parties, enjoy authentic halal Pakistani food and seamless event catering services.",
     images: ["/Saffron.jpg"],
   },
   alternates: {
-    canonical: "https://saffroncary.com/parties",
+    canonical: "https://lahoregrill.com/event",
   },
 };
 

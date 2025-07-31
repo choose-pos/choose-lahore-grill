@@ -12,25 +12,27 @@ import ReservationClient from "./ReservationClient";
 export const revalidate = 86400; // 1 day
 
 export const metadata: Metadata = {
-  title: "Groups and Parties | Saffron",
+  title: "Reserve a Table – Lahore Grill Marietta | Dine-In Pakistani Cuisine",
   description:
-    "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+    "Book your table at Lahore Grill in Marietta for an authentic halal Pakistani dining experience. Perfect for family dinners, date nights & group gatherings. Easy online reservations.",
   openGraph: {
-    title: "Groups and Parties | Saffron",
+    title:
+      "Reserve a Table – Lahore Grill Marietta | Dine-In Pakistani Cuisine",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Book your table at Lahore Grill in Marietta for an authentic halal Pakistani dining experience. Perfect for family dinners, date nights & group gatherings. Easy online reservations.",
     images: [{ url: "/Saffron.jpg" }],
     type: "article",
   },
   twitter: {
     card: "summary",
-    title: "Groups and Parties | Saffron",
+    title:
+      "Reserve a Table – Lahore Grill Marietta | Dine-In Pakistani Cuisine",
     description:
-      "Host unforgettable gatherings with Saffron’s authentic Indian cuisine and elegant ambiance, perfect for any celebration.",
+      "Book your table at Lahore Grill in Marietta for an authentic halal Pakistani dining experience. Perfect for family dinners, date nights & group gatherings. Easy online reservations.",
     images: ["/Saffron.jpg"],
   },
   alternates: {
-    canonical: "https://saffroncary.com/parties",
+    canonical: "https://lahoregrill.com/reservations",
   },
 };
 
@@ -158,9 +160,10 @@ export default async function OurStoryPage() {
     { name: "Home", link: "/" },
     { name: "Our Story", link: "/our-story" },
     { name: "Catering", link: "/catering" },
-    { name: "Parties", link: "/parties" },
+    { name: "Banquet Hall", link: "/parties" },
     { name: "Events", link: "/event" },
     { name: "Reservations", link: "/reservations" },
+    { name: "Contact us", link: "/contact" },
   ];
 
   if (menuSection.show) {

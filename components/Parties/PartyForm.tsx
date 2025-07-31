@@ -365,7 +365,6 @@ const PartyForm: React.FC = () => {
                 className={`w-full p-3 rounded-[10px] border-0 focus:ring-0 ${
                   errors.budgetPerPerson ? "border-2 border-red-500" : ""
                 }`}
-                placeholder="Enter budget amount"
               />
               {errors.budgetPerPerson && (
                 <p className="text-red-500 text-sm mt-1">
