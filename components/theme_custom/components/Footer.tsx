@@ -138,7 +138,7 @@ const Footer: React.FC<IFooterProps> = ({
 
       {/* Bottom Section */}
       <div className="container mx-auto mt-8 pt-4 border-t border-gray-300 flex md:flex-row space-y-4 flex-col md:space-y-0 justify-between md:items-center items-start">
-        <p className="text-sm">Delicious Indian Food in Cary North Carolina</p>
+        <p className="text-sm">Delicious Food in Marietta, Atlanta</p>
         <div className="flex flex-col items-start md:items-end space-y-1">
           <p className="text-sm">
             DEVELOPED BY{" "}

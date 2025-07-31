@@ -159,7 +159,7 @@ const Banner: React.FC<IBanner> = ({
               <Link
                 // target="_blank"
                 href={`/menu`}
-                aria-label="Kwality Link"
+                aria-label="Lahore Link"
               >
                 <button
                   aria-label="Lahore grill delivery"
