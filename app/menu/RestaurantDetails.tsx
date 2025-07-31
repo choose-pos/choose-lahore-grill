@@ -38,6 +38,7 @@ import { FaCartShopping } from "react-icons/fa6";
 import { FiSearch, FiX } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
+import RecentOrders from "@/components/partners/RecentOrders";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
@@ -314,6 +315,7 @@ RestaurantDetailsProps) {
               price: item.price,
               orderLimitTracker: item.orderLimitTracker,
               options: item.options,
+              modifierGroup: item.modifierGroup,
             })),
             availability: category.availability
               ? category.availability.map((avail) => ({
@@ -648,6 +650,7 @@ RestaurantDetailsProps) {
           <div className="flex items-start w-full font-online-ordering">
             {/* Main Content */}
             <div className="w-full max-w-8xl mx-auto xl:overflow-y-auto overflow-scroll px-6 md:px-20 lg:px-28">
+              {!searchQuery && <RecentOrders />}
               {!searchQuery && <PromoCodes />}
               {!searchQuery && (
                 <LoyaltyOffers

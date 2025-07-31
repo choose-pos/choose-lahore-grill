@@ -281,49 +281,6 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                     <p className="font-bold text-lg md:text-lg font-online-ordering">
                       ${item.price.toFixed(2)}
                     </p>
-                    {!isOutOfStock && (
-                      <button
-                        disabled={
-                          loadingItemId === item._id || loadingItem === item._id
-                        }
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (cartDetails?.orderType === null) {
-                            setClickState({
-                              id: item._id,
-                              type:
-                                item.modifierGroup &&
-                                item.modifierGroup.length === 0
-                                  ? "add"
-                                  : "view",
-                            });
-                            setShowMenu(false);
-                            return;
-                          }
-                          if (
-                            item.modifierGroup &&
-                            item.modifierGroup?.length === 0
-                          ) {
-                            handleAddToCart(item._id);
-                          } else {
-                            setSelectedItem(item._id);
-                            setSelectedCategoryId(category._id);
-                          }
-                        }}
-                        className="flex items-center absolute right-2.5 bottom-2 shadow-sm border border-gray-300  hover:shadow-lg justify-center p-1 rounded-lg bg-white text-black hover:bg-opacity-95 hover:-translate-y-0.5 disabled:bg-opacity-95 disabled:hover:translate-y-0 transition-all duration-200"
-                        aria-label="Add to cart"
-                      >
-                        {loadingItemId === item._id ||
-                        loadingItem === item._id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <div className="flex items-center">
-                            <p className="text-sm pl-1">Add</p>
-                            <Plus size={12} className="ml-1" />
-                          </div>
-                        )}
-                      </button>
-                    )}
                   </div>
                   {isOutOfStock && !item?.image && (
                     <div className="absolute right-4 top-4">
@@ -333,6 +290,48 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                     </div>
                   )}
                 </div>
+                {!isOutOfStock && (
+                  <button
+                    disabled={
+                      loadingItemId === item._id || loadingItem === item._id
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (cartDetails?.orderType === null) {
+                        setClickState({
+                          id: item._id,
+                          type:
+                            item.modifierGroup &&
+                            item.modifierGroup.length === 0
+                              ? "add"
+                              : "view",
+                        });
+                        setShowMenu(false);
+                        return;
+                      }
+                      if (
+                        item.modifierGroup &&
+                        item.modifierGroup?.length === 0
+                      ) {
+                        handleAddToCart(item._id);
+                      } else {
+                        setSelectedItem(item._id);
+                        setSelectedCategoryId(category._id);
+                      }
+                    }}
+                    className="flex items-center absolute right-2.5 bottom-2 shadow-sm border border-gray-300  hover:shadow-lg justify-center p-1 rounded-lg bg-white text-black hover:bg-opacity-95 hover:-translate-y-0.5 disabled:bg-opacity-95 disabled:hover:translate-y-0 transition-all duration-200"
+                    aria-label="Add to cart"
+                  >
+                    {loadingItemId === item._id || loadingItem === item._id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <div className="flex items-center">
+                        <p className="text-sm pl-1">Add</p>
+                        <Plus size={12} className="ml-1" />
+                      </div>
+                    )}
+                  </button>
+                )}
               </div>
             );
 

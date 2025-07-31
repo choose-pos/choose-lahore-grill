@@ -162,7 +162,7 @@ const Banner: React.FC<IBanner> = ({
                 aria-label="Kwality Link"
               >
                 <button
-                  aria-label="Kwality"
+                  aria-label="Lahore grill delivery"
                   className="mt-4 px-8 py-3 tracking-wide text-sm xsm:text-lg md:text-xl font-medium font-primary border-2 border-bg1 text-bg1 bg-bg3 rounded-[15px] shadow-xl"
                 >
                   Delivery

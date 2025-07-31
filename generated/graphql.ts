@@ -1129,6 +1129,7 @@ export type Mutation = {
   decreaseItemQty: Scalars['Boolean']['output'];
   deleteCartItem: Scalars['Boolean']['output'];
   increaseItemQty: Scalars['Boolean']['output'];
+  reorderItemsToCart: ReorderOrderResponse;
   updateCartDetails: Scalars['Boolean']['output'];
   updateCartItem: Scalars['Boolean']['output'];
   updateCustomerDetails: Customer;
@@ -1169,6 +1170,11 @@ export type MutationDeleteCartItemArgs = {
 
 export type MutationIncreaseItemQtyArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationReorderItemsToCartArgs = {
+  orderId: Scalars['String']['input'];
 };
 
 
@@ -1625,6 +1631,11 @@ export type QueryFetchCustomerOrderByIdArgs = {
 };
 
 
+export type QueryFetchCustomerOrdersArgs = {
+  lastThreeOrders?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
 export type QueryGetCustomerCategoriesAndItemsArgs = {
   ItemOptionSelected?: InputMaybe<Array<ItemOptionsEnum>>;
   searchText?: InputMaybe<Scalars['String']['input']>;
@@ -1691,6 +1702,12 @@ export type RejectRecord = {
   createdAt: Scalars['DateTimeISO']['output'];
   name: Scalars['String']['output'];
   reason: Scalars['String']['output'];
+};
+
+export type ReorderOrderResponse = {
+  __typename?: 'ReorderOrderResponse';
+  specialMessage?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
 };
 
 export type Restaurant = {
@@ -2169,7 +2186,9 @@ export type CreateOrderMutationVariables = Exact<{
 
 export type CreateOrderMutation = { __typename?: 'Mutation', createOrder: { __typename?: 'OrderPlacedInfo', success: boolean, message?: string | null, orderId?: string | null } };
 
-export type FetchCustomerOrdersQueryVariables = Exact<{ [key: string]: never; }>;
+export type FetchCustomerOrdersQueryVariables = Exact<{
+  lastThreeOrders?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
 
 
 export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, totalAmount: number, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemId: { __typename?: 'Item', name: string, desc?: string | null }, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
@@ -2234,6 +2253,13 @@ export type CheckDeliveryAvailableQueryVariables = Exact<{ [key: string]: never;
 
 
 export type CheckDeliveryAvailableQuery = { __typename?: 'Query', checkDeliveryAvailable: boolean };
+
+export type ReorderItemsToCartMutationVariables = Exact<{
+  orderId: Scalars['String']['input'];
+}>;
+
+
+export type ReorderItemsToCartMutation = { __typename?: 'Mutation', reorderItemsToCart: { __typename?: 'ReorderOrderResponse', success: boolean, specialMessage?: string | null } };
 
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2720,8 +2746,8 @@ export const CreateOrderDocument = gql`
 }
     `;
 export const FetchCustomerOrdersDocument = gql`
-    query fetchCustomerOrders {
-  fetchCustomerOrders {
+    query fetchCustomerOrders($lastThreeOrders: Boolean) {
+  fetchCustomerOrders(lastThreeOrders: $lastThreeOrders) {
     _id
     createdAt
     orderType
@@ -2909,6 +2935,14 @@ export const CreateOrderWithoutPaymentDocument = gql`
 export const CheckDeliveryAvailableDocument = gql`
     query checkDeliveryAvailable {
   checkDeliveryAvailable
+}
+    `;
+export const ReorderItemsToCartDocument = gql`
+    mutation reorderItemsToCart($orderId: String!) {
+  reorderItemsToCart(orderId: $orderId) {
+    success
+    specialMessage
+  }
 }
     `;
 export const GetCustomerRestaurantDetailsDocument = gql`
@@ -3268,6 +3302,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     checkDeliveryAvailable(variables?: CheckDeliveryAvailableQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CheckDeliveryAvailableQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<CheckDeliveryAvailableQuery>(CheckDeliveryAvailableDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'checkDeliveryAvailable', 'query', variables);
+    },
+    reorderItemsToCart(variables: ReorderItemsToCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ReorderItemsToCartMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ReorderItemsToCartMutation>(ReorderItemsToCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'reorderItemsToCart', 'mutation', variables);
     },
     GetCustomerRestaurantDetails(variables?: GetCustomerRestaurantDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCustomerRestaurantDetailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCustomerRestaurantDetailsQuery>(GetCustomerRestaurantDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetCustomerRestaurantDetails', 'query', variables);

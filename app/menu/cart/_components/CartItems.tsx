@@ -237,16 +237,24 @@ const CartItems = ({
           >
             <div className="flex items-center gap-4">
               {/* Content wrapper */}
-              {item.itemImage ? (
-                <div className="w-14 h-14 relative self-start flex-shrink-0">
-                  <Image
-                    src={item.itemImage}
-                    alt={item.itemName}
-                    fill
-                    className={`object-cover object-center w-full h-full rounded-lg`}
-                  />
-                </div>
-              ) : null}
+              {
+                item.itemImage ? (
+                  <div className="w-14 h-14 relative self-start flex-shrink-0">
+                    <Image
+                      src={item.itemImage}
+                      alt={item.itemName}
+                      fill
+                      className={`object-cover object-center w-full h-full rounded-lg`}
+                    />
+                  </div>
+                ) : null
+                // (
+                //   <div
+                //     className="relative w-14 h-14 aspect-square flex-shrink-0 rounded-l-[20px] overflow-hidden item-image-placeholder border-r border-r-gray-100"
+                //     data-text={Array(200).fill(`${item.itemName} `).join("")}
+                //   />
+                // )
+              }
               <div className="flex-grow flex flex-col gap-2">
                 {/* Top section with title and buttons */}
                 <div className="flex justify-between items-start">

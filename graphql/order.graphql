@@ -21,8 +21,8 @@ mutation CreateOrder($createOrder: CreateOrderInput!) {
   }
 }
 
-query fetchCustomerOrders {
-  fetchCustomerOrders {
+query fetchCustomerOrders($lastThreeOrders: Boolean) {
+  fetchCustomerOrders(lastThreeOrders: $lastThreeOrders) {
     _id
     createdAt
     orderType
@@ -215,4 +215,11 @@ mutation createOrderWithoutPayment(
 
 query checkDeliveryAvailable {
   checkDeliveryAvailable
+}
+
+mutation reorderItemsToCart($orderId: String!) {
+  reorderItemsToCart(orderId: $orderId) {
+    success
+    specialMessage
+  }
 }

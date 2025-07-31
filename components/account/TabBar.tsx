@@ -847,10 +847,11 @@ export const OrdersContent: React.FC = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const { setToastData } = ToastStore();
   const { restaurantData } = RestaurantStore();
-
+  const router = useRouter();
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 3;
+  const { setSpecialRemarks } = useCartStore();
 
   useEffect(() => {
     const fetchOrderHistory = async () => {
@@ -887,6 +888,33 @@ export const OrdersContent: React.FC = () => {
     setShowModal(true);
   };
 
+  const reOrder = async (orderId: string) => {
+    try {
+      setModalLoading(true);
+      const res = await fetchWithAuth(() =>
+        sdk.reorderItemsToCart({ orderId: orderId })
+      );
+
+      if (res.reorderItemsToCart?.success) {
+        if (res.reorderItemsToCart?.specialMessage) {
+          setSpecialRemarks(res.reorderItemsToCart.specialMessage);
+        }
+        setToastData({
+          type: "success",
+          message: "Successfully added items to cart",
+        });
+        router.push("/menu/cart");
+      }
+    } catch (error) {
+      console.log("Error reordering items:", error);
+      setToastData({
+        type: "error",
+        message: extractErrorMessage(error),
+      });
+    } finally {
+      setModalLoading(false);
+    }
+  };
   const closeModal = () => {
     setShowModal(false);
     setSelectedOrder(null);
@@ -1536,7 +1564,24 @@ export const OrdersContent: React.FC = () => {
                 </div>
 
                 {/* Action Button */}
-                <div className="flex justify-end mt-auto">
+                <div className="flex gap-2 justify-end mt-auto">
+                  {(order?.totalAmount ?? 0) > 0 ? (
+                    <button
+                      className="px-6 py-2 bg-primary text-white rounded-full text-base transition-colors"
+                      onClick={() => reOrder(order._id)}
+                      style={{
+                        color: isContrastOkay(
+                          Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                          Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        )
+                          ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                          : Env.NEXT_PUBLIC_TEXT_COLOR,
+                      }}
+                    >
+                      Reorder
+                    </button>
+                  ) : null}
+
                   <button
                     className="px-6 py-2 bg-primary text-white rounded-full text-base transition-colors"
                     onClick={() => openModal(order._id)}
