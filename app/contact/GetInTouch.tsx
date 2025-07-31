@@ -129,7 +129,7 @@ const GetInTouch: React.FC<IAddressSectionProps> = ({
         id="location"
         className="w-full flex flex-col items-center justify-center px-6 py-12 overflow-hidden max-w-7xl mx-auto"
       >
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-secondary text-bg1 text-center mb-8">
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-secondary text-bg1 text-center">
           Visit Us
         </h2>
         <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 lg:gap-12 pt-10">
