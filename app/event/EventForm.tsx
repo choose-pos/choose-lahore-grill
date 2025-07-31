@@ -26,7 +26,6 @@ const EventForm: React.FC<FormProps> = ({ isEvent = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const thankYouRef = useRef<HTMLDivElement>(null);
 
-  // Form State
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
