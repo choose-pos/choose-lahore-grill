@@ -23,7 +23,7 @@ export const getNavItems = (slug: string, website: string): NavItem[] => {
     //   href: "/#our-reviews",
     // },
     {
-      label: "Parties",
+      label: "Banquet Hall",
       href: "/parties",
     },
   ];

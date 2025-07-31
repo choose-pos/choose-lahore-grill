@@ -37,7 +37,7 @@ const MenuSection: React.FC<ISliderSectionProps> = ({
 }) => {
   console.log(id);
   return (
-    <div id={id} className="bg-primaryColor w-full h-full relative">
+    <div id={id} className="bg-bg2 text-black w-full h-full relative">
       <Image
         src={texture}
         alt="Texture Frame"
@@ -52,7 +52,7 @@ const MenuSection: React.FC<ISliderSectionProps> = ({
         // id={id}
         className="relative w-full flex flex-col items-center justify-center px-4 md:px-6 py-8 max-w-8xl mx-auto"
       >
-        <h2 className="text-3xl md:text-6xl font-secondary text-white text-center">
+        <h2 className="text-3xl md:text-6xl font-secondary text-black text-center">
           {sectionTitle}
         </h2>
         <div className="w-full pt-5 md:pt-10 relative px-4 xl:px-24">
@@ -81,7 +81,7 @@ const MenuSection: React.FC<ISliderSectionProps> = ({
                           priority={index === 0}
                         />
                       </div>
-                      <p className="font-secondary text-2xl md:text-3xl font-normal text-white">
+                      <p className="font-secondary text-2xl md:text-3xl font-normal text-black">
                         {item.title}
                       </p>
                       {/* <p className="font-primary text-base md:text-xl leading-7 md:leading-8 text-center font-normal text-textColor text-opacity-80">

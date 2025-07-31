@@ -17,7 +17,7 @@ const StoryImage: React.FC<IStoryImage> = ({
   sectionTitle,
 }) => {
   return (
-    <div className="bg-primaryColor lg:rounded-[60px] relative mb-5">
+    <div className="bg-bg2 lg:rounded-[60px] relative mb-5">
       <Image
         src={texture}
         alt="Texture Frame"
@@ -25,7 +25,7 @@ const StoryImage: React.FC<IStoryImage> = ({
       />
       <div className="lg:py-10 lg:px-24 xsm:px-12 px-6 relative flex flex-col custom-lg:flex-row items-center custom-lg:justify-evenly justify-center z-10 overflow-hidden max-w-8xl mx-auto">
         <div className="flex flex-col custom-lg:items-start items-center w-full custom-lg:w-[80%]">
-          <h1 className="text-lg font-primary text-textColor custom-lg:mt-0 mt-10">
+          <h1 className="text-lg font-primary text-black custom-lg:mt-0 mt-10">
             {sectionTitle}
           </h1>
         </div>

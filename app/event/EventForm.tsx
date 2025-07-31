@@ -291,7 +291,7 @@ const EventForm: React.FC<FormProps> = ({ isEvent = false }) => {
           {/* Event Date */}
           <div>
             <label className="block text-lg font-semibold mb-1 text-bg1 font-primary">
-              Event Date
+              {isEvent ? "Event Date" : "Date"}
             </label>
             <DateTimePicker
               selectedDate={eventDate.length === 0 ? null : new Date(eventDate)}

@@ -77,18 +77,11 @@ export default async function OurStoryPage() {
   ];
 
   if (menuSection.show) {
-    navItems.push({
+    navItems.splice(1, 0, {
       name: menuSection.navTitle,
       link: getCmsSectionIdHash(menuSection.navTitle),
     });
   }
-
-  // if (reviewSection?.show) {
-  //   navItems.push({
-  //     name: reviewSection.navTitle,
-  //     link: getCmsSectionIdHash(reviewSection.navTitle),
-  //   });
-  // }
 
   navItems.push(
     ...[{ name: "Reservation", link: "https://reserve.saffroncary.com/" }]

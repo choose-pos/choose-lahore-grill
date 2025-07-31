@@ -6,7 +6,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useRef } from "react";
-import arrowup from "../../../assets/mingcute_arrow-up-line.png";
+import arrowup from "../../../assets/arrow-up.png";
 import texture from "@/assets/Texture.png";
 
 interface IFrameSection {
@@ -50,7 +50,7 @@ const FrameSection: React.FC<IFrameSection> = ({
   const y2 = useTransform(scrollYProgress, [0, 1], ["-100%", "100%"]);
 
   return (
-    <div className="py-10 px-6 sm:px-6 md:px-24 bg-primaryColor flex items-center justify-evenly z-10 relative h-full lg:h-screen lg:flex-row flex-col overflow-hidden">
+    <div className="py-10 px-6 sm:px-6 md:px-24 bg-bg2 flex items-center justify-evenly z-10 relative h-full lg:h-screen lg:flex-row flex-col overflow-hidden">
       <Image
         src={texture}
         alt="Texture Frame"
@@ -113,9 +113,9 @@ const FrameSection: React.FC<IFrameSection> = ({
         <div className="flex items-center flex-col justify-center lg:hidden custom-sm:flex-row">
           <div>
             <Image
-              src={frameSectionImage4?.url}
+              src={frameSectionImage2?.url}
               placeholder="blur"
-              blurDataURL={blurHashToDataURL(frameSectionBlurHash4)}
+              blurDataURL={blurHashToDataURL(frameSectionBlurHash2)}
               alt="gallery-image"
               className="w-full h-[380px] md:h-[500px] rounded-[20px]"
               width={360}
@@ -131,11 +131,11 @@ const FrameSection: React.FC<IFrameSection> = ({
         viewport={{ once: true }}
         className="lg:ml-10 ml-0 lg:items-start items-center mt-8 lg:mt-0"
       >
-        <h1 className="font-secondary text-4xl md:text-[60px] md:leading-[55px] text-white lg:max-w-[438px] mb-3 md:mb-5">
+        <h1 className="font-secondary text-4xl md:text-[60px] md:leading-[55px] text-black lg:max-w-[438px] mb-3 md:mb-5">
           {frameSectionTitle}
         </h1>
         <Link href="/our-story">
-          <p className="flex items-center font-secondary xsm:text-3xl text-xl text-white font-bold cursor-pointer group">
+          <p className="flex items-center font-secondary xsm:text-3xl text-xl text-black font-bold cursor-pointer group">
             <span className="transition-all duration-300 ease-in-out">
               READ MORE
             </span>

@@ -130,7 +130,7 @@ const Banner: React.FC<IBanner> = ({
   };
 
   return (
-    <div className="relative w-full h-[90vh] md:h-screen overflow-hidden -mt-1">
+    <div className="relative w-full h-[90vh] md:h-screen overflow-hidden">
       {isVideo
         ? renderVideoBg()
         : slides.map((slide, index) => (
@@ -144,7 +144,7 @@ const Banner: React.FC<IBanner> = ({
             </div>
           ))}
 
-      <div className="bg-black bg-opacity-30 absolute z-10 w-full h-full ">
+      <div className="bg-black bg-opacity-30 absolute z-10 w-full h-full">
         <div className="absolute bottom-20 left-4 lg:left-16 xl:left-32 z-10 flex items-center justify-center">
           <div className="text-start">
             <h1 className="text-white max-w-[800px] text-4xl md:text-7xl font-secondary">

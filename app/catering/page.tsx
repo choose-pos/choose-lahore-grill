@@ -294,18 +294,11 @@ export default async function CateringPage() {
   ];
 
   if (menuSection.show) {
-    navItems.push({
+    navItems.splice(1, 0, {
       name: menuSection.navTitle,
       link: getCmsSectionIdHash(menuSection.navTitle),
     });
   }
-
-  // if (reviewSection?.show) {
-  //   navItems.push({
-  //     name: reviewSection.navTitle,
-  //     link: getCmsSectionIdHash(reviewSection.navTitle),
-  //   });
-  // }
 
   return (
     <CateringPageClient

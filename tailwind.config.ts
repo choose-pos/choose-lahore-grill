@@ -26,7 +26,7 @@ export default {
         bgGray: "#f8f8f8",
         textGrayColor: "#8B8B8B",
         bg1: "#000000",
-        bg2: "#FAF3E0",
+        bg2: "#dfb451",
         bg3: "#F8F8F8",
         bgbottom: "#E7E4DA",
         toptext: "#747474",

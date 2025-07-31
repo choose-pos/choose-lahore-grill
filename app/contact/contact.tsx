@@ -39,16 +39,6 @@ export default function PartyClient({
         logo={brandingLogo ?? ""}
       />
       <div className="mt-20">
-        {/* <PartyContent
-          sectionContent={partyPageData.section1Content}
-          sectionTitle={partyPageData.section1Title}
-          Img1={partyPageData.section1Image}
-          ImgBH1={partyPageData.hash}
-          Img2={partyPageData.section2Image}
-          ImgBH2={partyPageData.hash2}
-          Img3={partyPageData.section3Image}
-          ImgBH3={partyPageData.hash3}
-        /> */}
         <GetInTouch
           addressLine1={address?.addressLine1 ?? ""}
           city={address?.city ?? ""}
@@ -57,7 +47,6 @@ export default function PartyClient({
           name={name}
           state={address?.state?.stateName ?? ""}
         />
-        {/* <EventForm isEvent={true} /> */}
       </div>
       <Footer
         address={address?.addressLine1 ?? ""}

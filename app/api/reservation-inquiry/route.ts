@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
             <p><span class="label">Name:</span> ${firstname} ${lastname}</p>
             <p><span class="label">Phone:</span> ${phonenumber}</p>
             <p><span class="label">Email:</span> ${email}</p>
-            <p><span class="label">Event Date:</span> ${eventdate}</p>
+            <p><span class="label">Reservation Date:</span> ${eventdate}</p>
             <p><span class="label">Event Time:</span> ${pickuptime}</p>
             <p><span class="label">Message:</span> ${management_message}</p>
           </div>

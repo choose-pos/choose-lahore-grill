@@ -116,12 +116,6 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
             });
           }
 
-          navItems.push(
-            ...[
-              { name: "Reservation", link: "https://reserve.saffroncary.com/" },
-            ]
-          );
-
           setNavData(navItems);
         }
       } catch (error) {

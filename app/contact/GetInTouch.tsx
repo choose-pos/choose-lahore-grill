@@ -121,6 +121,60 @@ const GetInTouch: React.FC<IAddressSectionProps> = ({
 
   return (
     <div className="">
+      <motion.div
+        variants={fadeIn("right", "tween", 0.2, 1)}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        id="location"
+        className="w-full flex flex-col items-center justify-center px-6 py-12 overflow-hidden max-w-7xl mx-auto"
+      >
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-secondary text-bg1 text-center mb-8">
+          Visit Us
+        </h2>
+        <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 lg:gap-12 pt-10">
+          <div className="border rounded-lg border-t w-full lg:w-1/2 h-[300px] sm:h-[400px] lg:h-[430px]">
+            <iframe
+              title={name}
+              src={`https://maps.google.com/maps?q=${coords[0]}, ${coords[1]}&z=15&output=embed`}
+              className="w-full h-full rounded-lg"
+            ></iframe>
+          </div>
+          <div className="flex flex-col items-start  justify-start space-y-8 w-full lg:w-1/2 lg:ml-10">
+            <div className="flex flex-col items-start justify-between space-y-2">
+              <p className="font-primary text-lg font-semibold text-bg1">
+                {city}
+              </p>
+              <p className="font-primary text-base font-normal text-bg1 text-opacity-80">
+                {state}
+              </p>
+            </div>
+            <div className="flex flex-col items-start justify-between space-y-2">
+              <p className="font-primary text-lg font-semibold text-bg1">
+                Address
+              </p>
+              <p className="font-primary text-sm font-normal text-bg1 text-opacity-80">
+                {addressLine1}
+              </p>
+            </div>
+            <hr className="border-t border-primaryColor opacity-20 w-full" />
+            <div className="flex flex-col items-start justify-between space-y-2">
+              <p className="font-primary text-base font-semibold text-bg1">
+                Hours
+              </p>
+              {hours.map((hrs, index) => (
+                <p
+                  key={index.toString()}
+                  className="font-primary text-sm font-normal text-bg1 text-opacity-80"
+                >
+                  {hrs}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       <div className="bg-bg2 rounded-[30px] lg:rounded-[60px]">
         <div
           id="contact"
@@ -257,59 +311,6 @@ const GetInTouch: React.FC<IAddressSectionProps> = ({
           </form>
         </div>
       </div>
-      <motion.div
-        variants={fadeIn("right", "tween", 0.2, 1)}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        id="location"
-        className="w-full flex flex-col items-center justify-center px-6 py-12 overflow-hidden max-w-7xl mx-auto"
-      >
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-secondary text-bg1 text-center mb-8">
-          Visit Us
-        </h2>
-        <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 lg:gap-12 pt-10">
-          <div className="border rounded-lg border-t w-full lg:w-1/2 h-[300px] sm:h-[400px] lg:h-[430px]">
-            <iframe
-              title={name}
-              src={`https://maps.google.com/maps?q=${coords[0]}, ${coords[1]}&z=15&output=embed`}
-              className="w-full h-full rounded-lg"
-            ></iframe>
-          </div>
-          <div className="flex flex-col items-start  justify-start space-y-8 w-full lg:w-1/2 lg:ml-10">
-            <div className="flex flex-col items-start justify-between space-y-2">
-              <p className="font-primary text-lg font-semibold text-bg1">
-                {city}
-              </p>
-              <p className="font-primary text-base font-normal text-bg1 text-opacity-80">
-                {state}
-              </p>
-            </div>
-            <div className="flex flex-col items-start justify-between space-y-2">
-              <p className="font-primary text-lg font-semibold text-bg1">
-                Address
-              </p>
-              <p className="font-primary text-sm font-normal text-bg1 text-opacity-80">
-                {addressLine1}
-              </p>
-            </div>
-            <hr className="border-t border-primaryColor opacity-20 w-full" />
-            <div className="flex flex-col items-start justify-between space-y-2">
-              <p className="font-primary text-base font-semibold text-bg1">
-                Hours
-              </p>
-              {hours.map((hrs, index) => (
-                <p
-                  key={index.toString()}
-                  className="font-primary text-sm font-normal text-bg1 text-opacity-80"
-                >
-                  {hrs}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.div>
     </div>
   );
 };

@@ -8,6 +8,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { HiMenu } from "react-icons/hi";
 import { IoMdClose } from "react-icons/io";
 import ContactNav from "./ContactNav";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 
 interface INavProps {
   logo?: string;
@@ -18,6 +20,8 @@ interface INavProps {
 
 const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLLIElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const [isButtonVisible, setIsButtonVisible] = useState<boolean>(false);
@@ -81,8 +85,42 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
     setNavData(navItems);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        moreMenuRef.current &&
+        !moreMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowMoreMenu(false);
+      }
+    };
+
+    if (showMoreMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMoreMenu]);
+
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const staggerItem = {
+    hidden: { opacity: 0, y: -10 },
+    show: { opacity: 1, y: 0 },
   };
 
   return (
@@ -110,23 +148,66 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
             </Link>
           ) : null}
 
-          <div className="h-full hidden xl:block">
-            <ul className="flex text-xl text-gray-300">
-              {navItems.map((item, index) => (
+          <div className="h-full hidden lg:block">
+            <ul className="flex items-center text-xl text-gray-300 relative">
+              {navItems.slice(0, 5).map((item, index) => (
                 <li
                   key={index}
-                  className="justify-between flex flex-col text-xs items-center space-y-8 font-medium"
+                  className="justify-between flex flex-col text-base items-center space-y-8 font-medium"
                 >
                   <Link href={item.link}>
-                    <span
-                      className="block px-4 py-2 transition-all duration-300 cursor-pointer w-full hover:text-primaryColor/80 uppercasetext-bg3 hover:text-white"
-                      // onClick={toggleMenu}
-                    >
+                    <span className="block px-4 py-2 transition-all duration-300 cursor-pointer w-full hover:text-primaryColor/80 uppercasetext-bg3 hover:text-white">
                       {item.name}
                     </span>
                   </Link>
                 </li>
               ))}
+
+              {navItems.length > 4 && (
+                <li ref={moreMenuRef} className="relative">
+                  <button
+                    onClick={() => setShowMoreMenu(!showMoreMenu)}
+                    className="flex items-center gap-1 px-4 py-2 text-base text-gray-300 hover:text-white font-medium"
+                  >
+                    More
+                    <ChevronDown
+                      className={`transition-transform duration-300 text-gray-300 hover:text-white ${
+                        showMoreMenu ? "rotate-180" : ""
+                      }`}
+                      size={18}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {showMoreMenu && (
+                      <motion.ul
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate="show"
+                        exit="hidden"
+                        className="absolute right-0 mt-2 bg-bg1 border border-gray-700 rounded-md shadow-md z-50 w-48 py-2"
+                      >
+                        {navItems.slice(5).map((item, index) => (
+                          <motion.li
+                            key={index}
+                            variants={staggerItem}
+                            className="w-full"
+                          >
+                            <Link href={item.link}>
+                              <span
+                                className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
+                                onClick={() => setShowMoreMenu(false)}
+                              >
+                                {item.name}
+                              </span>
+                            </Link>
+                          </motion.li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -144,7 +225,7 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
               </button>
             </Link>
             <div
-              className="text-3xl cursor-pointer z-50 block xl:hidden"
+              className="text-3xl cursor-pointer z-50 block lg:hidden"
               onClick={toggleMenu}
             >
               {!isOpen && <HiMenu color="white" />}

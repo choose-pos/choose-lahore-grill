@@ -71,7 +71,7 @@ const Testimonials: React.FC<IReviewSectionProps> = ({ id, reviews }) => {
   return (
     <div
       id={id}
-      className="relative w-full flex flex-col items-center justify-center px-4 sm:px-6 md:px-12 lg:px-16 xl:px-24 py-12 text-center overflow-hidden bg-primaryColor"
+      className="relative w-full flex flex-col items-center justify-center px-4 sm:px-6 md:px-12 lg:px-16 xl:px-24 py-12 text-center overflow-hidden bg-bg2"
     >
       <Image
         src={texture}
@@ -105,15 +105,15 @@ const Testimonials: React.FC<IReviewSectionProps> = ({ id, reviews }) => {
               >
                 <Card className="border-none bg-transparent shadow-none">
                   <CardContent
-                    className="flex flex-col items-center p-0 sm:p-6"
-                    style={{
-                      color: isContrastOkay(
-                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                        Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                      )
-                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                        : Env.NEXT_PUBLIC_TEXT_COLOR,
-                    }}
+                    className="flex flex-col items-center p-0 sm:p-6 text-black"
+                    // style={{
+                    //   color: isContrastOkay(
+                    //     Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                    //     Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                    //   )
+                    //     ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                    //     : Env.NEXT_PUBLIC_TEXT_COLOR,
+                    // }}
                   >
                     <h2 className="font-secondary text-3xl sm:text-4xl md:text-5xl text-center capitalize">
                       {"Reviews"}
@@ -138,14 +138,9 @@ const Testimonials: React.FC<IReviewSectionProps> = ({ id, reviews }) => {
             <button
               key={index}
               onClick={() => handleDotClick(index)}
-              className={`w-4 h-4 rounded-full border-2 transition-all duration-200`}
+              className={`w-2.5 h-2.5 rounded-full border-2 transition-all duration-200`}
               style={{
-                borderColor: isContrastOkay(
-                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                )
-                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                  : Env.NEXT_PUBLIC_TEXT_COLOR,
+                borderColor: "#000",
                 backgroundColor:
                   current === index
                     ? isContrastOkay(
