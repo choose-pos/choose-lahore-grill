@@ -136,7 +136,7 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
               href={"/"}
               prefetch={false}
               passHref
-              className="relative w-24 md:!w-[170px] !h-[53px] min-w-[115px] min-h-[53px]"
+              className="relative w-24 md:!w-[170px] md:h-[83px] min-w-[115px] min-h-[53px]"
             >
               <Image
                 src={logo || ""}
