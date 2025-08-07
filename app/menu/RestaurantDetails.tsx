@@ -661,22 +661,33 @@ RestaurantDetailsProps) {
               <div className="space-y-10  mb-8 md:mb-0 ">
                 {filteredCategories.length === 0 ? (
                   <div className="py-4 h-[40rem]">
-                    <h1 className="md:text-4xl text-2xl font-bold">
-                      No result found
-                    </h1>
-                    <p className="md:text-lg text-base">
-                      {`Sorry, we couldn't find any available item. Please try again.`}
-                    </p>
+                    {!searchQuery && !categoryType ? (
+                      // No search query and no filters - show store message
+                      <>
+                        <h1 className="md:text-4xl text-2xl font-bold">
+                          Currently Store is Not Accepting Orders
+                        </h1>
+                        <p className="md:text-lg text-base mt-4">
+                          Please schedule your order or change your order date
+                          to explore available items.
+                        </p>
+                      </>
+                    ) : (
+                      // Has search query or filters - show no results found
+                      <>
+                        <h1 className="md:text-4xl text-2xl font-bold">
+                          No result found
+                        </h1>
+                        <p className="md:text-lg text-base">
+                          {`Sorry, we couldn't find any available item. Please try again.`}
+                        </p>
+                      </>
+                    )}
                   </div>
                 ) : (
+                  // Show categories when available
                   filteredCategories.map((category) => (
-                    <div
-                      key={category._id}
-                      // ref={(element: HTMLDivElement | null) => {
-                      //   categoryRefs.current[category._id] = element;
-                      // }}
-                      // data-category-id={category._id}
-                    >
+                    <div key={category._id}>
                       {category.items.length > 0 && (
                         <CategoryListing
                           ref={(element: HTMLDivElement | null) => {
