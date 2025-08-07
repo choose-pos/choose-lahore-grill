@@ -669,17 +669,17 @@ RestaurantDetailsProps) {
                         </h1>
 
                         <p className="md:text-lg text-base mt-4">
-                          Please schedule your order to view menu items.
-                          Schedule Your Order{" "}
-                          <span
-                            onClick={() => {
-                              setShowMenu(false);
-                            }}
-                            className="hover:underline cursor-pointer"
-                          >
-                            click here
-                          </span>
+                          Please schedule your order to view menu items.{" "}
                         </p>
+                        <button
+                          onClick={() => setShowMenu(false)}
+                          className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 `}
+                          type="button"
+                        >
+                          <span className="font-medium font-online-ordering">
+                            Schedule Order
+                          </span>
+                        </button>
                       </>
                     ) : (
                       // Has search query or filters - show no results found
