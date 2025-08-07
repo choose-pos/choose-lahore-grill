@@ -661,22 +661,42 @@ RestaurantDetailsProps) {
               <div className="space-y-10  mb-8 md:mb-0 ">
                 {filteredCategories.length === 0 ? (
                   <div className="py-4 h-[40rem]">
-                    <h1 className="md:text-4xl text-2xl font-bold">
-                      No result found
-                    </h1>
-                    <p className="md:text-lg text-base">
-                      {`Sorry, we couldn't find any available item. Please try again.`}
-                    </p>
+                    {!searchQuery && !categoryType ? (
+                      // No search query and no filters - show store message
+                      <>
+                        <h1 className="md:text-4xl text-2xl font-bold">
+                          Restaurant is not taking any orders for today
+                        </h1>
+
+                        <p className="md:text-lg text-base mt-4">
+                          Please schedule your order to view menu items.{" "}
+                        </p>
+                        <button
+                          onClick={() => setShowMenu(false)}
+                          className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 `}
+                          type="button"
+                        >
+                          <span className="font-medium font-online-ordering">
+                            Schedule Order
+                          </span>
+                        </button>
+                      </>
+                    ) : (
+                      // Has search query or filters - show no results found
+                      <>
+                        <h1 className="md:text-4xl text-2xl font-bold">
+                          No result found
+                        </h1>
+                        <p className="md:text-lg text-base">
+                          {`Sorry, we couldn't find any available item. Please refine your search or try changing your filters.`}
+                        </p>
+                      </>
+                    )}
                   </div>
                 ) : (
+                  // Show categories when available
                   filteredCategories.map((category) => (
-                    <div
-                      key={category._id}
-                      // ref={(element: HTMLDivElement | null) => {
-                      //   categoryRefs.current[category._id] = element;
-                      // }}
-                      // data-category-id={category._id}
-                    >
+                    <div key={category._id}>
                       {category.items.length > 0 && (
                         <CategoryListing
                           ref={(element: HTMLDivElement | null) => {
