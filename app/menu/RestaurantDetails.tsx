@@ -665,11 +665,20 @@ RestaurantDetailsProps) {
                       // No search query and no filters - show store message
                       <>
                         <h1 className="md:text-4xl text-2xl font-bold">
-                          Currently Store is Not Accepting Orders
+                          Restaurant is not taking any orders for today
                         </h1>
+
                         <p className="md:text-lg text-base mt-4">
-                          Please schedule your order or change your order date
-                          to explore available items.
+                          Please schedule your order to view menu items.
+                          Schedule Your Order{" "}
+                          <span
+                            onClick={() => {
+                              setShowMenu(false);
+                            }}
+                            className="hover:underline cursor-pointer"
+                          >
+                            click here
+                          </span>
                         </p>
                       </>
                     ) : (
@@ -679,7 +688,7 @@ RestaurantDetailsProps) {
                           No result found
                         </h1>
                         <p className="md:text-lg text-base">
-                          {`Sorry, we couldn't find any available item. Please try again.`}
+                          {`Sorry, we couldn't find any available item. Please refine your search or try changing your filters.`}
                         </p>
                       </>
                     )}
