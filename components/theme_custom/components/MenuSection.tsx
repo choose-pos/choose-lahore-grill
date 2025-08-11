@@ -16,6 +16,7 @@ import React from "react";
 import { fadeIn } from "../../../utils/motion";
 import Button from "./common/Button";
 import texture from "@/assets/Texture.png";
+import { Plus } from "lucide-react";
 
 interface ISliderItem {
   image: string;
@@ -80,6 +81,12 @@ const MenuSection: React.FC<ISliderSectionProps> = ({
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
                         />
+                        <div className="flex items-center absolute bottom-2 right-2">
+                          <button className="bg-white flex items-center text-black px-3 py-1 rounded-lg text-sm shadow-md hover:bg-opacity-95 transition">
+                            <p className="text-sm pl-1">Add</p>
+                            <Plus size={12} className="ml-1" />
+                          </button>
+                        </div>
                       </div>
                       <p className="font-secondary text-2xl md:text-3xl font-normal text-black">
                         {item.title}
