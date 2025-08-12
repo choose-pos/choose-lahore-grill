@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "Our Story – Lahore Grill Marietta | Authentic Pakistani Cuisine Since 2008",
     description:
       "Discover the journey of Lahore Grill – bringing traditional Lahori flavors to Marietta, Atlanta since 2008. Rooted in heritage, crafted with love, and served with halal authenticity.",
-    images: [{ url: "/Saffron.jpg" }],
+    images: [{ url: "/LahoreGrill.jpg" }],
     type: "article",
   },
   twitter: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
       "Our Story – Lahore Grill Marietta | Authentic Pakistani Cuisine Since 2008",
     description:
       "Discover the journey of Lahore Grill – bringing traditional Lahori flavors to Marietta, Atlanta since 2008. Rooted in heritage, crafted with love, and served with halal authenticity.",
-    images: ["/Saffron.jpg"],
+    images: ["/LahoreGrill.jpg"],
   },
   alternates: {
     canonical: "https://lahoregrill.com/our-story",

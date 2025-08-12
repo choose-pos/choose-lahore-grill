@@ -142,7 +142,7 @@ const Footer: React.FC<IFooterProps> = ({
           <p className="text-sm">
             DEVELOPED BY{" "}
             <Link
-              href="https://debox.co.in?utm_source=saffron-carry-client-site&utm_medium=saffron_carry_footer&utm_id=debox"
+              href="https://debox.co.in?utm_source=lahore-grill-client-site&utm_medium=lahore_grill_footer&utm_id=debox"
               target="_blank"
               className="underline"
             >
