@@ -83,10 +83,6 @@ export default async function OurStoryPage() {
     });
   }
 
-  navItems.push(
-    ...[{ name: "Reservation", link: "https://reserve.saffroncary.com/" }]
-  );
-
   const {
     name,
     brandingLogo,
@@ -116,8 +112,8 @@ export default async function OurStoryPage() {
 
         <div className="space-y-4 py-10">
           <p>
-            {`At Saffron, accessible from`}{" "}
-            <a href=" https://lahoregrill.com/"> https://saffroncary.com</a>
+            {`At Lahore Grill, accessible from`}{" "}
+            <a href=" https://lahoregrill.com/"> https://lahoregrill.com</a>
           </p>
           <p>
             {`We always strive to serve fresh, delicious meals with strict standards of quality and accuracy. If for some reason we have provided you with an incorrect order, please contact us by telephone or by coming into the store as soon as you notice the discrepancy. We will do everything we can to quickly correct the issue. We also appreciate feedback if you are otherwise unsatisfied with your order. We strive to always take care of our customers and resolve any issues as best as we possibly can. We offer replacements when appropriate and, when that is not a suitable solution for a particular situation, we provide both full and partial refunds. Please note, when paying by credit card, refunds may take up to 5-7 business days to process to your account. If there is ever anything wrong with your order or you have a concern please return your meal just as it is. We strive to always take care of our customers and resolve any issues as best as we possibly can.`}

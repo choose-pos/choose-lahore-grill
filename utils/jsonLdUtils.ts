@@ -69,7 +69,7 @@ export const generateRestaurantJsonLd = (restaurantData: Restaurant) => {
     "@type": "Restaurant",
     name: name,
     image: brandingLogo ?? undefined,
-    url: "https://saffroncary.com",
+    url: "https://lahoregrill.com",
     telephone: phone,
     address: address
       ? {

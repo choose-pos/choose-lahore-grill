@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "Contact Lahore Grill Marietta – Get in Touch for Orders & Inquiries",
     description:
       "Contact Lahore Grill in Marietta, Atlanta. Call, email, or fill out our form for quick assistance.",
-    images: [{ url: "/Saffron.jpg" }],
+    images: [{ url: "/LahoreGrill.jpg" }],
     type: "article",
   },
   twitter: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
       "Contact Lahore Grill Marietta – Get in Touch for Orders & Inquiries",
     description:
       "Contact Lahore Grill in Marietta, Atlanta. Call, email, or fill out our form for quick assistance.",
-    images: ["/Saffron.jpg"],
+    images: ["/LahoreGrill.jpg"],
   },
   alternates: {
     canonical: "https://lahoregrill.com/contact",

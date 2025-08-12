@@ -21,7 +21,7 @@ export const metadata: Metadata = {
       "Events in Marietta – Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
       "Plan your perfect event with Lahore Grill in Marietta, Atlanta. From mehndis to corporate parties, enjoy authentic halal Pakistani food and seamless event catering services.",
-    images: [{ url: "/Saffron.jpg" }],
+    images: [{ url: "/LahoreGrill.jpg" }],
     type: "article",
   },
   twitter: {
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
       "Events in Marietta – Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
       "Plan your perfect event with Lahore Grill in Marietta, Atlanta. From mehndis to corporate parties, enjoy authentic halal Pakistani food and seamless event catering services.",
-    images: ["/Saffron.jpg"],
+    images: ["/LahoreGrill.jpg"],
   },
   alternates: {
     canonical: "https://lahoregrill.com/event",

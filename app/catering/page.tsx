@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "Catering in Marietta –  Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
       "Bring the bold flavors of Pakistan to your event with Lahore Grill’s halal catering in Marietta, Atlanta. Perfect for weddings, mehndis, office lunches & more. Freshly cooked, custom packages, and timely delivery.",
-    images: [{ url: "/Saffron.jpg" }],
+    images: [{ url: "/LahoreGrill.jpg" }],
     type: "article",
   },
   twitter: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
       "Catering in Marietta –  Lahore Grill Pakistani, Indian & Halal Restaurant",
     description:
       "Bring the bold flavors of Pakistan to your event with Lahore Grill’s halal catering in Marietta, Atlanta. Perfect for weddings, mehndis, office lunches & more. Freshly cooked, custom packages, and timely delivery.",
-    images: ["/Saffron.jpg"],
+    images: ["/LahoreGrill.jpg"],
   },
   alternates: {
     canonical: "https://lahoregrill.com/catering",

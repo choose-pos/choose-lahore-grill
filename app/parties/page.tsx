@@ -21,7 +21,7 @@ export const metadata: Metadata = {
       "Banquet Hall in Marietta – Lahore Grill | Elegant Venue for All Occasions",
     description:
       "Lahore Grill’s banquet hall in Marietta blends elegance with tradition. Ideal for weddings, birthdays, and cultural events, with full halal catering and warm hospitality.",
-    images: [{ url: "/Saffron.jpg" }],
+    images: [{ url: "/LahoreGrill.jpg" }],
     type: "article",
   },
   twitter: {
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
       "Banquet Hall in Marietta – Lahore Grill | Elegant Venue for All Occasions",
     description:
       "Lahore Grill’s banquet hall in Marietta blends elegance with tradition. Ideal for weddings, birthdays, and cultural events, with full halal catering and warm hospitality.",
-    images: ["/Saffron.jpg"],
+    images: ["/LahoreGrill.jpg"],
   },
   alternates: {
     canonical: "https://lahoregrill.com/parties",

@@ -48,9 +48,8 @@ export async function POST(request: NextRequest) {
     `;
 
     const { data, error } = await resend.emails.send({
-      from: "Saffron Cary <safforn@updates.saffroncary.com>",
-      to: ["aditya@debox.co.in"],
-      // cc: ["saffroncarymarketing@gmail.com"],
+      from: "Lahore Grill <lahoregrill@updates.lahoregrill.com>",
+      to: ["altaf1.mughal@gmail.com"],
       subject: "Lahore Grill: Event Inquiry",
       html: htmlTemplate,
     });
