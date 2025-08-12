@@ -1,4 +1,3 @@
-import saffron from "@/assets/logo-saffron.png";
 import { formatUSAPhoneNumber } from "@/utils/UtilFncs";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,7 +33,7 @@ const Footer: React.FC<IFooterProps> = ({
     { name: "Catering", link: "/catering" },
     { name: "Banquet Hall", link: "/parties" },
     { name: "Events", link: "/event" },
-    { name: "Reservations", link: "/reservations" },
+    // { name: "Reservations", link: "/reservations" },
     { name: "Contact us", link: "/contact" },
     // { name: "Gallery", link: "/gallery" },
     // { name: "Blogs", link: "/blogs" },
