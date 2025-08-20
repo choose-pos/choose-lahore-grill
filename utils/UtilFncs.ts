@@ -112,3 +112,31 @@ export function isRewardApplied(
     cartDetails.loyaltyType === type
   );
 }
+
+export const processButtonLink = (link: string | null) => {
+  if (!link) return "";
+
+  // If it's a full URL (starts with http:// or https://), return as is
+  if (link.startsWith("http://") || link.startsWith("https://")) {
+    return link;
+  }
+
+  // If it starts with #, it's an anchor link - convert to full URL for external handling
+  if (link.startsWith("#")) {
+    console.log("Anchor link detected, converting to full URL");
+    const currentOrigin =
+      typeof window !== "undefined" ? window.location.origin : "";
+    console.log("Current origin:", currentOrigin);
+    console.log("Anchor link:", link);
+    console.log("Converted link:", `${currentOrigin}${link}`);
+    return `${currentOrigin}/${link}`;
+  }
+
+  // If it starts with /, it's a relative path - keep it as is
+  if (link.startsWith("/")) {
+    return link;
+  }
+
+  // For any other case, treat as relative path and prepend with /
+  return `/${link}`;
+};

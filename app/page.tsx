@@ -104,6 +104,18 @@ export default async function Home() {
     ),
   ]);
 
+  async function getOfferLinks() {
+    try {
+      const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+      const res = await sdk.getCmsPromoNavItems({}, { cookie: cookieVal });
+      return res.getCmsPromoNavItems;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+  const offerNavItems = await getOfferLinks();
+
   const query = gql`
     query HomePage {
       homePages {
@@ -292,6 +304,12 @@ export default async function Home() {
           phone={phone}
           navItems={navItems}
           logo={brandingLogo ?? ""}
+          offerNavTitles={offerNavItems?.map((e) => {
+            return {
+              title: e.navTitle,
+              link: `/offer-promotion/${e.link}`,
+            };
+          })}
         />
         <div>
           <HeroSection

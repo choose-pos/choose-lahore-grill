@@ -78,12 +78,14 @@ interface OurStoryClientProps {
   ourStoryPageData: IOurStoryPage;
   restaurantData: any; // Use appropriate type from your API
   navItems: { name: string; link: string }[];
+  offerNavTitles?: { title: string; link: string }[];
 }
 
 export default function OurStoryClient({
   ourStoryPageData,
   restaurantData,
   navItems,
+  offerNavTitles,
 }: OurStoryClientProps) {
   const {
     name,
@@ -102,6 +104,7 @@ export default function OurStoryClient({
         phone={phone}
         navItems={navItems}
         logo={brandingLogo ?? ""}
+        offerNavTitles={offerNavTitles}
       />
       <OurStory
         sectionImage={ourStoryPageData.section1Image}

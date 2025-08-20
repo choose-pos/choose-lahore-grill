@@ -139,12 +139,25 @@ async function getRestaurtCmsData() {
   }
 }
 
+async function getOfferLinks() {
+  try {
+    const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+    const res = await sdk.getCmsPromoNavItems({}, { cookie: cookieVal });
+    return res.getCmsPromoNavItems;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 export default async function OurStoryPage() {
   const [partyData, restaurantData, cmsData] = await Promise.all([
     getOurStoryData(),
     getRestaurantData(),
     getRestaurtCmsData(),
   ]);
+
+  const offerNavItems = await getOfferLinks();
 
   if (!restaurantData || !partyData) {
     return <div>Loading...</div>;
@@ -178,6 +191,12 @@ export default async function OurStoryPage() {
       navItems={navItems}
       partyPageData={partyData}
       restaurantData={restaurantData}
+      offerNavTitles={offerNavItems?.map((e) => {
+        return {
+          title: e.navTitle,
+          link: e.link,
+        };
+      })}
     />
   );
 }

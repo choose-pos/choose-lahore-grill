@@ -12,12 +12,14 @@ interface PartyProps {
   partyPageData: IPartyPage;
   restaurantData: any;
   navItems: { name: string; link: string }[];
+  offerNavTitles?: { title: string; link: string }[];
 }
 
 export default function PartyClient({
   partyPageData,
   restaurantData,
   navItems,
+  offerNavTitles,
 }: PartyProps) {
   const {
     name,
@@ -36,6 +38,7 @@ export default function PartyClient({
         phone={phone}
         navItems={navItems}
         logo={brandingLogo ?? ""}
+        offerNavTitles={offerNavTitles}
       />
       <div className="mt-28">
         <PartyContent

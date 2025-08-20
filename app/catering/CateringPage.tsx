@@ -18,12 +18,14 @@ interface CateringPageClientProps {
   cateringPageData: ICateringPage; // Use the ICateringPage interface from the server component
   restaurantData: any; // Use appropriate type from your API
   navItems: { name: string; link: string }[];
+  offerNavTitles?: { title: string; link: string }[];
 }
 
 export default function CateringPageClient({
   cateringPageData,
   restaurantData,
   navItems,
+  offerNavTitles,
 }: CateringPageClientProps) {
   const {
     name,
@@ -42,6 +44,12 @@ export default function CateringPageClient({
         phone={phone}
         navItems={navItems}
         logo={brandingLogo ?? ""}
+        offerNavTitles={offerNavTitles?.map((e) => {
+          return {
+            title: e.title,
+            link: `/offer-promotion/${e.link}`,
+          };
+        })}
       />
       <Catering
         sectionImage={cateringPageData.section1Image}
