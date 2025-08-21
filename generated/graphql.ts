@@ -384,6 +384,27 @@ export type CmsOnlineOrderingConfig = {
   websiteLink: Scalars['String']['output'];
 };
 
+export type CmsPopupContent = {
+  __typename?: 'CmsPopupContent';
+  button: PromoCmsButton;
+  description: Scalars['String']['output'];
+  image?: Maybe<CmsImage>;
+  isVerticallyAligned: Scalars['Boolean']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type CmsPromoPopup = {
+  __typename?: 'CmsPromoPopup';
+  _id: Scalars['ID']['output'];
+  content: CmsPopupContent;
+  createdAt: Scalars['DateTimeISO']['output'];
+  restaurant: Restaurant;
+  status: Scalars['Boolean']['output'];
+  updatedAt: Scalars['DateTimeISO']['output'];
+  updatedBy?: Maybe<User>;
+  user: User;
+};
+
 export type CmsPromoRoutes = {
   __typename?: 'CmsPromoRoutes';
   PromoImageSection: Array<CmsImage>;
@@ -1630,6 +1651,7 @@ export type Query = {
   fetchVisiblePromoCodes: Array<PromoCode>;
   getCmsDetails?: Maybe<CmsRestaurant>;
   getCmsPromoNavItems: Array<PromoNavItem>;
+  getCmsPromoPopUp?: Maybe<CmsPromoPopup>;
   getCmsPromoRouteDetails?: Maybe<CmsPromoRoutes>;
   getCmsRestaurantDetails?: Maybe<Restaurant>;
   getCustomerCategoriesAndItems: Array<CategoryItem>;
@@ -2330,6 +2352,11 @@ export type GetCmsPromoNavItemsQueryVariables = Exact<{ [key: string]: never; }>
 
 
 export type GetCmsPromoNavItemsQuery = { __typename?: 'Query', getCmsPromoNavItems: Array<{ __typename?: 'PromoNavItem', navTitle: string, link: string }> };
+
+export type GetCmsPromoPopUpQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: { __typename?: 'CmsPromoPopup', status: boolean, content: { __typename?: 'CmsPopupContent', title: string, description: string, isVerticallyAligned: boolean, image?: { __typename?: 'CmsImage', desktop: string, mobile?: string | null } | null, button: { __typename?: 'PromoCmsButton', title: string, link?: string | null } } } | null };
 
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3053,6 +3080,26 @@ export const GetCmsPromoNavItemsDocument = gql`
   }
 }
     `;
+export const GetCmsPromoPopUpDocument = gql`
+    query getCmsPromoPopUp {
+  getCmsPromoPopUp {
+    status
+    content {
+      title
+      description
+      image {
+        desktop
+        mobile
+      }
+      button {
+        title
+        link
+      }
+      isVerticallyAligned
+    }
+  }
+}
+    `;
 export const GetCustomerRestaurantDetailsDocument = gql`
     query GetCustomerRestaurantDetails {
   getCustomerRestaurantDetails {
@@ -3419,6 +3466,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getCmsPromoNavItems(variables?: GetCmsPromoNavItemsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoNavItemsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoNavItemsQuery>(GetCmsPromoNavItemsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoNavItems', 'query', variables);
+    },
+    getCmsPromoPopUp(variables?: GetCmsPromoPopUpQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoPopUpQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoPopUpQuery>(GetCmsPromoPopUpDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoPopUp', 'query', variables);
     },
     GetCustomerRestaurantDetails(variables?: GetCustomerRestaurantDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCustomerRestaurantDetailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCustomerRestaurantDetailsQuery>(GetCustomerRestaurantDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetCustomerRestaurantDetails', 'query', variables);

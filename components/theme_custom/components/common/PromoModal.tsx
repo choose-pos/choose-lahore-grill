@@ -78,7 +78,7 @@ const PromoModal: React.FC<ModalProps> = ({
             {isVerticallyAligned ? (
               <div className="flex flex-col h-full">
                 {image && (
-                  <div className="relative h-80 md:h-96">
+                  <div className="relative h-80 md:h-92">
                     {/* Desktop Image */}
                     <Image
                       src={image.desktop}
@@ -108,16 +108,16 @@ const PromoModal: React.FC<ModalProps> = ({
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
                     onClick={onClose}
-                    className="inline-block rounded-lg bg-black text-white px-8 py-3 hover:bg-gray-800 transition font-medium"
+                    className={`md:px-6 px-4 py-3 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
                   >
                     {button.text}
                   </Link>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row h-full min-h-[500px]">
+              <div className="flex flex-col md:flex-row h-full min-h-[400px]">
                 {image && (
-                  <div className="relative w-full md:w-1/2 h-64 md:h-auto">
+                  <div className="relative w-full md:w-[55%] h-52 md:h-auto">
                     {/* Desktop Image */}
                     <Image
                       src={image.desktop}
@@ -147,7 +147,7 @@ const PromoModal: React.FC<ModalProps> = ({
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
                     onClick={onClose}
-                    className={`md:px-6 px-4 py-2 border-2 border-bg3 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
+                    className={`md:px-6 px-4 py-2 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
                   >
                     {button.text}
                   </Link>

@@ -33,3 +33,22 @@ query getCmsPromoNavItems {
     link
   }
 }
+
+query getCmsPromoPopUp {
+  getCmsPromoPopUp {
+    status
+    content {
+      title
+      description
+      image {
+        desktop
+        mobile
+      }
+      button {
+        title
+        link
+      }
+      isVerticallyAligned
+    }
+  }
+}

@@ -9,6 +9,8 @@ import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import Script from "next/script";
 import { getCookie, setCookie } from "@/utils/UtilFncs";
+import { sdk } from "@/utils/graphqlClient";
+import { CmsPopupContent, CmsPromoPopup } from "@/generated/graphql";
 
 const Toast = dynamic(() => import("@/components/common/toast/toast"), {
   ssr: false,
@@ -59,35 +61,14 @@ export default function RootLayout({
   useEffect(() => {
     const fetchPromoData = async () => {
       try {
-        // const response = await sdk.getCmsPromoPopUp();
-        const response = {
-          _id: "dummy-popup-1",
-          name: "Summer Special Offer",
-          status: true,
-          content: {
-            title: "🔥 Limited Time Offer!",
-            description:
-              "Get 20% off on all orders above $25. Fresh ingredients, amazing taste, unbeatable prices!",
-            image: {
-              desktop:
-                "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-              mobile:
-                "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
-            },
-            button: {
-              text: "Order Now",
-              url: "/menu",
-            },
-            isVerticallyAligned: true,
-          },
-        };
+        const response = await sdk.getCmsPromoPopUp();
 
-        if (response && response.status) {
+        if (response && response.getCmsPromoPopUp?.status) {
           const popup = getCookie("popup");
           if (popup) {
             return;
           }
-          setPromoData(response);
+          setPromoData(response.getCmsPromoPopUp);
 
           setTimeout(() => {
             setShowPopup(true);
@@ -132,14 +113,14 @@ export default function RootLayout({
                 title={promoData?.content?.title}
                 description={promoData?.content?.description}
                 button={{
-                  text: promoData?.content?.button?.text,
-                  url: promoData?.content?.button?.url,
+                  text: promoData?.content?.button?.title,
+                  url: promoData?.content?.button?.link,
                 }}
                 image={{
                   desktop: promoData?.content?.image?.desktop,
                   mobile: promoData?.content?.image?.mobile,
                 }}
-                isVerticallyAligned={false} // try changing to false
+                isVerticallyAligned={promoData?.content?.isVerticallyAligned}
               />
               {children}
               <AnalyticsLoader />
