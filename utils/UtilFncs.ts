@@ -140,3 +140,16 @@ export const processButtonLink = (link: string | null) => {
   // For any other case, treat as relative path and prepend with /
   return `/${link}`;
 };
+
+export function setCookie(name: string, value: string, ttlSeconds: number) {
+  const d = new Date();
+  d.setTime(d.getTime() + ttlSeconds * 1000);
+  document.cookie = `${name}=${value}; expires=${d.toUTCString()}; path=/`;
+}
+
+export function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+  return null;
+}

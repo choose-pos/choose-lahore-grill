@@ -67,7 +67,7 @@ export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
               <Link
                 href={processButtonLink(ctaSection.button.link ?? "")}
                 className={`
-                md:px-6 px-4 py-2 md:h-12  md:w-[180px] text-[20px] uppercase  border-2 border-bg1 bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
+                md:px-6 px-4 py-1.5 md:py-2 text-base md:text-lg uppercase  border-2 border-bg1 bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
                 {...(ctaSection.button.link?.startsWith("http")
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
@@ -77,7 +77,7 @@ export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
             ) : (
               <Link href={processButtonLink(ctaSection.button.link ?? "")}>
                 <button
-                  className={`md:px-6 px-4 py-2 md:h-12 md:w-[180px] border-2 border-bg1 text-[20px] uppercase bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
+                  className={`md:px-6 px-4 py-1.5 md:py-2 border-2 border-bg1 text-base md:text-lg uppercase bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
                 >
                   {ctaSection.button.title}
                 </button>

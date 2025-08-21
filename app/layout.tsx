@@ -3,11 +3,12 @@
 import ToastStore from "@/store/toast";
 import dynamic from "next/dynamic";
 import { Bebas_Neue, Karla, Rubik } from "next/font/google";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import Script from "next/script";
+import { getCookie, setCookie } from "@/utils/UtilFncs";
 
 const Toast = dynamic(() => import("@/components/common/toast/toast"), {
   ssr: false,
@@ -18,6 +19,13 @@ const Loading = dynamic(() => import("./menu/loading"), {
 const AnalyticsLoader = dynamic(() => import("@/components/analytics"), {
   ssr: false,
 });
+
+const PromoModal = dynamic(
+  () => import("@/components/theme_custom/components/common/PromoModal"),
+  {
+    ssr: false,
+  }
+);
 
 const karla_online_ordering = Karla({
   weight: ["400", "500", "600", "700"],
@@ -46,7 +54,55 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const { toastData } = ToastStore();
+  const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [promoData, setPromoData] = useState<any>(null);
+  useEffect(() => {
+    const fetchPromoData = async () => {
+      try {
+        // const response = await sdk.getCmsPromoPopUp();
+        const response = {
+          _id: "dummy-popup-1",
+          name: "Summer Special Offer",
+          status: true,
+          content: {
+            title: "🔥 Limited Time Offer!",
+            description:
+              "Get 20% off on all orders above $25. Fresh ingredients, amazing taste, unbeatable prices!",
+            image: {
+              desktop:
+                "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+              mobile:
+                "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+            },
+            button: {
+              text: "Order Now",
+              url: "/menu",
+            },
+            isVerticallyAligned: true,
+          },
+        };
 
+        if (response && response.status) {
+          const popup = getCookie("popup");
+          if (popup) {
+            return;
+          }
+          setPromoData(response);
+
+          setTimeout(() => {
+            setShowPopup(true);
+            setCookie("popup", "true", 3600);
+          }, 5000);
+        }
+      } catch (error) {
+        console.error("Error fetching promo popup:", error);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      fetchPromoData();
+    }
+  }, []);
   return (
     <html lang="en" className={`${rubik.variable} ${bebas.variable}`}>
       <head>
@@ -70,6 +126,21 @@ export default function RootLayout({
           {
             <>
               <NextTopLoader color="#fff" showSpinner={false} />
+              <PromoModal
+                isOpen={showPopup}
+                onClose={() => setShowPopup(false)}
+                title={promoData?.content?.title}
+                description={promoData?.content?.description}
+                button={{
+                  text: promoData?.content?.button?.text,
+                  url: promoData?.content?.button?.url,
+                }}
+                image={{
+                  desktop: promoData?.content?.image?.desktop,
+                  mobile: promoData?.content?.image?.mobile,
+                }}
+                isVerticallyAligned={false} // try changing to false
+              />
               {children}
               <AnalyticsLoader />
             </>

@@ -16,13 +16,37 @@ import { FaCartShopping } from "react-icons/fa6";
 import { HiMenu, HiX } from "react-icons/hi";
 import { MdAccountCircle } from "react-icons/md";
 import { getNavItems } from "../data/nav-items"; // Assuming you have a types folder
+import { FiChevronDown } from "react-icons/fi";
+import { ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface NavbarProps {
   myaccount: boolean;
 }
 
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: -10 },
+  show: { opacity: 1, y: 0 },
+};
+
 const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isOffersOpen, setIsOffersOpen] = useState(false);
+  const [isMobileOffersOpen, setIsMobileOffersOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [offerNavitems, setOfferNavItems] = useState<
+    { title: string; link: string }[]
+  >([]);
   const { restaurantData } = RestaurantStore();
   const { cartCountInfo } = useCartStore();
   const { setCartOpen, setSignInOpen } = useSidebarStore();
@@ -74,6 +98,34 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
     };
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    const fetchNavItems = async () => {
+      try {
+        const nav = await sdk.getCmsPromoNavItems();
+        const items =
+          nav?.getCmsPromoNavItems?.map((e) => ({
+            title: e.navTitle,
+            link: `./offer-promotion/${e.link}`,
+          })) || [];
+
+        setOfferNavItems(items);
+      } catch (error) {
+        console.error("Error fetching promo nav items:", error);
+        setOfferNavItems([]);
+      }
+    };
+
+    fetchNavItems();
+  }, []);
+
+  const toggleOffersDropdown = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    setIsOffersOpen(!isOffersOpen);
+  };
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <header
       className={`${
@@ -110,6 +162,40 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 </p>
               </Link>
             ))}
+            {offerNavitems.length > 0 && (
+              <div
+                className=" relative px-4 py-2 rounded-md text-2xl md:text-lg font-medium "
+                onMouseEnter={() => setIsOffersOpen(true)}
+                onMouseLeave={() => setIsOffersOpen(false)}
+              >
+                <div
+                  className="flex items-center space-x-1 cursor-pointer hover:text-primaryColor transition-colors duration-200"
+                  onClick={toggleOffersDropdown}
+                >
+                  <span>Offers</span>
+                  <FiChevronDown
+                    className={`transition-transform duration-200 ${
+                      isOffersOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+
+                {/* Desktop Dropdown - improved positioning and interaction */}
+                {isOffersOpen && (
+                  <div className="absolute top-full left-0 pt-2 z-60">
+                    <div className="w-64 bg-white border border-primaryColor rounded-lg cursor-pointer shadow-lg py-2">
+                      {offerNavitems.map((offer, index) => (
+                        <Link key={index} href={`/${offer.link}`}>
+                          <div className="px-4 py-3  hover:text-primaryColor transition-all duration-200 cursor-pointer border-b border-gray-100 last:border-b-0">
+                            {offer.title}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </nav>
 
           {/* Desktop Right Side Actions */}
@@ -301,6 +387,51 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                   </p>
                 </Link>
               ))}
+              {offerNavitems && offerNavitems.length > 0 && (
+                <li className="justify-between flex flex-col text-lg items-center font-medium">
+                  <button
+                    onClick={() => setIsMobileOffersOpen(!isMobileOffersOpen)}
+                    className="flex items-center justify-center gap-1 px-4 py-2 cursor-pointer w-full  transition-all duration-300"
+                  >
+                    Offers
+                    <ChevronDown
+                      className={`transition-transform duration-300 ${
+                        isMobileOffersOpen ? "rotate-180" : ""
+                      }`}
+                      size={18}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {isMobileOffersOpen && (
+                      <motion.ul
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate="show"
+                        exit="hidden"
+                        className="w-full"
+                      >
+                        {offerNavitems.map((offer, index) => (
+                          <motion.li
+                            key={index}
+                            variants={staggerItem}
+                            className="w-full flex justify-center"
+                          >
+                            <Link href={offer.link} className="w-full">
+                              <span
+                                className="block px-4 py-2 text-center cursor-pointer w-full transition-all duration-300 text-base opacity-80"
+                                onClick={toggleMenu}
+                              >
+                                {offer.title}
+                              </span>
+                            </Link>
+                          </motion.li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </li>
+              )}
             </nav>
 
             <div className="px-4 py-6 font-online-ordering">
