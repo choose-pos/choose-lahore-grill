@@ -17,9 +17,14 @@ const OfferPromoNotFound = () => {
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          {/* <Button text="Back to Homepage" url="/" /> */}
-        </div>
+        <Link href={"/"} aria-label="Back Link">
+          <button
+            aria-label="Back to home"
+            className={`md:px-6 px-4 py-2 border-2 border-bg1 text-[20px] uppercase bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
+          >
+            {`Back to Home`}
+          </button>
+        </Link>
       </div>
     </div>
   );

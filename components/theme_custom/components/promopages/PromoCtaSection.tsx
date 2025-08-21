@@ -75,12 +75,8 @@ export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
                 {ctaSection.button.title}
               </Link>
             ) : (
-              <Link
-                href={processButtonLink(ctaSection.button.link ?? "")}
-                aria-label="Order Now Link"
-              >
+              <Link href={processButtonLink(ctaSection.button.link ?? "")}>
                 <button
-                  aria-label="Order Now"
                   className={`md:px-6 px-4 py-2 md:h-12 md:w-[180px] border-2 border-bg1 text-[20px] uppercase bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
                 >
                   {ctaSection.button.title}
