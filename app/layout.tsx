@@ -73,7 +73,7 @@ export default function RootLayout({
           setTimeout(() => {
             setShowPopup(true);
             setCookie("popup", "true", 3600);
-          }, 5000);
+          }, 3000);
         }
       } catch (error) {
         console.error("Error fetching promo popup:", error);
