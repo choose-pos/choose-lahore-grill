@@ -61,8 +61,9 @@ export default function RestaurantDetails({
 // cartCount,
 // slug,
 RestaurantDetailsProps) {
-  const [filteredCategories, setFilteredCategories] =
-    useState<CustomerCategoryItem[]>(categories);
+  const [filteredCategories, setFilteredCategories] = useState<
+    CustomerCategoryItem[] | null
+  >(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCategoriesPopupOpen, setIsCategoriesPopupOpen] =
@@ -137,17 +138,17 @@ RestaurantDetailsProps) {
   }, [searchParams]);
 
   useEffect(() => {
-  const signup = searchParams.get("signup");
-  if (!signup) return;
-  if (isLoggedIn) {
-    window.history.replaceState({}, '', "/menu");
-    router.push("/menu/my-account");
-  } else {
-    window.history.replaceState({}, '', "/menu");
-    setSignInOpen(true);
-    setIsSignUpOpen(true);
-  }
-}, [ isLoggedIn]);
+    const signup = searchParams.get("signup");
+    if (!signup) return;
+    if (isLoggedIn) {
+      // router.replace('/menu', { shallow: true });
+      router.replace("/menu/my-account");
+    } else {
+      router.replace("/menu");
+      setSignInOpen(true);
+      setIsSignUpOpen(true);
+    }
+  }, [isLoggedIn]);
 
   // Fetching cart count and cart details
   useEffect(() => {
@@ -616,7 +617,7 @@ RestaurantDetailsProps) {
 
             {!isMobile ? (
               <div className="flex overflow-x-auto space-x-2 pb-2 scrollbar-hide">
-                {filteredCategories.map((category) => (
+                {filteredCategories && filteredCategories.map((category) => (
                   <button
                     key={category._id}
                     data-category-id={category._id}
@@ -677,7 +678,7 @@ RestaurantDetailsProps) {
                 />
               )}
               <div className="space-y-10  mb-8 md:mb-0 ">
-                {filteredCategories.length === 0 ? (
+                {filteredCategories && filteredCategories.length === 0 ? (
                   <div className="py-4 h-[40rem]">
                     {!searchQuery && !categoryType ? (
                       // No search query and no filters - show store message
@@ -713,7 +714,7 @@ RestaurantDetailsProps) {
                   </div>
                 ) : (
                   // Show categories when available
-                  filteredCategories.map((category) => (
+                  filteredCategories && filteredCategories.map((category) => (
                     <div key={category._id}>
                       {category.items.length > 0 && (
                         <CategoryListing
@@ -785,7 +786,7 @@ RestaurantDetailsProps) {
 
                 <div className="overflow-y-scroll pb-3">
                   <div className="space-y-2">
-                    {filteredCategories.map((category) => (
+                    {filteredCategories && filteredCategories.map((category) => (
                       <button
                         key={category._id}
                         data-category-id={category._id}

@@ -167,7 +167,7 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
   };
 
   const handleBack = () => {
-    router.back();
+    router.replace("/menu");
   };
 
   return (

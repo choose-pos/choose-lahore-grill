@@ -78,7 +78,7 @@ const PromoModal: React.FC<ModalProps> = ({
             {isVerticallyAligned ? (
               <div className="flex flex-col h-full">
                 {image && (
-                  <div className="relative h-80 md:h-92">
+                  <div className="relative h-60 md:h-92">
                     {/* Desktop Image */}
                     <Image
                       src={image.desktop}
@@ -96,7 +96,7 @@ const PromoModal: React.FC<ModalProps> = ({
                   </div>
                 )}
                 <div className="p-4 md:p-8 flex-1 overflow-y-auto">
-                  <h2 className="text-3xl md:text-5xl font-secondary mb-4">
+                  <h2 className="text-3xl md:text-4xl font-secondary mb-4">
                     {title}
                   </h2>
                   <p className="text-gray-600 mb-6 text-sm md:text-lg font-primary leading-relaxed">
@@ -135,7 +135,7 @@ const PromoModal: React.FC<ModalProps> = ({
                   </div>
                 )}
                 <div className="p-4 md:p-6 flex flex-col justify-center items-start md:w-1/2 flex-1">
-                  <h2 className="text-3xl font-secondary md:text-4xl font-bold mb-4">
+                  <h2 className="text-3xl font-secondary md:text-4xl  mb-4">
                     {title}
                   </h2>
                   <p className="text-gray-600 mb-6 text-sm font-primary md:text-base leading-relaxed">
