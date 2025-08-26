@@ -78,7 +78,7 @@ const PromoModal: React.FC<ModalProps> = ({
             {isVerticallyAligned ? (
               <div className="flex flex-col h-full">
                 {image && (
-                  <div className="relative h-60 md:h-92">
+                  <div className="relative h-60 md:h-80">
                     {/* Desktop Image */}
                     <Image
                       src={image.desktop}
