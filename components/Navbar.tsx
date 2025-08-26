@@ -172,7 +172,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                   className="flex items-center space-x-1 cursor-pointer hover:text-primaryColor transition-colors duration-200"
                   onClick={toggleOffersDropdown}
                 >
-                  <span>Offers</span>
+                  <span>Promotions</span>
                   <FiChevronDown
                     className={`transition-transform duration-200 ${
                       isOffersOpen ? "rotate-180" : ""
@@ -393,7 +393,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                     onClick={() => setIsMobileOffersOpen(!isMobileOffersOpen)}
                     className="flex items-center justify-center gap-1 px-4 py-2 cursor-pointer w-full  transition-all duration-300"
                   >
-                    Offers
+                    Promotions
                     <ChevronDown
                       className={`transition-transform duration-300 ${
                         isMobileOffersOpen ? "rotate-180" : ""

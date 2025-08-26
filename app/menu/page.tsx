@@ -303,6 +303,18 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+async function CheckMeCustomer(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const authCookie = cookieStore.get('choose_ordering_at');
+    // If the cookie exists and has a value, user is logged in
+    return !!authCookie?.value;
+  } catch (error) {
+    console.error(error);
+    return false; // in case of error, return false
+  }
+}
+
 async function Page({
   searchParams,
 }: {
@@ -372,12 +384,13 @@ async function Page({
     }
   }
 
-  const [restaurant, categories, loyaltyRule, loyaltyOffers] =
+  const [restaurant, categories, loyaltyRule, loyaltyOffers, isLoggedIn] =
     await Promise.all([
       getRestaurantDetails(),
       getRestaurantCategories(),
       getLoyaltyRule(),
       getLoyaltyOffers(),
+      CheckMeCustomer(),
     ]);
 
   if (!restaurant || !categories) {
@@ -391,6 +404,7 @@ async function Page({
       loyaltyRule={loyaltyRule ?? null}
       loyaltyOffers={loyaltyOffers ?? null}
       mismatch={mismatch}
+      isLoggedIn={isLoggedIn}
     />
   );
 }

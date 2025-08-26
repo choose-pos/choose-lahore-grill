@@ -32,7 +32,7 @@ import {
 import { extractFreeDiscountItemDetails } from "@/utils/UtilFncs";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import { FiSearch, FiX } from "react-icons/fi";
@@ -46,6 +46,8 @@ interface RestaurantDetailsProps {
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   loyaltyOffers: RestaurantRedeemOffers | null;
   mismatch: boolean | null;
+  isLoggedIn: boolean;
+
 }
 
 export default function RestaurantDetails({
@@ -54,6 +56,7 @@ export default function RestaurantDetails({
   loyaltyOffers,
   loyaltyRule,
   mismatch,
+  isLoggedIn,
 }: // cartStore,
 // cartCount,
 // slug,
@@ -88,6 +91,8 @@ RestaurantDetailsProps) {
   const [showButton, setShowButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const {setSignInOpen, setIsSignUpOpen } = useSidebarStore();
+
   const IntialCategory = categories;
 
   const isDelivery = restaurant.deliveryConfig.provideDelivery;
@@ -103,7 +108,7 @@ RestaurantDetailsProps) {
   };
 
   const filterRef = useRef<HTMLDivElement>(null);
-
+   const router = useRouter();
   useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
@@ -130,6 +135,19 @@ RestaurantDetailsProps) {
       );
     }
   }, [searchParams]);
+
+  useEffect(() => {
+  const signup = searchParams.get("signup");
+  if (!signup) return;
+  if (isLoggedIn) {
+    window.history.replaceState({}, '', "/menu");
+    router.push("/menu/my-account");
+  } else {
+    window.history.replaceState({}, '', "/menu");
+    setSignInOpen(true);
+    setIsSignUpOpen(true);
+  }
+}, [ isLoggedIn]);
 
   // Fetching cart count and cart details
   useEffect(() => {

@@ -188,7 +188,7 @@ const Navbar: React.FC<INavProps> = ({
                     onClick={() => setShowOffersMenu(!showOffersMenu)}
                     className="flex items-center gap-1 px-4 py-2 text-base text-gray-300 hover:text-white font-medium"
                   >
-                    Offers
+                    Promotions
                     <ChevronDown
                       className={`transition-transform duration-300 text-gray-300 hover:text-white ${
                         showOffersMenu ? "rotate-180" : ""
@@ -349,7 +349,7 @@ const Navbar: React.FC<INavProps> = ({
                   onClick={() => setShowOffersMobileMenu(!showOffersMobilMenu)}
                   className="flex items-center justify-center gap-1 px-4 py-2 transition-all duration-300 cursor-pointer w-full hover:text-primaryColor/80 uppercasetext-bg3 hover:text-white"
                 >
-                  Offers
+                  Promotions
                   <ChevronDown
                     className={`transition-transform duration-300 ${
                       showOffersMobilMenu ? "rotate-180" : ""
