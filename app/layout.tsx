@@ -148,8 +148,7 @@ export default function RootLayout({
         <Suspense fallback={<Loading />}>
           {
             <>
-              
-            <NextTopLoader color="#fff" showSpinner={false} />
+              <NextTopLoader color="#fff" showSpinner={false} />
               {promoData && (
                 <Modal
                   isOpen={showPopup}
@@ -167,6 +166,8 @@ export default function RootLayout({
                   isVerticallyAligned={promoData.content.isVerticallyAligned}
                 />
               )}
+              {children}
+              <AnalyticsLoader />
             </>
           }
         </Suspense>
