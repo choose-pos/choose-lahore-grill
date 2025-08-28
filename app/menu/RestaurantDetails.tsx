@@ -42,7 +42,7 @@ import RecentOrders from "@/components/partners/RecentOrders";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
-  categories: CustomerCategoryItem[];
+  // categories: CustomerCategoryItem[];
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   loyaltyOffers: RestaurantRedeemOffers | null;
   mismatch: boolean | null;
@@ -52,7 +52,7 @@ interface RestaurantDetailsProps {
 
 export default function RestaurantDetails({
   restaurant,
-  categories,
+  // categories,
   loyaltyOffers,
   loyaltyRule,
   mismatch,
@@ -94,7 +94,7 @@ RestaurantDetailsProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const {setSignInOpen, setIsSignUpOpen } = useSidebarStore();
 
-  const IntialCategory = categories;
+  // const IntialCategory = categories;
 
   const isDelivery = restaurant.deliveryConfig.provideDelivery;
   const isPickUp = restaurant.restaurantConfigs.pickup;
@@ -301,12 +301,12 @@ RestaurantDetailsProps) {
   };
 
   // Effect to update visible categories based on filters
-  useEffect(() => {
-    if (!categoryType) {
-      // setVisibleCategories(IntialCategory);
-      setFilteredCategories(IntialCategory);
-    }
-  }, [categoryType, categories, IntialCategory]);
+  // useEffect(() => {
+  //   if (!categoryType) {
+  //     // setVisibleCategories(IntialCategory);
+  //     setFilteredCategories(IntialCategory);
+  //   }
+  // }, [categoryType, categories, IntialCategory]);
 
   // Effect to set restaurant data
   useEffect(() => {

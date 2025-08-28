@@ -2356,7 +2356,7 @@ export type GetCmsPromoNavItemsQuery = { __typename?: 'Query', getCmsPromoNavIte
 export type GetCmsPromoPopUpQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: { __typename?: 'CmsPromoPopup', status: boolean, content: { __typename?: 'CmsPopupContent', title: string, description: string, isVerticallyAligned: boolean, image?: { __typename?: 'CmsImage', desktop: string, mobile?: string | null } | null, button: { __typename?: 'PromoCmsButton', title: string, link?: string | null } } } | null };
+export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: { __typename?: 'CmsPromoPopup', _id: string, status: boolean, content: { __typename?: 'CmsPopupContent', title: string, description: string, isVerticallyAligned: boolean, image?: { __typename?: 'CmsImage', desktop: string, mobile?: string | null } | null, button: { __typename?: 'PromoCmsButton', title: string, link?: string | null } }, updatedBy?: { __typename?: 'User', creatorUser?: string | null } | null } | null };
 
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3083,6 +3083,7 @@ export const GetCmsPromoNavItemsDocument = gql`
 export const GetCmsPromoPopUpDocument = gql`
     query getCmsPromoPopUp {
   getCmsPromoPopUp {
+    _id
     status
     content {
       title
@@ -3096,6 +3097,9 @@ export const GetCmsPromoPopUpDocument = gql`
         link
       }
       isVerticallyAligned
+    }
+    updatedBy {
+      creatorUser
     }
   }
 }

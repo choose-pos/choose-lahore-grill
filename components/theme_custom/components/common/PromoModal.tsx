@@ -103,7 +103,7 @@ const PromoModal: React.FC<ModalProps> = ({
                     {description}
                   </p>
                   <Link
-                    href={button.url}
+                    href={decodeURI(button.url)}
                     {...(button.url?.startsWith("http")
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
@@ -142,7 +142,7 @@ const PromoModal: React.FC<ModalProps> = ({
                     {description}
                   </p>
                   <Link
-                    href={button.url}
+                    href={decodeURI(button.url)}
                     {...(button.url?.startsWith("http")
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}

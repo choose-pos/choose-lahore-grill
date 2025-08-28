@@ -67,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: pageTitle,
     description: metaDescription,
     alternates: {
-      canonical: "./",
+      canonical: "/",
     },
     metadataBase: new URL("https://" + website),
     openGraph: {

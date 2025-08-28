@@ -68,7 +68,7 @@ export async function generateMetadata({
       description:
         websiteSeo?.metaDescription || `Special promotion at ${name}`,
       alternates: {
-        canonical: `./offer-promotion/${resolvedParams.slugName}`,
+        canonical: `/offer-promotion/${resolvedParams.slugName}`,
       },
       openGraph: {
         title: websiteSeo?.pageTitle || `${heroTitle} - ${name}`,

@@ -36,6 +36,7 @@ query getCmsPromoNavItems {
 
 query getCmsPromoPopUp {
   getCmsPromoPopUp {
+    _id
     status
     content {
       title
@@ -49,6 +50,9 @@ query getCmsPromoPopUp {
         link
       }
       isVerticallyAligned
+    }
+    updatedBy {
+      creatorUser
     }
   }
 }

@@ -22,7 +22,7 @@ const AnalyticsLoader = dynamic(() => import("@/components/analytics"), {
   ssr: false,
 });
 
-const PromoModal = dynamic(
+const Modal = dynamic(
   () => import("@/components/theme_custom/components/common/PromoModal"),
   {
     ssr: false,
@@ -50,6 +50,27 @@ const bebas = Bebas_Neue({
   display: "swap",
 });
 
+interface PromoData {
+  _id: string;
+  status: boolean;
+  content: {
+    title: string;
+    description: string;
+    image: {
+      desktop: string;
+      mobile: string;
+    };
+    button: {
+      title: string;
+      link: string;
+    };
+    isVerticallyAligned: boolean;
+  };
+  updatedBy: {
+    creatorUser: string;
+  };
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,7 +78,7 @@ export default function RootLayout({
 }>) {
   const { toastData } = ToastStore();
   const [showPopup, setShowPopup] = useState<boolean>(false);
-  const [promoData, setPromoData] = useState<any>(null);
+  const [promoData, setPromoData] = useState<PromoData | null>(null);
   useEffect(() => {
     const fetchPromoData = async () => {
       try {
@@ -68,7 +89,28 @@ export default function RootLayout({
           if (popup) {
             return;
           }
-          setPromoData(response.getCmsPromoPopUp);
+
+          const resp = response.getCmsPromoPopUp;
+          setPromoData({
+            _id: resp._id,
+            status: resp.status,
+            content: {
+              title: resp.content?.title ?? "",
+              description: resp.content?.description ?? "",
+              image: {
+                desktop: resp.content?.image?.desktop ?? "",
+                mobile: resp.content?.image?.mobile ?? "",
+              },
+              button: {
+                title: resp.content?.button?.title ?? "",
+                link: resp.content?.button?.link ?? "",
+              },
+              isVerticallyAligned: resp.content?.isVerticallyAligned ?? false,
+            },
+            updatedBy: {
+              creatorUser: resp.updatedBy?.creatorUser ?? "",
+            },
+          });
 
           setTimeout(() => {
             setShowPopup(true);
@@ -106,24 +148,25 @@ export default function RootLayout({
         <Suspense fallback={<Loading />}>
           {
             <>
-              <NextTopLoader color="#fff" showSpinner={false} />
-              <PromoModal
-                isOpen={showPopup}
-                onClose={() => setShowPopup(false)}
-                title={promoData?.content?.title}
-                description={promoData?.content?.description}
-                button={{
-                  text: promoData?.content?.button?.title,
-                  url: promoData?.content?.button?.link,
-                }}
-                image={{
-                  desktop: promoData?.content?.image?.desktop,
-                  mobile: promoData?.content?.image?.mobile,
-                }}
-                isVerticallyAligned={promoData?.content?.isVerticallyAligned}
-              />
-              {children}
-              <AnalyticsLoader />
+              
+            <NextTopLoader color="#fff" showSpinner={false} />
+              {promoData && (
+                <Modal
+                  isOpen={showPopup}
+                  onClose={() => setShowPopup(false)}
+                  title={promoData.content.title}
+                  description={promoData.content.description}
+                  button={{
+                    text: promoData.content.button.title,
+                    url: promoData.content.button.link,
+                  }}
+                  image={{
+                    desktop: promoData.content.image.desktop,
+                    mobile: promoData.content.image.mobile,
+                  }}
+                  isVerticallyAligned={promoData.content.isVerticallyAligned}
+                />
+              )}
             </>
           }
         </Suspense>

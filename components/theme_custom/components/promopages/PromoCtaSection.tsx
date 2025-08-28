@@ -1,8 +1,6 @@
 "use client";
 
-import { Env } from "@/env";
-import { isContrastOkay } from "@/utils/isContrastOkay";
-import { processButtonLink } from "@/utils/UtilFncs";
+
 import texture from "@/assets/Texture.png";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,16 +23,6 @@ interface CasualCtaSectionProps {
 }
 
 export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
-  const isExternalOrAnchorLink = (link: string | null) => {
-    if (!link) return false;
-
-    // Check if it's a full URL or anchor link
-    return (
-      link.startsWith("http://") ||
-      link.startsWith("https://") ||
-      link.startsWith("#")
-    );
-  };
 
   return (
     <section
@@ -62,32 +50,16 @@ export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
 
           {/* CTA Button Side - Right */}
           <div className="flex w-full justify-center items-center mt-5">
-            {/* {renderButton()} */}
-            {isExternalOrAnchorLink(ctaSection.button.link ?? "") ? (
-              <Link
-                href={processButtonLink(ctaSection.button.link ?? "")}
-                className={`
-                md:px-6 px-4 py-1.5 md:py-2 text-base md:text-lg uppercase  border-2 border-bg1 bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
-                {...(ctaSection.button.link?.startsWith("http")
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {ctaSection.button.title}
-              </Link>
-            ) : (
-              <Link href={processButtonLink(ctaSection.button.link ?? "")}>
-                <button
-                  className={`md:px-6 px-4 py-1.5 md:py-2 border-2 border-bg1 text-base md:text-lg uppercase bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
-                >
-                  {ctaSection.button.title}
-                </button>
-              </Link>
-              //   <Button
-              //     text={ctaSection.button.title}
-              //     url={processButtonLink(ctaSection.button.link ?? "")}
-              //     secondaryColor={true}
-              //   />
-            )}
+           <Link
+              href={decodeURI(ctaSection.button.link ?? "")}
+              className={`
+                md:px-6 px-4 py-1.5 md:py-2 border-2 border-bg1 text-base md:text-lg uppercase bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}
+              {...(ctaSection.button.link?.startsWith("http")
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+            >
+              {ctaSection.button.title}
+            </Link>
           </div>
         </div>
       </div>

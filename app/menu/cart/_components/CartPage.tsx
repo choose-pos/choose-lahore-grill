@@ -140,9 +140,9 @@ const CartPage = ({
         }
 
         let cartCount = cartCountReq.fetchCartCount;
-        const cartStore = cartStoreReq.fetchCartDetails;
+        let cartStore = cartStoreReq.fetchCartDetails;
         const cartItems = cartItemsReq.groupedCart;
-        const cartTotal = cartTotalReq.calculateFinalAmount;
+        let cartTotal = cartTotalReq.calculateFinalAmount;
 
         if (cartItemsReq.message) {
           setToastData({
@@ -150,7 +150,21 @@ const CartPage = ({
             type: "error",
           });
 
-          fetchCartDets();
+          const [
+            updatedCartCountReq,
+            updatedCartStoreReq,
+            updatedCartTotalReq,
+          ] = await Promise.all([
+            sdk.fetchCartCount(),
+            sdk.fetchCartDetails(),
+            sdk.CalculateFinalAmount(),
+          ]);
+
+          // Update the variables with fresh data
+          cartCount = updatedCartCountReq.fetchCartCount;
+          cartStore = updatedCartStoreReq.fetchCartDetails;
+          cartTotal = updatedCartTotalReq.calculateFinalAmount;
+
           const res = await sdk.fetchCartCount();
           cartCount = res.fetchCartCount;
         }
