@@ -150,6 +150,7 @@ const CartPage = ({
             type: "error",
           });
 
+          fetchCartDets();
           const res = await sdk.fetchCartCount();
           cartCount = res.fetchCartCount;
         }
