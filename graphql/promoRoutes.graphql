@@ -1,0 +1,58 @@
+query getCmsPromoRouteDetails($slug: String!) {
+  getCmsPromoRouteDetails(slug: $slug) {
+    name
+    websiteSeo {
+      pageTitle
+      metaDescription
+    }
+    heroTitle
+    PromoImageSection {
+      desktop
+      mobile
+    }
+    ctaSection {
+      title
+      description
+      button {
+        title
+        isExternalLink
+        link
+        textColor
+      }
+    }
+    termsAndConditionSection {
+      title
+      terms
+    }
+  }
+}
+
+query getCmsPromoNavItems {
+  getCmsPromoNavItems {
+    navTitle
+    link
+  }
+}
+
+query getCmsPromoPopUp {
+  getCmsPromoPopUp {
+    _id
+    status
+    content {
+      title
+      description
+      image {
+        desktop
+        mobile
+      }
+      button {
+        title
+        link
+      }
+      isVerticallyAligned
+    }
+    updatedBy {
+      creatorUser
+    }
+  }
+}

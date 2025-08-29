@@ -220,6 +220,17 @@ async function getCateringData() {
   }
 }
 
+async function getOfferLinks() {
+  try {
+    const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+    const res = await sdk.getCmsPromoNavItems({}, { cookie: cookieVal });
+    return res.getCmsPromoNavItems;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 async function getRestaurantData() {
   const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
 
@@ -273,6 +284,7 @@ export default async function CateringPage() {
     getRestaurtCmsData(),
   ]);
 
+  const offerNavItems = await getOfferLinks();
   if (!restaurantData || !cateringData) {
     return <div>Loading...</div>;
   }
@@ -305,6 +317,12 @@ export default async function CateringPage() {
       navItems={navItems}
       cateringPageData={cateringData}
       restaurantData={restaurantData}
+      offerNavTitles={offerNavItems?.map((e) => {
+        return {
+          title: e.navTitle,
+          link: e.link,
+        };
+      })}
     />
   );
 }

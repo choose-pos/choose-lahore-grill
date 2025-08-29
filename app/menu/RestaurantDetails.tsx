@@ -32,7 +32,7 @@ import {
 import { extractFreeDiscountItemDetails } from "@/utils/UtilFncs";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import { FiSearch, FiX } from "react-icons/fi";
@@ -42,24 +42,28 @@ import RecentOrders from "@/components/partners/RecentOrders";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
-  categories: CustomerCategoryItem[];
+  // categories: CustomerCategoryItem[];
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   loyaltyOffers: RestaurantRedeemOffers | null;
   mismatch: boolean | null;
+  isLoggedIn: boolean;
+
 }
 
 export default function RestaurantDetails({
   restaurant,
-  categories,
+  // categories,
   loyaltyOffers,
   loyaltyRule,
   mismatch,
+  isLoggedIn,
 }: // cartStore,
 // cartCount,
 // slug,
 RestaurantDetailsProps) {
-  const [filteredCategories, setFilteredCategories] =
-    useState<CustomerCategoryItem[]>(categories);
+  const [filteredCategories, setFilteredCategories] = useState<
+    CustomerCategoryItem[] | null
+  >(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCategoriesPopupOpen, setIsCategoriesPopupOpen] =
@@ -88,7 +92,9 @@ RestaurantDetailsProps) {
   const [showButton, setShowButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const IntialCategory = categories;
+  const {setSignInOpen, setIsSignUpOpen } = useSidebarStore();
+
+  // const IntialCategory = categories;
 
   const isDelivery = restaurant.deliveryConfig.provideDelivery;
   const isPickUp = restaurant.restaurantConfigs.pickup;
@@ -103,7 +109,7 @@ RestaurantDetailsProps) {
   };
 
   const filterRef = useRef<HTMLDivElement>(null);
-
+   const router = useRouter();
   useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
@@ -130,6 +136,19 @@ RestaurantDetailsProps) {
       );
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const signup = searchParams.get("signup");
+    if (!signup) return;
+    if (isLoggedIn) {
+      // router.replace('/menu', { shallow: true });
+      router.replace("/menu/my-account");
+    } else {
+      router.replace("/menu");
+      setSignInOpen(true);
+      setIsSignUpOpen(true);
+    }
+  }, [isLoggedIn, searchParams]);
 
   // Fetching cart count and cart details
   useEffect(() => {
@@ -282,12 +301,12 @@ RestaurantDetailsProps) {
   };
 
   // Effect to update visible categories based on filters
-  useEffect(() => {
-    if (!categoryType) {
-      // setVisibleCategories(IntialCategory);
-      setFilteredCategories(IntialCategory);
-    }
-  }, [categoryType, categories, IntialCategory]);
+  // useEffect(() => {
+  //   if (!categoryType) {
+  //     // setVisibleCategories(IntialCategory);
+  //     setFilteredCategories(IntialCategory);
+  //   }
+  // }, [categoryType, categories, IntialCategory]);
 
   // Effect to set restaurant data
   useEffect(() => {
@@ -598,7 +617,7 @@ RestaurantDetailsProps) {
 
             {!isMobile ? (
               <div className="flex overflow-x-auto space-x-2 pb-2 scrollbar-hide">
-                {filteredCategories.map((category) => (
+                {filteredCategories && filteredCategories.map((category) => (
                   <button
                     key={category._id}
                     data-category-id={category._id}
@@ -659,7 +678,7 @@ RestaurantDetailsProps) {
                 />
               )}
               <div className="space-y-10  mb-8 md:mb-0 ">
-                {filteredCategories.length === 0 ? (
+                {filteredCategories && filteredCategories.length === 0 ? (
                   <div className="py-4 h-[40rem]">
                     {!searchQuery && !categoryType ? (
                       // No search query and no filters - show store message
@@ -695,7 +714,7 @@ RestaurantDetailsProps) {
                   </div>
                 ) : (
                   // Show categories when available
-                  filteredCategories.map((category) => (
+                  filteredCategories && filteredCategories.map((category) => (
                     <div key={category._id}>
                       {category.items.length > 0 && (
                         <CategoryListing
@@ -767,7 +786,7 @@ RestaurantDetailsProps) {
 
                 <div className="overflow-y-scroll pb-3">
                   <div className="space-y-2">
-                    {filteredCategories.map((category) => (
+                    {filteredCategories && filteredCategories.map((category) => (
                       <button
                         key={category._id}
                         data-category-id={category._id}

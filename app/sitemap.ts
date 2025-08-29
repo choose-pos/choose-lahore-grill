@@ -1,7 +1,20 @@
 import { Env } from "@/env";
+import { cookieKeys } from "@/constants";
+import { sdk } from "@/utils/graphqlClient";
 import type { MetadataRoute } from "next";
 
-export const revalidate = 3600; // an hour
+export const revalidate = 600; // 10 min revalidations
+
+async function getOfferLinks() {
+  try {
+    const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+    const res = await sdk.getCmsPromoNavItems({}, { cookie: cookieVal });
+    return res.getCmsPromoNavItems || [];
+  } catch (error) {
+    console.error("Error fetching offer links for sitemap:", error);
+    return [];
+  }
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let domain = "";
@@ -14,10 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const data = await restaurantDetails.json();
     domain = data.domain;
   } catch (error) {
-    console.log("Error in generating robots.ts", error);
+    console.log("Error in generating sitemap.ts", error);
   }
 
-  return [
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `https://${domain}`,
       lastModified: new Date(),
@@ -31,19 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `https://${domain}/blogs`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.8,
-    },
-    {
       url: `https://${domain}/catering`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.8,
-    },
-    {
-      url: `https://${domain}/gallery`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
@@ -55,10 +56,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `https://${domain}/privacy-policy`,
+      url: `https://${domain}/event`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `https://${domain}/parties`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `https://${domain}/contact`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
     },
   ];
+
+  // fetch dynamic promo slugs with sdk
+  const promoLinks = await getOfferLinks();
+  const promoRoutes: MetadataRoute.Sitemap = promoLinks.map((item: any) => ({
+    url: `https://${domain}/promotion/${item.link}`,
+    lastModified: new Date(),
+    changeFrequency: "daily",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...promoRoutes];
 }

@@ -352,7 +352,7 @@ const PartyForm: React.FC = () => {
             </div>
             <div className="flex-1">
               <label className="block text-lg font-semibold mb-1 text-bg1 font-primary">
-                Of Hours
+                Duration (In hours)
               </label>
               <input
                 name="budgetPerPerson"

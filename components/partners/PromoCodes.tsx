@@ -3,10 +3,103 @@ import ToastStore from "@/store/toast";
 import { sdk } from "@/utils/graphqlClient";
 import { PromoData } from "@/utils/types";
 import { extractErrorMessage } from "@/utils/UtilFncs";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, X } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import discountImg2 from "../../assets/OBJECT.png";
+// Modal Component
+const PromoModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  promoData: PromoData;
+  getDiscountText: (code: PromoData) => string | undefined;
+  handleCopy: (e: React.MouseEvent, code: string) => void;
+  copiedCode: string | null;
+}> = ({
+  isOpen,
+  onClose,
+  promoData,
+  getDiscountText,
+  handleCopy,
+  copiedCode,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-[20px] max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          {/* Header with close button */}
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-xl font-bold text-gray-900 font-online-ordering">
+              Offer Details
+            </h3>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          {/* Discount text */}
+          <div className="text-start mb-4">
+            <p className="text-lg font-bold text-gray-900 mb-2 font-online-ordering">
+              {getDiscountText(promoData)}
+            </p>
+          </div>
+
+          {/* Description */}
+          {promoData.description && (
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2 font-online-ordering">
+                Description:
+              </h4>
+              <p className="text-sm text-gray-600 font-online-ordering leading-relaxed">
+                {promoData.description}
+              </p>
+            </div>
+          )}
+
+          {/* Promo code */}
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-2 font-online-ordering">
+              Promo Code:
+            </h4>
+            <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+              <code className="font-mono text-base font-medium">
+                {promoData.code}
+              </code>
+              <button
+                onClick={(e) => handleCopy(e, promoData.code || "")}
+                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                aria-label={
+                  copiedCode === promoData.code ? "Copied!" : "Copy code"
+                }
+              >
+                {copiedCode === promoData.code ? (
+                  <Check className="w-4 h-4 text-green-500" />
+                ) : (
+                  <Copy className="w-4 h-4 text-gray-500" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Additional info */}
+          {promoData.minCartValue && (
+            <div className="mt-3">
+              <p className="text-xs text-gray-500 font-online-ordering">
+                Minimum cart value: ${promoData.minCartValue}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const PromoCodes: React.FC = () => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -15,6 +108,9 @@ const PromoCodes: React.FC = () => {
   const { setToastData } = ToastStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollIntervalRef = useRef<NodeJS.Timeout>();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPromo, setSelectedPromo] = useState<PromoData | null>(null);
+
 
   const fetchRestaurantPromoCodes = useCallback(() => {
     const fetchFunc = async () => {
@@ -132,6 +228,16 @@ const PromoCodes: React.FC = () => {
     }
   };
 
+  const openModal = (promo: PromoData) => {
+    setSelectedPromo(promo);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedPromo(null);
+  };
+
   return (
     <div className="w-full py-4 max-w-8xl mx-auto">
       <h2 className="text-xl sm:text-3xl font-bold mb-4 font-online-ordering">
@@ -153,18 +259,32 @@ const PromoCodes: React.FC = () => {
               <div
                 key={index}
                 data-promo-card
-                className="bg-white border  transition-all duration-300 w-72 md:w-96 md:h-32 shrink-0 rounded-[20px]"
+                className="bg-white border  transition-all duration-300  md:h-32 shrink-0 rounded-[20px]"
               >
                 <div className="p-3 md:p-4 h-full flex flex-col justify-center">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-center justify-between">
                     <div className="flex-grow pr-2">
                       <p className="sm:text-lg text-base font-bold text-gray-900 mb-1 line-clamp-1 font-online-ordering">
                         {getDiscountText(code)}
                       </p>
                       {code.description && (
-                        <p className="text-xs text-gray-600 line-clamp-1 font-online-ordering">
-                          {code.description}
-                        </p>
+                        <div className="relative group">
+                          <div className="flex flex-wrap items-center gap-1">
+                            <p className="text-xs sm:text-sm text-gray-600 font-online-ordering  truncate">
+                              {code.description && code.description.length > 30
+                                ? `${code.description.substring(0, 30)}...`
+                                : code.description}
+                            </p>
+                            {code.description.length > 30 && (
+                              <button
+                                onClick={() => openModal(code)}
+                                className="text-xs text-black hover:text-black/80 font-semibold whitespace-nowrap"
+                              >
+                                Read More
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       )}
                       <div className="flex items-center justify-start mt-2">
                         <code className="font-mono text-xs sm:text-sm  font-medium mr-1">
@@ -185,7 +305,7 @@ const PromoCodes: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                    <div>
+                    <div className="flex-shrink-0">
                       <Image
                         src={discountImg2}
                         alt="discount Img"
@@ -213,6 +333,17 @@ const PromoCodes: React.FC = () => {
           ))}
         </div>
       </div>
+      {/* Modal */}
+      {selectedPromo && (
+        <PromoModal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          promoData={selectedPromo}
+          getDiscountText={getDiscountText}
+          handleCopy={handleCopy}
+          copiedCode={copiedCode}
+        />
+      )}
     </div>
   );
 };

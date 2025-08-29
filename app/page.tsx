@@ -67,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: pageTitle,
     description: metaDescription,
     alternates: {
-      canonical: "./",
+      canonical: "/",
     },
     metadataBase: new URL("https://" + website),
     openGraph: {
@@ -103,6 +103,18 @@ export default async function Home() {
       }
     ),
   ]);
+
+  async function getOfferLinks() {
+    try {
+      const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+      const res = await sdk.getCmsPromoNavItems({}, { cookie: cookieVal });
+      return res.getCmsPromoNavItems;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+  const offerNavItems = await getOfferLinks();
 
   const query = gql`
     query HomePage {
@@ -292,6 +304,12 @@ export default async function Home() {
           phone={phone}
           navItems={navItems}
           logo={brandingLogo ?? ""}
+          offerNavTitles={offerNavItems?.map((e) => {
+            return {
+              title: e.navTitle,
+              link: `/promotion/${e.link}`,
+            };
+          })}
         />
         <div>
           <HeroSection

@@ -112,44 +112,44 @@ async function getRestaurantDetails() {
   }
 }
 
-async function getRestaurantCategories() {
-  try {
-    const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
-    const itemsResponse = await sdk.getCustomerCategoriesAndItems(
-      {},
-      { cookie: cookieVal }
-    );
+// async function getRestaurantCategories() {
+//   try {
+//     const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+//     const itemsResponse = await sdk.getCustomerCategoriesAndItems(
+//       {},
+//       { cookie: cookieVal }
+//     );
 
-    return itemsResponse.getCustomerCategoriesAndItems.map((category) => ({
-      _id: category._id,
-      name: category.name,
-      desc: category.desc ?? null,
-      items: category.items.map((item) => ({
-        name: item.name,
-        _id: item._id,
-        desc: item.desc,
-        image: item.image,
-        price: item.price,
-        orderLimitTracker: item.orderLimitTracker,
-        options: item.options,
-        modifierGroup: item.modifierGroup,
-      })),
-      availability: category.availability?.map((avail) => ({
-        day: avail.day,
-        active: avail.active,
-        hours: avail.hours.map((hour) => ({
-          start: hour.start,
-          end: hour.end,
-        })),
-      })),
-      createdAt: new Date(category.createdAt),
-      updatedAt: new Date(category.updatedAt),
-    })) as CustomerCategoryItem[];
-  } catch (err) {
-    console.error("Failed to fetch restaurant categories:", err);
-    return null;
-  }
-}
+//     return itemsResponse.getCustomerCategoriesAndItems.map((category) => ({
+//       _id: category._id,
+//       name: category.name,
+//       desc: category.desc ?? null,
+//       items: category.items.map((item) => ({
+//         name: item.name,
+//         _id: item._id,
+//         desc: item.desc,
+//         image: item.image,
+//         price: item.price,
+//         orderLimitTracker: item.orderLimitTracker,
+//         options: item.options,
+//         modifierGroup: item.modifierGroup,
+//       })),
+//       availability: category.availability?.map((avail) => ({
+//         day: avail.day,
+//         active: avail.active,
+//         hours: avail.hours.map((hour) => ({
+//           start: hour.start,
+//           end: hour.end,
+//         })),
+//       })),
+//       createdAt: new Date(category.createdAt),
+//       updatedAt: new Date(category.updatedAt),
+//     })) as CustomerCategoryItem[];
+//   } catch (err) {
+//     console.error("Failed to fetch restaurant categories:", err);
+//     return null;
+//   }
+// }
 
 async function getLoyaltyRule() {
   try {
@@ -284,7 +284,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: pageTitle,
     description: metaDescription,
     alternates: {
-      canonical: "./",
+      canonical: "/",
     },
     metadataBase: new URL("https://" + website),
     openGraph: {
@@ -301,6 +301,18 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
   };
+}
+
+async function CheckMeCustomer(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const authCookie = cookieStore.get('choose_ordering_at');
+    // If the cookie exists and has a value, user is logged in
+    return !!authCookie?.value;
+  } catch (error) {
+    console.error(error);
+    return false; // in case of error, return false
+  }
 }
 
 async function Page({
@@ -372,25 +384,27 @@ async function Page({
     }
   }
 
-  const [restaurant, categories, loyaltyRule, loyaltyOffers] =
+  const [restaurant, loyaltyRule, loyaltyOffers, isLoggedIn] =
     await Promise.all([
       getRestaurantDetails(),
-      getRestaurantCategories(),
+      // getRestaurantCategories(),
       getLoyaltyRule(),
       getLoyaltyOffers(),
+      CheckMeCustomer(),
     ]);
 
-  if (!restaurant || !categories) {
+  if (!restaurant ) {
     return <InActiveMenu />;
   }
 
   return (
     <RestaurantDetails
       restaurant={restaurant}
-      categories={categories}
+      // categories={categories}
       loyaltyRule={loyaltyRule ?? null}
       loyaltyOffers={loyaltyOffers ?? null}
       mismatch={mismatch}
+      isLoggedIn={isLoggedIn}
     />
   );
 }

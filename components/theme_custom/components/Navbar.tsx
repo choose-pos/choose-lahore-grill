@@ -16,12 +16,22 @@ interface INavProps {
   navItems: { name: string; link: string }[];
   email?: string;
   phone?: string;
+  offerNavTitles?: { title: string; link: string }[];
 }
 
-const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
+const Navbar: React.FC<INavProps> = ({
+  logo,
+  navItems,
+  email,
+  phone,
+  offerNavTitles,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showOffersMenu, setShowOffersMenu] = useState(false);
+  const [showOffersMobilMenu, setShowOffersMobileMenu] = useState(false);
   const moreMenuRef = useRef<HTMLLIElement>(null);
+  const offersMenuRef = useRef<HTMLLIElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const [isButtonVisible, setIsButtonVisible] = useState<boolean>(false);
@@ -93,19 +103,28 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
       ) {
         setShowMoreMenu(false);
       }
+      if (
+        offersMenuRef.current &&
+        !offersMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowOffersMenu(false);
+      }
     };
 
-    if (showMoreMenu) {
+    if (showMoreMenu || showOffersMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showMoreMenu]);
+  }, [showMoreMenu, showOffersMenu]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+    if (!isOpen) {
+      setShowOffersMobileMenu(false); // Reset mobile offers menu when opening sidebar
+    }
   };
 
   const staggerContainer = {
@@ -162,6 +181,52 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
                   </Link>
                 </li>
               ))}
+
+              {offerNavTitles && offerNavTitles.length > 0 && (
+                <li ref={offersMenuRef} className="relative">
+                  <button
+                    onClick={() => setShowOffersMenu(!showOffersMenu)}
+                    className="flex items-center gap-1 px-4 py-2 text-base text-gray-300 hover:text-white font-medium"
+                  >
+                    Promotions
+                    <ChevronDown
+                      className={`transition-transform duration-300 text-gray-300 hover:text-white ${
+                        showOffersMenu ? "rotate-180" : ""
+                      }`}
+                      size={18}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {showOffersMenu && (
+                      <motion.ul
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate="show"
+                        exit="hidden"
+                        className="absolute right-0 mt-2 bg-bg1 border border-gray-700 rounded-md shadow-md z-50 w-48 py-2"
+                      >
+                        {offerNavTitles.map((offer, index) => (
+                          <motion.li
+                            key={index}
+                            variants={staggerItem}
+                            className="w-full"
+                          >
+                            <Link href={offer.link}>
+                              <span
+                                className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
+                                onClick={() => setShowOffersMenu(false)}
+                              >
+                                {offer.title}
+                              </span>
+                            </Link>
+                          </motion.li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </li>
+              )}
 
               {navItems.length > 4 && (
                 <li ref={moreMenuRef} className="relative">
@@ -253,7 +318,7 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
           <IoMdClose color="white" onClick={toggleMenu} />
         </div>
 
-        <div className="flex flex-col h-full pt-24">
+        <div className="flex flex-col h-full pt-24 overflow-y-auto">
           <ul className="flex flex-col text-xl text-gray-300">
             {navItems.map((item, index) => (
               <li
@@ -277,6 +342,52 @@ const Navbar: React.FC<INavProps> = ({ logo, navItems, email, phone }) => {
                 </Link>
               </li>
             ))}
+
+            {offerNavTitles && offerNavTitles.length > 0 && (
+              <li className="justify-between flex flex-col text-lg items-center font-medium">
+                <button
+                  onClick={() => setShowOffersMobileMenu(!showOffersMobilMenu)}
+                  className="flex items-center justify-center gap-1 px-4 py-2 transition-all duration-300 cursor-pointer w-full hover:text-primaryColor/80 uppercasetext-bg3 hover:text-white"
+                >
+                  Promotions
+                  <ChevronDown
+                    className={`transition-transform duration-300 ${
+                      showOffersMobilMenu ? "rotate-180" : ""
+                    }`}
+                    size={18}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {showOffersMobilMenu && (
+                    <motion.ul
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="show"
+                      exit="hidden"
+                      className="w-full pb-4"
+                    >
+                      {offerNavTitles.map((offer, index) => (
+                        <motion.li
+                          key={index}
+                          variants={staggerItem}
+                          className="w-full flex justify-center"
+                        >
+                          <Link href={offer.link} className="w-full">
+                            <span
+                              className="block px-4 py-2 text-center transition-all duration-300 cursor-pointer w-full hover:text-primaryColor/80 uppercasetext-bg3 hover:text-white text-base opacity-80"
+                              onClick={toggleMenu}
+                            >
+                              {offer.title}
+                            </span>
+                          </Link>
+                        </motion.li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </li>
+            )}
           </ul>
         </div>
       </div>

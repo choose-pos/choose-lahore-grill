@@ -384,6 +384,45 @@ export type CmsOnlineOrderingConfig = {
   websiteLink: Scalars['String']['output'];
 };
 
+export type CmsPopupContent = {
+  __typename?: 'CmsPopupContent';
+  button: PromoCmsButton;
+  description: Scalars['String']['output'];
+  image?: Maybe<CmsImage>;
+  isVerticallyAligned: Scalars['Boolean']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type CmsPromoPopup = {
+  __typename?: 'CmsPromoPopup';
+  _id: Scalars['ID']['output'];
+  content: CmsPopupContent;
+  createdAt: Scalars['DateTimeISO']['output'];
+  restaurant: Restaurant;
+  status: Scalars['Boolean']['output'];
+  updatedAt: Scalars['DateTimeISO']['output'];
+  updatedBy?: Maybe<User>;
+  user: User;
+};
+
+export type CmsPromoRoutes = {
+  __typename?: 'CmsPromoRoutes';
+  PromoImageSection: Array<CmsImage>;
+  _id: Scalars['ID']['output'];
+  createdAt: Scalars['DateTimeISO']['output'];
+  ctaSection: CtaSection;
+  heroTitle: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  restaurant: Restaurant;
+  slug: Scalars['String']['output'];
+  status: Scalars['Boolean']['output'];
+  termsAndConditionSection: TermsAndConditionSection;
+  updatedAt: Scalars['DateTimeISO']['output'];
+  updatedBy?: Maybe<User>;
+  user: User;
+  websiteSeo: CmsWebsiteSeoConfig;
+};
+
 export type CmsRestaurant = {
   __typename?: 'CmsRestaurant';
   _id: Scalars['ID']['output'];
@@ -474,6 +513,13 @@ export type CreateOrderWihoutPaymentInput = {
   discount?: InputMaybe<DiscountInput>;
   guestCustomerDetails?: InputMaybe<CustomerDetailsInput>;
   specialRemark?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CtaSection = {
+  __typename?: 'CtaSection';
+  button: PromoCmsButton;
+  description: Scalars['String']['output'];
+  title: Scalars['String']['output'];
 };
 
 export type CuisineData = {
@@ -1517,6 +1563,14 @@ export type ProgramSettings = {
   name: Scalars['String']['output'];
 };
 
+export type PromoCmsButton = {
+  __typename?: 'PromoCmsButton';
+  isExternalLink: Scalars['Boolean']['output'];
+  link?: Maybe<Scalars['String']['output']>;
+  textColor?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+};
+
 export type PromoCode = {
   __typename?: 'PromoCode';
   _id: Scalars['ID']['output'];
@@ -1567,6 +1621,12 @@ export enum PromoDiscountType {
   Percentage = 'Percentage'
 }
 
+export type PromoNavItem = {
+  __typename?: 'PromoNavItem';
+  link: Scalars['String']['output'];
+  navTitle: Scalars['String']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   calculateFinalAmount: Scalars['Float']['output'];
@@ -1590,6 +1650,9 @@ export type Query = {
   fetchRestaurantRedeemOffers: RestaurantRedeemOffers;
   fetchVisiblePromoCodes: Array<PromoCode>;
   getCmsDetails?: Maybe<CmsRestaurant>;
+  getCmsPromoNavItems: Array<PromoNavItem>;
+  getCmsPromoPopUp?: Maybe<CmsPromoPopup>;
+  getCmsPromoRouteDetails?: Maybe<CmsPromoRoutes>;
   getCmsRestaurantDetails?: Maybe<Restaurant>;
   getCustomerCategoriesAndItems: Array<CategoryItem>;
   getCustomerItem?: Maybe<ItemWithModifiersResponse>;
@@ -1603,6 +1666,7 @@ export type Query = {
   updateCartTip: Scalars['Boolean']['output'];
   validateDelivery: Scalars['Boolean']['output'];
   verifyOTPGuestOrder: VerifyOtpGuestOrderResponse;
+  verifyPaymentIntent: PaymentIntentResponse;
 };
 
 
@@ -1633,6 +1697,11 @@ export type QueryFetchCustomerOrderByIdArgs = {
 
 export type QueryFetchCustomerOrdersArgs = {
   lastThreeOrders?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type QueryGetCmsPromoRouteDetailsArgs = {
+  slug: Scalars['String']['input'];
 };
 
 
@@ -1680,6 +1749,11 @@ export type QueryValidateDeliveryArgs = {
 
 export type QueryVerifyOtpGuestOrderArgs = {
   input: CustomerDetailsInput;
+};
+
+
+export type QueryVerifyPaymentIntentArgs = {
+  paymentIntentId: Scalars['String']['input'];
 };
 
 export type RedeemDiscount = {
@@ -1838,6 +1912,12 @@ export type TaxRateInfo = {
   _id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   salesTax: Scalars['Float']['output'];
+};
+
+export type TermsAndConditionSection = {
+  __typename?: 'TermsAndConditionSection';
+  terms: Array<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
 };
 
 export type TimezoneData = {
@@ -2260,6 +2340,23 @@ export type ReorderItemsToCartMutationVariables = Exact<{
 
 
 export type ReorderItemsToCartMutation = { __typename?: 'Mutation', reorderItemsToCart: { __typename?: 'ReorderOrderResponse', success: boolean, specialMessage?: string | null } };
+
+export type GetCmsPromoRouteDetailsQueryVariables = Exact<{
+  slug: Scalars['String']['input'];
+}>;
+
+
+export type GetCmsPromoRouteDetailsQuery = { __typename?: 'Query', getCmsPromoRouteDetails?: { __typename?: 'CmsPromoRoutes', name: string, heroTitle: string, websiteSeo: { __typename?: 'CmsWebsiteSeoConfig', pageTitle: string, metaDescription: string }, PromoImageSection: Array<{ __typename?: 'CmsImage', desktop: string, mobile?: string | null }>, ctaSection: { __typename?: 'CtaSection', title: string, description: string, button: { __typename?: 'PromoCmsButton', title: string, isExternalLink: boolean, link?: string | null, textColor?: string | null } }, termsAndConditionSection: { __typename?: 'TermsAndConditionSection', title: string, terms: Array<string> } } | null };
+
+export type GetCmsPromoNavItemsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCmsPromoNavItemsQuery = { __typename?: 'Query', getCmsPromoNavItems: Array<{ __typename?: 'PromoNavItem', navTitle: string, link: string }> };
+
+export type GetCmsPromoPopUpQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: { __typename?: 'CmsPromoPopup', _id: string, status: boolean, content: { __typename?: 'CmsPopupContent', title: string, description: string, isVerticallyAligned: boolean, image?: { __typename?: 'CmsImage', desktop: string, mobile?: string | null } | null, button: { __typename?: 'PromoCmsButton', title: string, link?: string | null } }, updatedBy?: { __typename?: 'User', creatorUser?: string | null } | null } | null };
 
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2945,6 +3042,68 @@ export const ReorderItemsToCartDocument = gql`
   }
 }
     `;
+export const GetCmsPromoRouteDetailsDocument = gql`
+    query getCmsPromoRouteDetails($slug: String!) {
+  getCmsPromoRouteDetails(slug: $slug) {
+    name
+    websiteSeo {
+      pageTitle
+      metaDescription
+    }
+    heroTitle
+    PromoImageSection {
+      desktop
+      mobile
+    }
+    ctaSection {
+      title
+      description
+      button {
+        title
+        isExternalLink
+        link
+        textColor
+      }
+    }
+    termsAndConditionSection {
+      title
+      terms
+    }
+  }
+}
+    `;
+export const GetCmsPromoNavItemsDocument = gql`
+    query getCmsPromoNavItems {
+  getCmsPromoNavItems {
+    navTitle
+    link
+  }
+}
+    `;
+export const GetCmsPromoPopUpDocument = gql`
+    query getCmsPromoPopUp {
+  getCmsPromoPopUp {
+    _id
+    status
+    content {
+      title
+      description
+      image {
+        desktop
+        mobile
+      }
+      button {
+        title
+        link
+      }
+      isVerticallyAligned
+    }
+    updatedBy {
+      creatorUser
+    }
+  }
+}
+    `;
 export const GetCustomerRestaurantDetailsDocument = gql`
     query GetCustomerRestaurantDetails {
   getCustomerRestaurantDetails {
@@ -3305,6 +3464,15 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     reorderItemsToCart(variables: ReorderItemsToCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ReorderItemsToCartMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ReorderItemsToCartMutation>(ReorderItemsToCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'reorderItemsToCart', 'mutation', variables);
+    },
+    getCmsPromoRouteDetails(variables: GetCmsPromoRouteDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoRouteDetailsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoRouteDetailsQuery>(GetCmsPromoRouteDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoRouteDetails', 'query', variables);
+    },
+    getCmsPromoNavItems(variables?: GetCmsPromoNavItemsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoNavItemsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoNavItemsQuery>(GetCmsPromoNavItemsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoNavItems', 'query', variables);
+    },
+    getCmsPromoPopUp(variables?: GetCmsPromoPopUpQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoPopUpQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoPopUpQuery>(GetCmsPromoPopUpDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoPopUp', 'query', variables);
     },
     GetCustomerRestaurantDetails(variables?: GetCustomerRestaurantDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCustomerRestaurantDetailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCustomerRestaurantDetailsQuery>(GetCustomerRestaurantDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetCustomerRestaurantDetails', 'query', variables);
