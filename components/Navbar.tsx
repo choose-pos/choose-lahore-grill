@@ -126,6 +126,10 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
     setIsOpen(!isOpen);
   };
 
+  const toggleOffers = () => {
+    setIsOffersOpen(!isOffersOpen);
+  };
+
   return (
     <header
       className={`${
@@ -165,8 +169,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
             {offerNavitems.length > 0 && (
               <div
                 className=" relative px-4 py-2 rounded-md text-2xl md:text-lg font-medium "
-                onMouseEnter={() => setIsOffersOpen(true)}
-                onMouseLeave={() => setIsOffersOpen(false)}
+                onClick={toggleOffers}
               >
                 <div
                   className="flex items-center space-x-1 cursor-pointer hover:text-primaryColor transition-colors duration-200"
@@ -182,15 +185,36 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
 
                 {/* Desktop Dropdown - improved positioning and interaction */}
                 {isOffersOpen && (
-                  <div className="absolute top-full left-0 pt-2 z-60">
-                    <div className="w-64 bg-white border border-primaryColor rounded-lg cursor-pointer shadow-lg py-2">
-                      {offerNavitems.map((offer, index) => (
-                        <Link key={index} href={`/${offer.link}`}>
-                          <div className="px-4 py-3  hover:text-primaryColor transition-all duration-200 cursor-pointer border-b border-gray-100 last:border-b-0">
-                            {offer.title}
-                          </div>
-                        </Link>
-                      ))}
+                  <div className="relative">
+                    <div className="rounded-lg cursor-pointer text-lg text-black hover:text-gray-600 font-medium ">
+                      <AnimatePresence>
+                        {isOffersOpen && (
+                          <motion.ul
+                            variants={staggerContainer}
+                            initial="hidden"
+                            animate="show"
+                            exit="hidden"
+                            className="absolute mt-2 bg-white border border-gray-300 rounded-md shadow-lg z-50 w-48 py-2"
+                          >
+                            {offerNavitems.map((offer, index) => (
+                              <motion.li
+                                key={index}
+                                variants={staggerItem}
+                                className="w-full"
+                              >
+                                <Link href={offer.link}>
+                                  <span
+                                    className="block px-4 py-2 text-sm text-black hover:text-gray-600 hover:bg-gray-50 transition-all"
+                                    onClick={() => setIsOffersOpen(false)}
+                                  >
+                                    {offer.title}
+                                  </span>
+                                </Link>
+                              </motion.li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 )}

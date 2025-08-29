@@ -148,7 +148,7 @@ RestaurantDetailsProps) {
       setSignInOpen(true);
       setIsSignUpOpen(true);
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, searchParams]);
 
   // Fetching cart count and cart details
   useEffect(() => {
