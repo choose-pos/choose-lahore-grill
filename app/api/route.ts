@@ -10,6 +10,6 @@ export async function GET(request: NextRequest) {
   revalidatePath("/event", "page");
   revalidatePath("/parties", "page");
   revalidatePath("/contact", "page");
-  revalidatePath("/offer-promotion", "layout");
+  revalidatePath("/promotion", "layout");
   return new Response("OK", { status: 200 });
 }

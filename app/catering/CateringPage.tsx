@@ -47,7 +47,7 @@ export default function CateringPageClient({
         offerNavTitles={offerNavTitles?.map((e) => {
           return {
             title: e.title,
-            link: `/offer-promotion/${e.link}`,
+            link: `/promotion/${e.link}`,
           };
         })}
       />

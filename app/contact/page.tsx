@@ -194,7 +194,7 @@ export default async function OurStoryPage() {
       offerNavTitles={offerNavItems?.map((e) => {
         return {
           title: e.navTitle,
-          link: `/offer-promotion/${e.link}`,
+          link: `/promotion/${e.link}`,
         };
       })}
     />

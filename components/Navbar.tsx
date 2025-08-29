@@ -105,7 +105,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
         const items =
           nav?.getCmsPromoNavItems?.map((e) => ({
             title: e.navTitle,
-            link: `./offer-promotion/${e.link}`,
+            link: `./promotion/${e.link}`,
           })) || [];
 
         setOfferNavItems(items);

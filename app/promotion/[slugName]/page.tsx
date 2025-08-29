@@ -68,7 +68,7 @@ export async function generateMetadata({
       description:
         websiteSeo?.metaDescription || `Special promotion at ${name}`,
       alternates: {
-        canonical: `/offer-promotion/${resolvedParams.slugName}`,
+        canonical: `/promotion/${resolvedParams.slugName}`,
       },
       openGraph: {
         title: websiteSeo?.pageTitle || `${heroTitle} - ${name}`,
@@ -240,7 +240,7 @@ export default async function PromoPage({ params }: PromoPageProps) {
                 offerNavTitles={promoNavItemsData.map((e) => {
                   return {
                     title: e.navTitle,
-                    link: `/offer-promotion/${e.link}`,
+                    link: `/promotion/${e.link}`,
                   };
                 })}
               />
@@ -330,7 +330,7 @@ export default async function PromoPage({ params }: PromoPageProps) {
           offerNavTitles={promoNavItemsData.map((e) => {
             return {
               title: e.navTitle,
-              link: `/offer-promotion/${e.link}`,
+              link: `/promotion/${e.link}`,
             };
           })}
         />

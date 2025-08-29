@@ -78,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // fetch dynamic promo slugs with sdk
   const promoLinks = await getOfferLinks();
   const promoRoutes: MetadataRoute.Sitemap = promoLinks.map((item: any) => ({
-    url: `https://${domain}/offer-promotion/${item.link}`,
+    url: `https://${domain}/promotion/${item.link}`,
     lastModified: new Date(),
     changeFrequency: "daily",
     priority: 0.7,
