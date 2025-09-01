@@ -3,7 +3,7 @@ import { cookieKeys } from "@/constants";
 import { sdk } from "@/utils/graphqlClient";
 import type { MetadataRoute } from "next";
 
-export const revalidate = 3600; // an hour
+export const revalidate = 600; // 10 min revalidations
 
 async function getOfferLinks() {
   try {

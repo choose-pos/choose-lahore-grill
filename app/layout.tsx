@@ -11,6 +11,7 @@ import Script from "next/script";
 import { getCookie, setCookie } from "@/utils/UtilFncs";
 import { sdk } from "@/utils/graphqlClient";
 import { CmsPopupContent, CmsPromoPopup } from "@/generated/graphql";
+import { Env } from "@/env";
 
 const Toast = dynamic(() => import("@/components/common/toast/toast"), {
   ssr: false,
@@ -82,8 +83,10 @@ export default function RootLayout({
   useEffect(() => {
     const fetchPromoData = async () => {
       try {
-        const response = await sdk.getCmsPromoPopUp();
-
+        const response = await sdk.getCmsPromoPopUp(
+          {},
+          { Authorization: Env.NEXT_PUBLIC_RESTAURANT_ID }
+        );
         if (response && response.getCmsPromoPopUp?.status) {
           const popup = getCookie("popup");
           if (popup) {

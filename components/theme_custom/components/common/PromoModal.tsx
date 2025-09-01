@@ -1,10 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
+import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
+import { getOrCreateUserHash } from "@/utils/analytics";
+import { Env } from "@/env";
 
 interface ModalProps {
   isOpen: boolean;
@@ -46,6 +49,43 @@ const PromoModal: React.FC<ModalProps> = ({
   image,
   isVerticallyAligned = true,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      const userHash = getOrCreateUserHash();
+      sendAnalyticsEvent({
+        restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+        pagePath: window.location.pathname,
+        pageQuery: null,
+        source: document.referrer || "direct",
+        utm: null,
+        userHash,
+        eventType: "popup_view",
+        metadata: {
+          action: "promotional_popup_view",
+          title: title,
+        },
+      });
+    }
+  }, [isOpen, title]);
+
+  const handleClose = () => {
+    const userHash = getOrCreateUserHash();
+    sendAnalyticsEvent({
+      restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+      pagePath: window.location.pathname,
+      pageQuery: null,
+      source: document.referrer || "direct",
+      utm: null,
+      userHash,
+      eventType: "popup_close",
+      metadata: {
+        action: "promotional_popup_close",
+        title: title,
+      },
+    });
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -55,7 +95,7 @@ const PromoModal: React.FC<ModalProps> = ({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          onClick={onClose}
+          onClick={handleClose}
         >
           {/* Modal box with increased height */}
           <motion.div
@@ -68,7 +108,7 @@ const PromoModal: React.FC<ModalProps> = ({
           >
             {/* Close button */}
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition shadow-sm"
             >
               <X className="w-5 h-5 text-gray-600" />
@@ -107,7 +147,25 @@ const PromoModal: React.FC<ModalProps> = ({
                     {...(button.url?.startsWith("http")
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
-                    onClick={onClose}
+                    onClick={() => {
+                      const userHash = getOrCreateUserHash();
+                      sendAnalyticsEvent({
+                        restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+                        pagePath: window.location.pathname,
+                        pageQuery: null,
+                        source: document.referrer || "direct",
+                        utm: null,
+                        userHash,
+                        eventType: "popup_cta_click",
+                        metadata: {
+                          action: "promotional_cta_click",
+                          title: title,
+                          buttonText: button.text,
+                          link: button.url,
+                        },
+                      });
+                      handleClose();
+                    }}
                     className={`md:px-6 px-4 py-3 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
                   >
                     {button.text}
@@ -146,7 +204,25 @@ const PromoModal: React.FC<ModalProps> = ({
                     {...(button.url?.startsWith("http")
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
-                    onClick={onClose}
+                    onClick={() => {
+                      const userHash = getOrCreateUserHash();
+                      sendAnalyticsEvent({
+                        restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+                        pagePath: window.location.pathname,
+                        pageQuery: null,
+                        source: document.referrer || "direct",
+                        utm: null,
+                        userHash,
+                        eventType: "popup_cta_click",
+                        metadata: {
+                          action: "promotional_cta_click",
+                          title: title,
+                          buttonText: button.text,
+                          link: button.url,
+                        },
+                      });
+                      handleClose();
+                    }}
                     className={`md:px-6 px-4 py-2 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
                   >
                     {button.text}
