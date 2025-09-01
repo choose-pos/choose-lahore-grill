@@ -60,7 +60,7 @@ export default function ImageSection({
             alt="Promo"
             width={1240}
             height={800}
-            className="md:rounded-[70px] max-h-screen min-h-[300px] hidden md:block rounded-[10px] object-cover"
+            className="md:rounded-[70px] max-h-screen min-h-[300px] hidden md:block rounded-[10px] object-contain"
           />
 
           {image.mobile ? (
@@ -69,7 +69,7 @@ export default function ImageSection({
               alt="Promo Mobile"
               width={1240}
               height={800}
-              className="md:rounded-[70px] max-h-[400px] md:hidden block rounded-[10px] object-cover"
+              className="md:rounded-[70px] max-h-[400px] md:hidden block rounded-[10px] object-contain"
             />
           ) : (
             <Image
@@ -77,7 +77,7 @@ export default function ImageSection({
               alt="Promo"
               width={1240}
               height={800}
-              className="md:rounded-[70px] max-h-[400px] md:hidden block rounded-[10px] object-cover"
+              className="md:rounded-[70px] max-h-[400px] md:hidden block rounded-[10px] object-contain"
             />
           )}
         </div>
@@ -111,7 +111,7 @@ export default function ImageSection({
                 src={PromoImageSection[currentImageIndex].desktop}
                 alt={`Promo ${currentImageIndex + 1}`}
                 fill
-                className="object-cover rounded-[70px]"
+                className="object-contain rounded-[70px]"
                 priority
               />
             </motion.div>
@@ -140,7 +140,7 @@ export default function ImageSection({
                 }
                 alt={`Promo ${currentImageIndex + 1} Mobile`}
                 fill
-                className="object-cover rounded-[10px]"
+                className="object-contain rounded-[10px]"
                 priority
               />
             </motion.div>
