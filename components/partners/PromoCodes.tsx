@@ -73,11 +73,15 @@ const PromoModal: React.FC<{
               </code>
               <button
                 onClick={(e) => handleCopy(e, promoData.code || "")}
-                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded-lg transition-colors"
                 aria-label={
                   copiedCode === promoData.code ? "Copied!" : "Copy code"
                 }
               >
+                <span className="text-sm text-gray-700">
+                  {copiedCode === promoData.code ? "Copied!" : "Copy"}
+                </span>
+
                 {copiedCode === promoData.code ? (
                   <Check className="w-4 h-4 text-green-500" />
                 ) : (
@@ -254,10 +258,11 @@ const PromoCodes: React.FC = () => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <div className="flex gap-4 sm:gap-6 pb-4 w-max">
+          <div className="flex cursor-pointer gap-4 sm:gap-6 pb-4 w-max">
             {promoCodeData.map((code, index) => (
               <div
                 key={index}
+                onClick={() => openModal(code)}
                 data-promo-card
                 className="bg-white border  transition-all duration-300  md:h-32 shrink-0 rounded-[20px]"
               >
