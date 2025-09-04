@@ -39,7 +39,7 @@ export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
         <div className="flx flex-col gap-12 lg:gap-16 items-center justify-center w-full">
           {/* Content Side - Left */}
           <div className="flex flex-col items-center space-y-3">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-secondary leading-tight text-bg1">
+            <h2 className="text-4xl md:text-5xl text-center lg:text-6xl font-semibold font-secondary leading-tight text-bg1">
               {ctaSection.title}
             </h2>
 
