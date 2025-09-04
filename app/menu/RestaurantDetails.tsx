@@ -140,11 +140,20 @@ RestaurantDetailsProps) {
   useEffect(() => {
     const signup = searchParams.get("signup");
     if (!signup) return;
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete("signup");
+
+    const queryString = newSearchParams.toString();
+    const menuPath = queryString ? `/menu?${queryString}` : "/menu";
+    const myAccountPath = queryString
+      ? `/menu/my-account?${queryString}`
+      : "/menu/my-account";
+
     if (isLoggedIn) {
-      // router.replace('/menu', { shallow: true });
-      router.replace("/menu/my-account");
+      router.replace(myAccountPath);
     } else {
-      router.replace("/menu");
+      router.replace(menuPath);
       setSignInOpen(true);
       setIsSignUpOpen(true);
     }
