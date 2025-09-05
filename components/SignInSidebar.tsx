@@ -56,13 +56,12 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.classList.add("overflow-y-hidden");
     } else {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-y-hidden");
     }
-
     return () => {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-y-hidden");
     };
   }, [isOpen]);
 
@@ -606,6 +605,11 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
       </div>
       <hr />
       <div className="space-y-4 mt-5">
+        {signUpOtpId ? (
+          <p className="flex items-start text-xs text-gray-400">
+            {`Note: Please check your spam / trash folder if you don't find the verification code in your inbox.`}
+          </p>
+        ) : null}
         <div>
           <label
             htmlFor="otp"
