@@ -56,13 +56,12 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.classList.add("overflow-y-hidden");
     } else {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-y-hidden");
     }
-
     return () => {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-y-hidden");
     };
   }, [isOpen]);
 
@@ -606,6 +605,11 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
       </div>
       <hr />
       <div className="space-y-4 mt-5">
+        {signUpOtpId ? (
+          <p className="flex items-start text-xs text-gray-400">
+            {`Note: Please check your spam / trash folder if you don't find the verification code in your inbox.`}
+          </p>
+        ) : null}
         <div>
           <label
             htmlFor="otp"
@@ -614,18 +618,6 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             {signUpOtpId
               ? " Enter the code we sent on your mail"
               : " Enter the code we sent on your mobile phone"}
-          </label>
-          <label
-            htmlFor="otp"
-            className="flex items-center text-xs md:text-[0.84rem] font-medium mt-2 text-gray-400"
-          >
-            {signUpOtpId && (
-              <>
-                {/* <FaInfoCircle className="mr-1 text-gray-400" /> */}
-                Please check your spam/trash folder if you haven’t found the
-                email.
-              </>
-            )}
           </label>
           <input
             type="text"

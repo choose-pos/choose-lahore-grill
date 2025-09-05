@@ -135,7 +135,7 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
       }
       setSelectedItem(itemId);
     }
-  }, [itemId, setSelectedItem]);
+  }, [itemId, setShowMenu,setSelectedItem, cartDetails]);
 
   useEffect(() => {
     if (restaurantData) {
@@ -148,22 +148,19 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
         setDaysList(days);
       }
     }
-  }, [restaurantData, showMenu]);
+  }, [restaurantData, setDaysList, showMenu]);
 
   useEffect(() => {
-    const isAnyModalOpen =
-      selectedItem !== null || (!showMenu && restaurantData);
-
-    if (isAnyModalOpen) {
-      document.body.style.overflow = "hidden"; // lock scroll
+    if (selectedItem || !showMenu) {
+      document.body.classList.add("overflow-y-hidden");
     } else {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-y-hidden");
     }
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-y-hidden");
     };
-  }, [selectedItem, showMenu]);
+  }, [showMenu, selectedItem]);
 
   return (
     <div className="relative flex flex-col">

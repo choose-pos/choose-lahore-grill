@@ -88,7 +88,7 @@ const MenuSection: React.FC<ISliderSectionProps> = ({
                           </button>
                         </div>
                       </div>
-                      <p className="font-secondary text-2xl md:text-3xl font-normal text-black">
+                      <p className="font-secondary text-2xl md:text-3xl text-center font-normal text-black">
                         {item.title}
                       </p>
                       {/* <p className="font-primary text-base md:text-xl leading-7 md:leading-8 text-center font-normal text-textColor text-opacity-80">
