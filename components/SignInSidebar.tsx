@@ -615,6 +615,18 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               ? " Enter the code we sent on your mail"
               : " Enter the code we sent on your mobile phone"}
           </label>
+          <label
+            htmlFor="otp"
+            className="flex items-center text-xs md:text-[0.84rem] font-medium mt-2 text-gray-400"
+          >
+            {signUpOtpId && (
+              <>
+                {/* <FaInfoCircle className="mr-1 text-gray-400" /> */}
+                Please check your spam/trash folder if you haven’t found the
+                email.
+              </>
+            )}
+          </label>
           <input
             type="text"
             id="otp"
