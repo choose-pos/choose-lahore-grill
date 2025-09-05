@@ -150,6 +150,21 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
     }
   }, [restaurantData, showMenu]);
 
+  useEffect(() => {
+    const isAnyModalOpen =
+      selectedItem !== null || (!showMenu && restaurantData);
+
+    if (isAnyModalOpen) {
+      document.body.style.overflow = "hidden"; // lock scroll
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedItem, showMenu]);
+
   return (
     <div className="relative flex flex-col">
       {!pathname.includes("checkout") &&
