@@ -417,40 +417,37 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           )}
         </div>
         <div
-          className="flex items-center cursor-pointer"
+          className="cursor-pointer w-max"
           onClick={() => setEmailOffers(!emailOffers)}
         >
-          <input
-            id="emailOffers"
-            type="checkbox"
-            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded accent-primary cursor-pointer"
-            checked={emailOffers}
-            onChange={(e) => setEmailOffers(e.target.checked)}
-          />
-
           <label
             htmlFor="emailOffers"
-            className="ml-2 block text-sm text-gray-900 cursor-pointer "
+            className="gap-2 text-sm text-gray-900 cursor-pointer flex items-center"
           >
+            <input
+              type="checkbox"
+              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded accent-primary cursor-pointer"
+              checked={emailOffers}
+              onChange={(e) => setEmailOffers(e.target.checked)}
+            />
             Receive exclusive offers in your inbox
           </label>
         </div>
 
         <div
-          className="flex items-center cursor-pointer"
+          className="cursor-pointer w-max"
           onClick={() => setTextOffers(!textOffers)}
         >
-          <input
-            id="textOffers"
-            type="checkbox"
-            className="h-4 w-4 text-primary rounded accent-primary focus:ring-primary border-gray-300 cursor-pointer"
-            checked={textOffers}
-            onChange={(e) => setTextOffers(e.target.checked)}
-          />
           <label
             htmlFor="textOffers"
-            className="ml-2 block text-sm text-gray-900 cursor-pointer select-none"
+            className="gap-2 text-sm text-gray-900 cursor-pointer flex items-center"
           >
+            <input
+              type="checkbox"
+              className="h-4 w-4 text-primary rounded accent-primary focus:ring-primary border-gray-300 cursor-pointer"
+              checked={textOffers}
+              onChange={(e) => setTextOffers(e.target.checked)}
+            />
             Receive special offers by text
           </label>
         </div>

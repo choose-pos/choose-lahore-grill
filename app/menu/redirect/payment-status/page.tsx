@@ -555,16 +555,9 @@ const PaymentStatusPage = () => {
                                 ?.discountValue &&
                               selectedOrder.appliedDiscount.promoData
                                 .discountType === PromoDiscountType.Percentage
-                            ? `Discount: ${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
+                            ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
                                 2
-                              )}% off ${
-                                selectedOrder.appliedDiscount?.promoData
-                                  ?.uptoAmount
-                                  ? `upto $${selectedOrder.appliedDiscount.promoData.uptoAmount.toFixed(
-                                      2
-                                    )}`
-                                  : ""
-                              }`
+                              )} off`
                             : selectedOrder.appliedDiscount.promoData
                                 ?.discountItemName &&
                               `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
