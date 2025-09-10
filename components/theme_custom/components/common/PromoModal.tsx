@@ -177,7 +177,7 @@ const PromoModal: React.FC<ModalProps> = ({
             ) : (
               <div className="flex flex-col md:flex-row h-full min-h-[500px]">
                 {image && (
-                  <div className="relative w-full md:w-[55%] h-52 md:h-auto">
+                  <div className="relative w-full md:w-[55%] h-64 md:h-auto">
                     {/* Desktop Image */}
                     <Image
                       src={image.desktop}
