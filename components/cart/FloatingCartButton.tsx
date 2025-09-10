@@ -102,15 +102,19 @@ const FloatingCartButton = ({ count }: { count: number }) => {
             : Env.NEXT_PUBLIC_TEXT_COLOR,
         }}
       >
-        {`View cart `}
-        {/* <FaCartShopping size={18} className="mr-2" /> */}
-        {count > 0
-          ? `- ${
+         {count > 0
+          ? `${
               isMobile
-                ? `$${cartDetails?.amounts.subTotalAmount?.toFixed(2)}`
+                ? cartDetails?.amounts?.subTotalAmount &&
+                  cartDetails?.amounts?.subTotalAmount > 0
+                  ? `VIEW CART - $${(
+                      cartDetails?.amounts?.subTotalAmount ?? 0
+                    ).toFixed(2)}`
+                  : "Proceed to checkout"
                 : `VIEW CART (${count})`
             }`
           : "VIEW CART"}
+
       </button>
     </Link>
   );

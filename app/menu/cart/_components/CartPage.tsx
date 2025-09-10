@@ -21,7 +21,7 @@ import {
   RestaurantRedeemOffers,
   TAmounts,
 } from "@/utils/types";
-import { extractFreeDiscountItemDetails } from "@/utils/UtilFncs";
+import { extractErrorMessage, extractFreeDiscountItemDetails } from "@/utils/UtilFncs";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -326,7 +326,7 @@ const CartPage = ({
       } catch (error) {
         setToastData({
           type: "error",
-          message: "Failed to place free order. Please try again.",
+          message: extractErrorMessage(error),
         });
       } finally {
         setActionLoading(false);
