@@ -29,6 +29,8 @@ export const useAnalytics = (
   const searchParams = useSearchParams(); // Get query parameters
 
   useEffect(() => {
+    if (pathname.includes("/promotion/")) return;
+
     debounce(() => {
       const userHash = getOrCreateUserHash(); // Generate or retrieve persistent user hash
 

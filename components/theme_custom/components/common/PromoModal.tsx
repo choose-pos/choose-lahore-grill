@@ -223,7 +223,7 @@ const PromoModal: React.FC<ModalProps> = ({
                           link: button.url,
                         },
                       });
-                      handleClose();
+                      onClose();
                     }}
                     className={`md:px-6 px-4 py-2 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
                   >

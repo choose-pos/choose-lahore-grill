@@ -6,6 +6,7 @@ import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
 import { getOrCreateUserHash } from "@/utils/analytics";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 
 interface CtaButton {
   title: string;
@@ -25,6 +26,25 @@ interface CasualCtaSectionProps {
 }
 
 export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
+
+    useEffect(() => {
+    const userHash = getOrCreateUserHash();
+    sendAnalyticsEvent({
+      restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+      pagePath: window.location.pathname,
+      pageQuery: null,
+      source: document.referrer || "direct",
+      utm: null,
+      userHash,
+      eventType: "page_view",
+      metadata: {
+        action: "promotional_page_cta_view",
+        title: ctaSection.title,
+        link: ctaSection.button.link,
+      },
+    });
+  }, []);
+
   return (
     <section
       id="cta"
