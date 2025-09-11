@@ -23,11 +23,14 @@ interface CtaSection {
 
 interface CasualCtaSectionProps {
   ctaSection: CtaSection;
+  pageName: string;
 }
 
-export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
-
-    useEffect(() => {
+export default function PromoCtaSection({
+  ctaSection,
+  pageName,
+}: CasualCtaSectionProps) {
+  useEffect(() => {
     const userHash = getOrCreateUserHash();
     sendAnalyticsEvent({
       restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
@@ -38,6 +41,7 @@ export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
       userHash,
       eventType: "page_view",
       metadata: {
+        name: pageName,
         action: "promotional_page_cta_view",
         title: ctaSection.title,
         link: ctaSection.button.link,
