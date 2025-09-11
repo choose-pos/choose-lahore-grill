@@ -19,7 +19,11 @@ export const useAnalytics = (
     | "page_view"
     | "item_view"
     | "category_view"
+    | "add_to_cart"
     | "click"
+    | "popup_view"
+    | "popup_close"
+    | "popup_cta_click"
     | "scroll" = "page_view",
   metadata?: {
     [key: string]: any;
