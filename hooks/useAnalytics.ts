@@ -19,7 +19,11 @@ export const useAnalytics = (
     | "page_view"
     | "item_view"
     | "category_view"
+    | "add_to_cart"
     | "click"
+    | "popup_view"
+    | "popup_close"
+    | "popup_cta_click"
     | "scroll" = "page_view",
   metadata?: {
     [key: string]: any;
@@ -29,6 +33,8 @@ export const useAnalytics = (
   const searchParams = useSearchParams(); // Get query parameters
 
   useEffect(() => {
+    if (pathname.includes("/promotion/")) return;
+
     debounce(() => {
       const userHash = getOrCreateUserHash(); // Generate or retrieve persistent user hash
 

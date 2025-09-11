@@ -259,7 +259,12 @@ export default async function PromoPage({ params }: PromoPageProps) {
                   )}
 
                   {/* CTA Section */}
-                  {ctaSection && <PromoCtaSection ctaSection={ctaSection} />}
+                  {ctaSection && (
+                    <PromoCtaSection
+                      ctaSection={ctaSection}
+                      pageName={promoData.getCmsPromoRouteDetails.name}
+                    />
+                  )}
 
                   {/* Terms and Conditions Section */}
                   {termsAndConditionSection && (

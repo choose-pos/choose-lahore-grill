@@ -81,6 +81,8 @@ const PromoModal: React.FC<ModalProps> = ({
       metadata: {
         action: "promotional_popup_close",
         title: title,
+        link: button.url,
+        buttonText: button.text,
       },
     });
     onClose();
@@ -164,7 +166,7 @@ const PromoModal: React.FC<ModalProps> = ({
                           link: button.url,
                         },
                       });
-                      handleClose();
+                      onClose();
                     }}
                     className={`md:px-6 px-4 py-3 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
                   >
@@ -175,7 +177,7 @@ const PromoModal: React.FC<ModalProps> = ({
             ) : (
               <div className="flex flex-col md:flex-row h-full min-h-[500px]">
                 {image && (
-                  <div className="relative w-full md:w-[55%] h-52 md:h-auto">
+                  <div className="relative w-full md:w-[55%] h-64 md:h-auto">
                     {/* Desktop Image */}
                     <Image
                       src={image.desktop}
@@ -221,7 +223,7 @@ const PromoModal: React.FC<ModalProps> = ({
                           link: button.url,
                         },
                       });
-                      handleClose();
+                      onClose();
                     }}
                     className={`md:px-6 px-4 py-2 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
                   >

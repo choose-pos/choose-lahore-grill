@@ -1,9 +1,12 @@
 "use client";
 
-
 import texture from "@/assets/Texture.png";
+import { Env } from "@/env";
+import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
+import { getOrCreateUserHash } from "@/utils/analytics";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 
 interface CtaButton {
   title: string;
@@ -20,9 +23,31 @@ interface CtaSection {
 
 interface CasualCtaSectionProps {
   ctaSection: CtaSection;
+  pageName: string;
 }
 
-export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
+export default function PromoCtaSection({
+  ctaSection,
+  pageName,
+}: CasualCtaSectionProps) {
+  useEffect(() => {
+    const userHash = getOrCreateUserHash();
+    sendAnalyticsEvent({
+      restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+      pagePath: window.location.pathname,
+      pageQuery: null,
+      source: document.referrer || "direct",
+      utm: null,
+      userHash,
+      eventType: "page_view",
+      metadata: {
+        name: pageName,
+        action: "promotional_page_cta_view",
+        title: ctaSection.title,
+        link: ctaSection.button.link,
+      },
+    });
+  }, []);
 
   return (
     <section
@@ -50,7 +75,25 @@ export default function PromoCtaSection({ ctaSection }: CasualCtaSectionProps) {
 
           {/* CTA Button Side - Right */}
           <div className="flex w-full justify-center items-center mt-5">
-           <Link
+            <Link
+              onClick={() => {
+                const userHash = getOrCreateUserHash();
+                sendAnalyticsEvent({
+                  restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+                  pagePath: window.location.pathname,
+                  pageQuery: null,
+                  source: document.referrer || "direct",
+                  utm: null,
+                  userHash,
+                  eventType: "click",
+                  metadata: {
+                    action: "promotional_page_cta_click",
+                    title: ctaSection.title,
+                    buttonText: ctaSection.button.title,
+                    link: ctaSection.button.link,
+                  },
+                });
+              }}
               href={decodeURI(ctaSection.button.link ?? "")}
               className={`
                 md:px-6 px-4 py-1.5 md:py-2 border-2 border-bg1 text-base md:text-lg uppercase bg-bg3 font-primary font-medium rounded-[10px] text-bg1 transition-opacity duration-500`}

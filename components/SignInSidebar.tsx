@@ -416,7 +416,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             <p className="mt-1 text-sm text-red-500">{errors.dob}</p>
           )}
         </div>
-        <div
+       <div
           className="cursor-pointer w-max"
           onClick={() => setEmailOffers(!emailOffers)}
         >
