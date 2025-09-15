@@ -39,13 +39,6 @@ import { FiSearch, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
 import RecentOrders from "@/components/partners/RecentOrders";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
@@ -675,7 +668,7 @@ RestaurantDetailsProps) {
                 {showLeftArrow && (
                   <button
                     onClick={scrollLeft}
-                    className="absolute -left-9 top-1 z-10 bg-white  border-gray-700  border-2  rounded-full p-1 hover:bg-gray-50 transition-all duration-200"
+                    className="absolute -left-12 top-1 z-10 rounded-full p-1 bg-gray-200 shadow-sm transition-all duration-200"
                   >
                     <FiChevronLeft size={20} />
                   </button>
@@ -685,7 +678,7 @@ RestaurantDetailsProps) {
                 {showRightArrow && (
                   <button
                     onClick={scrollRight}
-                    className="absolute -right-9 top-1 z-10 bg-white  border-2 border-gray-700 rounded-full p-1 hover:bg-gray-50 transition-all duration-200"
+                    className="absolute -right-12 top-1 z-10 rounded-full p-1 bg-gray-200 shadow-sm transition-all duration-200"
                   >
                     <FiChevronRight size={20} />
                   </button>
