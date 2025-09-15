@@ -594,6 +594,12 @@ RestaurantDetailsProps) {
     }
   }, [restaurant, setDaysList]);
 
+    useEffect(() => {
+    if (filteredCategories && scrollContainerRef.current) {
+      setTimeout(checkScrollPosition, 100);
+    }
+  }, [filteredCategories]);
+
   // No online ordering check
   if (!isOnlineOrdering) {
     return <NoOnlineOrder />;
