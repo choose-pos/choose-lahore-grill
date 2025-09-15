@@ -35,11 +35,17 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import { FiSearch, FiX } from "react-icons/fi";
+import { FiSearch, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
 import RecentOrders from "@/components/partners/RecentOrders";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
@@ -72,6 +78,8 @@ RestaurantDetailsProps) {
     ItemOptionsEnum[] | null
   >(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
   const [categoryType, setCategoryType] = useState<ItemOptionsEnum[] | null>(
     null
   );
@@ -102,6 +110,8 @@ RestaurantDetailsProps) {
 
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const mobileCategoryBarRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleFilter = () => {
@@ -504,6 +514,35 @@ RestaurantDetailsProps) {
 
   const shouldShow = showButton;
 
+  // Scroll functions for custom carousel
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -200,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 200,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Check scroll position to show/hide arrows
+  const checkScrollPosition = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
   const scrollToCategory = (
     categoryId: string,
     categoryName: string,
@@ -625,58 +664,66 @@ RestaurantDetailsProps) {
             </div>
 
             {!isMobile ? (
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: false,
-                  dragFree: true,
-                  duration: 15,
-                }}
-                className="w-full overflow-hidden"
-              >
-                <CarouselContent className="-ml-2 overflow-x-auto scrollbar-hide">
+              <div className="relative w-full">
+                {/* Left Arrow */}
+                {showLeftArrow && (
+                  <button
+                    onClick={scrollLeft}
+                    className="absolute -left-9 top-1 z-10 bg-white  border-gray-700  border-2  rounded-full p-1 hover:bg-gray-50 transition-all duration-200"
+                  >
+                    <FiChevronLeft size={20} />
+                  </button>
+                )}
+
+                {/* Right Arrow */}
+                {showRightArrow && (
+                  <button
+                    onClick={scrollRight}
+                    className="absolute -right-9 top-1 z-10 bg-white  border-2 border-gray-700 rounded-full p-1 hover:bg-gray-50 transition-all duration-200"
+                  >
+                    <FiChevronRight size={20} />
+                  </button>
+                )}
+
+                {/* Scrollable Container */}
+                <div
+                  ref={scrollContainerRef}
+                  className="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
+                  onScroll={checkScrollPosition}
+                  style={{ scrollBehavior: "smooth" }}
+                >
                   {filteredCategories &&
                     filteredCategories.map((category) => (
-                      <CarouselItem
+                      <button
                         key={category._id}
-                        className="pl-2 basis-auto"
+                        data-category-id={category._id}
+                        className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300 transition-all duration-200 whitespace-nowrap`}
+                        style={{
+                          backgroundColor:
+                            activeCategory === category._id
+                              ? Env.NEXT_PUBLIC_PRIMARY_COLOR
+                              : "transparent",
+                          color:
+                            activeCategory === category._id
+                              ? isContrastOkay(
+                                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                )
+                                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                : Env.NEXT_PUBLIC_TEXT_COLOR
+                              : "black",
+                        }}
+                        onClick={(e) =>
+                          scrollToCategory(category._id, category.name, e)
+                        }
                       >
-                        <button
-                          data-category-id={category._id}
-                          className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300 transition-all duration-200 whitespace-nowrap`}
-                          style={{
-                            backgroundColor:
-                              activeCategory === category._id
-                                ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                                : "transparent",
-                            color:
-                              activeCategory === category._id
-                                ? isContrastOkay(
-                                    Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                                    Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                                  )
-                                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                                  : Env.NEXT_PUBLIC_TEXT_COLOR
-                                : "black",
-                          }}
-                          onClick={(e) =>
-                            scrollToCategory(category._id, category.name, e)
-                          }
-                        >
-                          {category.name.length > 35
-                            ? `${category.name.slice(0, 35)}...`
-                            : category.name}
-                        </button>
-                      </CarouselItem>
+                        {category.name.length > 35
+                          ? `${category.name.slice(0, 35)}...`
+                          : category.name}
+                      </button>
                     ))}
-                </CarouselContent>
-                {filteredCategories && filteredCategories.length > 0 && (
-                  <>
-                    <CarouselPrevious className="-left-9" />
-                    <CarouselNext className="-right-9" />
-                  </>
-                )}
-              </Carousel>
+                </div>
+              </div>
             ) : null}
           </div>
         </div>
