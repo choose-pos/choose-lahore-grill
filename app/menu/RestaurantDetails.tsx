@@ -39,6 +39,7 @@ import { FiSearch, FiX } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
 import RecentOrders from "@/components/partners/RecentOrders";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
@@ -47,7 +48,6 @@ interface RestaurantDetailsProps {
   loyaltyOffers: RestaurantRedeemOffers | null;
   mismatch: boolean | null;
   isLoggedIn: boolean;
-
 }
 
 export default function RestaurantDetails({
@@ -92,7 +92,7 @@ RestaurantDetailsProps) {
   const [showButton, setShowButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const {setSignInOpen, setIsSignUpOpen } = useSidebarStore();
+  const { setSignInOpen, setIsSignUpOpen } = useSidebarStore();
 
   // const IntialCategory = categories;
 
@@ -109,7 +109,7 @@ RestaurantDetailsProps) {
   };
 
   const filterRef = useRef<HTMLDivElement>(null);
-   const router = useRouter();
+  const router = useRouter();
   useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
@@ -625,37 +625,58 @@ RestaurantDetailsProps) {
             </div>
 
             {!isMobile ? (
-              <div className="flex overflow-x-auto space-x-2 pb-2 scrollbar-hide">
-                {filteredCategories && filteredCategories.map((category) => (
-                  <button
-                    key={category._id}
-                    data-category-id={category._id}
-                    className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300`}
-                    style={{
-                      backgroundColor:
-                        activeCategory === category._id
-                          ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                          : "transparent",
-                      color:
-                        activeCategory === category._id
-                          ? isContrastOkay(
-                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                              Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            )
-                            ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            : Env.NEXT_PUBLIC_TEXT_COLOR
-                          : "black",
-                    }}
-                    onClick={(e) =>
-                      scrollToCategory(category._id, category.name, e)
-                    }
-                  >
-                    {category.name.length > 35
-                      ? `${category.name.slice(0, 35)}...`
-                      : category.name}
-                  </button>
-                ))}
-              </div>
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: false,
+                  dragFree: true,
+                  duration: 15,
+                }}
+                className="w-full overflow-hidden"
+              >
+                <CarouselContent className="-ml-2 overflow-x-auto scrollbar-hide">
+                  {filteredCategories &&
+                    filteredCategories.map((category) => (
+                      <CarouselItem
+                        key={category._id}
+                        className="pl-2 basis-auto"
+                      >
+                        <button
+                          data-category-id={category._id}
+                          className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300 transition-all duration-200 whitespace-nowrap`}
+                          style={{
+                            backgroundColor:
+                              activeCategory === category._id
+                                ? Env.NEXT_PUBLIC_PRIMARY_COLOR
+                                : "transparent",
+                            color:
+                              activeCategory === category._id
+                                ? isContrastOkay(
+                                    Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                                    Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                  )
+                                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                  : Env.NEXT_PUBLIC_TEXT_COLOR
+                                : "black",
+                          }}
+                          onClick={(e) =>
+                            scrollToCategory(category._id, category.name, e)
+                          }
+                        >
+                          {category.name.length > 35
+                            ? `${category.name.slice(0, 35)}...`
+                            : category.name}
+                        </button>
+                      </CarouselItem>
+                    ))}
+                </CarouselContent>
+                {filteredCategories && filteredCategories.length > 0 && (
+                  <>
+                    <CarouselPrevious className="-left-9" />
+                    <CarouselNext className="-right-9" />
+                  </>
+                )}
+              </Carousel>
             ) : null}
           </div>
         </div>
@@ -723,7 +744,8 @@ RestaurantDetailsProps) {
                   </div>
                 ) : (
                   // Show categories when available
-                  filteredCategories && filteredCategories.map((category) => (
+                  filteredCategories &&
+                  filteredCategories.map((category) => (
                     <div key={category._id}>
                       {category.items.length > 0 && (
                         <CategoryListing
@@ -795,28 +817,29 @@ RestaurantDetailsProps) {
 
                 <div className="overflow-y-scroll pb-3">
                   <div className="space-y-2">
-                    {filteredCategories && filteredCategories.map((category) => (
-                      <button
-                        key={category._id}
-                        data-category-id={category._id}
-                        className={`w-full text-left py-1.5 px-3 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
-                        style={{
-                          color:
-                            activeCategory === category._id
-                              ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                              : "#000000",
-                        }}
-                        onClick={(e) => {
-                          scrollToCategory(category._id, category.name, e);
-                          setIsCategoriesPopupOpen(false);
-                        }}
-                      >
-                        <div className="w-full flex justify-between">
-                          <p>{category.name}</p>
-                          <p>{category.items.length}</p>
-                        </div>
-                      </button>
-                    ))}
+                    {filteredCategories &&
+                      filteredCategories.map((category) => (
+                        <button
+                          key={category._id}
+                          data-category-id={category._id}
+                          className={`w-full text-left py-1.5 px-3 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
+                          style={{
+                            color:
+                              activeCategory === category._id
+                                ? Env.NEXT_PUBLIC_PRIMARY_COLOR
+                                : "#000000",
+                          }}
+                          onClick={(e) => {
+                            scrollToCategory(category._id, category.name, e);
+                            setIsCategoriesPopupOpen(false);
+                          }}
+                        >
+                          <div className="w-full flex justify-between">
+                            <p>{category.name}</p>
+                            <p>{category.items.length}</p>
+                          </div>
+                        </button>
+                      ))}
                   </div>
                 </div>
               </>
