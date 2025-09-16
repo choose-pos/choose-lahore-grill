@@ -35,7 +35,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import { FiSearch, FiX } from "react-icons/fi";
+import { FiSearch, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
 import RecentOrders from "@/components/partners/RecentOrders";
@@ -47,7 +47,6 @@ interface RestaurantDetailsProps {
   loyaltyOffers: RestaurantRedeemOffers | null;
   mismatch: boolean | null;
   isLoggedIn: boolean;
-
 }
 
 export default function RestaurantDetails({
@@ -72,6 +71,8 @@ RestaurantDetailsProps) {
     ItemOptionsEnum[] | null
   >(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
   const [categoryType, setCategoryType] = useState<ItemOptionsEnum[] | null>(
     null
   );
@@ -92,7 +93,7 @@ RestaurantDetailsProps) {
   const [showButton, setShowButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const {setSignInOpen, setIsSignUpOpen } = useSidebarStore();
+  const { setSignInOpen, setIsSignUpOpen } = useSidebarStore();
 
   // const IntialCategory = categories;
 
@@ -102,6 +103,8 @@ RestaurantDetailsProps) {
 
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const mobileCategoryBarRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleFilter = () => {
@@ -109,7 +112,7 @@ RestaurantDetailsProps) {
   };
 
   const filterRef = useRef<HTMLDivElement>(null);
-   const router = useRouter();
+  const router = useRouter();
   useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
@@ -504,6 +507,35 @@ RestaurantDetailsProps) {
 
   const shouldShow = showButton;
 
+  // Scroll functions for custom carousel
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -200,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 200,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Check scroll position to show/hide arrows
+  const checkScrollPosition = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
   const scrollToCategory = (
     categoryId: string,
     categoryName: string,
@@ -554,6 +586,12 @@ RestaurantDetailsProps) {
       }
     }
   }, [restaurant, setDaysList]);
+
+    useEffect(() => {
+    if (filteredCategories && scrollContainerRef.current) {
+      setTimeout(checkScrollPosition, 100);
+    }
+  }, [filteredCategories]);
 
   // No online ordering check
   if (!isOnlineOrdering) {
@@ -625,36 +663,65 @@ RestaurantDetailsProps) {
             </div>
 
             {!isMobile ? (
-              <div className="flex overflow-x-auto space-x-2 pb-2 scrollbar-hide">
-                {filteredCategories && filteredCategories.map((category) => (
+              <div className="relative w-full">
+                {/* Left Arrow */}
+                {showLeftArrow && (
                   <button
-                    key={category._id}
-                    data-category-id={category._id}
-                    className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300`}
-                    style={{
-                      backgroundColor:
-                        activeCategory === category._id
-                          ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                          : "transparent",
-                      color:
-                        activeCategory === category._id
-                          ? isContrastOkay(
-                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                              Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            )
-                            ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            : Env.NEXT_PUBLIC_TEXT_COLOR
-                          : "black",
-                    }}
-                    onClick={(e) =>
-                      scrollToCategory(category._id, category.name, e)
-                    }
+                    onClick={scrollLeft}
+                    className="absolute -left-12 top-1 z-10 rounded-full p-1 bg-gray-200 shadow-sm transition-all duration-200"
                   >
-                    {category.name.length > 35
-                      ? `${category.name.slice(0, 35)}...`
-                      : category.name}
+                    <FiChevronLeft size={20} />
                   </button>
-                ))}
+                )}
+
+                {/* Right Arrow */}
+                {showRightArrow && (
+                  <button
+                    onClick={scrollRight}
+                    className="absolute -right-12 top-1 z-10 rounded-full p-1 bg-gray-200 shadow-sm transition-all duration-200"
+                  >
+                    <FiChevronRight size={20} />
+                  </button>
+                )}
+
+                {/* Scrollable Container */}
+                <div
+                  ref={scrollContainerRef}
+                  className="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
+                  onScroll={checkScrollPosition}
+                  style={{ scrollBehavior: "smooth" }}
+                >
+                  {filteredCategories &&
+                    filteredCategories.map((category) => (
+                      <button
+                        key={category._id}
+                        data-category-id={category._id}
+                        className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300 transition-all duration-200 whitespace-nowrap`}
+                        style={{
+                          backgroundColor:
+                            activeCategory === category._id
+                              ? Env.NEXT_PUBLIC_PRIMARY_COLOR
+                              : "transparent",
+                          color:
+                            activeCategory === category._id
+                              ? isContrastOkay(
+                                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                )
+                                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                : Env.NEXT_PUBLIC_TEXT_COLOR
+                              : "black",
+                        }}
+                        onClick={(e) =>
+                          scrollToCategory(category._id, category.name, e)
+                        }
+                      >
+                        {category.name.length > 35
+                          ? `${category.name.slice(0, 35)}...`
+                          : category.name}
+                      </button>
+                    ))}
+                </div>
               </div>
             ) : null}
           </div>
@@ -723,7 +790,8 @@ RestaurantDetailsProps) {
                   </div>
                 ) : (
                   // Show categories when available
-                  filteredCategories && filteredCategories.map((category) => (
+                  filteredCategories &&
+                  filteredCategories.map((category) => (
                     <div key={category._id}>
                       {category.items.length > 0 && (
                         <CategoryListing
@@ -795,28 +863,29 @@ RestaurantDetailsProps) {
 
                 <div className="overflow-y-scroll pb-3">
                   <div className="space-y-2">
-                    {filteredCategories && filteredCategories.map((category) => (
-                      <button
-                        key={category._id}
-                        data-category-id={category._id}
-                        className={`w-full text-left py-1.5 px-3 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
-                        style={{
-                          color:
-                            activeCategory === category._id
-                              ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                              : "#000000",
-                        }}
-                        onClick={(e) => {
-                          scrollToCategory(category._id, category.name, e);
-                          setIsCategoriesPopupOpen(false);
-                        }}
-                      >
-                        <div className="w-full flex justify-between">
-                          <p>{category.name}</p>
-                          <p>{category.items.length}</p>
-                        </div>
-                      </button>
-                    ))}
+                    {filteredCategories &&
+                      filteredCategories.map((category) => (
+                        <button
+                          key={category._id}
+                          data-category-id={category._id}
+                          className={`w-full text-left py-1.5 px-3 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
+                          style={{
+                            color:
+                              activeCategory === category._id
+                                ? Env.NEXT_PUBLIC_PRIMARY_COLOR
+                                : "#000000",
+                          }}
+                          onClick={(e) => {
+                            scrollToCategory(category._id, category.name, e);
+                            setIsCategoriesPopupOpen(false);
+                          }}
+                        >
+                          <div className="w-full flex justify-between">
+                            <p>{category.name}</p>
+                            <p>{category.items.length}</p>
+                          </div>
+                        </button>
+                      ))}
                   </div>
                 </div>
               </>
