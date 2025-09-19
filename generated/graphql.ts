@@ -542,6 +542,7 @@ export type Customer = {
   phone: Scalars['String']['output'];
   restaurant?: Maybe<Restaurant>;
   updatedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  visitorHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type CustomerBehavior = {
@@ -615,6 +616,7 @@ export type CustomerSignupInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   phone: Scalars['String']['input'];
+  sendSms?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type CustomerSignupVerificationInput = {
@@ -625,6 +627,7 @@ export type CustomerSignupVerificationInput = {
   lastName: Scalars['String']['input'];
   otp: Scalars['String']['input'];
   phone: Scalars['String']['input'];
+  sendSms?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** The day */
@@ -1809,6 +1812,7 @@ export type Restaurant = {
   restaurantConfigs?: Maybe<RestaurantConfigs>;
   socialInfo?: Maybe<SocialInfo>;
   status: RestaurantStatus;
+  syncCategoryRules: Array<SyncCategoryRule>;
   taxRates?: Maybe<Array<TaxRateInfo>>;
   timezone?: Maybe<TimezoneData>;
   type?: Maybe<RestaurantType>;
@@ -1906,6 +1910,12 @@ export enum StatusEnum {
   Active = 'active',
   Inactive = 'inactive'
 }
+
+export type SyncCategoryRule = {
+  __typename?: 'SyncCategoryRule';
+  categoryId: Scalars['String']['output'];
+  categoryName: Scalars['String']['output'];
+};
 
 export type TaxRateInfo = {
   __typename?: 'TaxRateInfo';

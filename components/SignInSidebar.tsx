@@ -45,6 +45,9 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
   const [otp, setOtp] = useState<string>("");
   const [signInOtpId, setSignInOtpId] = useState<boolean | null>(null);
   const [signUpOtpId, setSignUpOtpId] = useState<boolean | null>(null);
+  const [resendTimer, setResendTimer] = useState<number>(0);
+  const [isResendClicked, setIsResendClicked] = useState<boolean>(false);
+
   const [accountPreference, setAccountPrefrence] = useState<AccountPreference>({
     email: false,
     sms: false,
@@ -85,6 +88,16 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
 
     fetchPoints();
   }, []);
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+
+    const interval = setInterval(() => {
+      setResendTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
@@ -160,6 +173,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         const data = await sdk.customerSignUp({ input });
 
         setSignUpOtpId(data.customerSignUp);
+        setIsResendClicked(false); // Reset to email verification for new signup
+        setResendTimer(0);
         if (data.customerSignUp) {
           setToastData({
             type: "success",
@@ -194,6 +209,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
     setAccountPrefrence({ email: false, sms: false });
     setIsSignUpOpen(false);
     setShowOtpPage(false);
+    setIsResendClicked(false);
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
@@ -262,9 +278,15 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
   const handleBack = () => {
     setShowOtpPage(false);
     setOtp("");
+    setIsResendClicked(false); // Reset resend state when going back
+    setResendTimer(0);
   };
 
   const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+
+    setIsResendClicked(true);
+    setResendTimer(30);
     try {
       if (isSignUpOpen && signUpOtpId) {
         const data = await sdk.customerSignUp({
@@ -275,12 +297,13 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             phone: phoneNumber,
             dob: new Date(dob).toISOString(),
             accountPreferences: accountPreference,
+            sendSms: true,
           },
         });
         setSignUpOtpId(data.customerSignUp);
         setToastData({
           type: "success",
-          message: "OTP has been resent.",
+          message: "OTP has been sent to your number",
         });
       } else if (!isSignUpOpen && signInOtpId) {
         const data = await sdk.customerLogin({
@@ -416,7 +439,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             <p className="mt-1 text-sm text-red-500">{errors.dob}</p>
           )}
         </div>
-       <div
+        <div
           className="cursor-pointer w-max"
           onClick={() => setEmailOffers(!emailOffers)}
         >
@@ -586,78 +609,90 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
     </form>
   );
 
-  const renderOtpForm = () => (
-    <form onSubmit={handleOtpSubmit} className="font-online-ordering">
-      <div className="flex items-center mb-4">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="text-gray-500 hover:text-gray-700 mr-2"
-        >
-          <IoArrowBack size={24} />
-        </button>
-        <h2 className="text-2xl font-bold font-online-ordering">
-          {signUpOtpId ? "Verify Email OTP" : "Verfify OTP"}
-        </h2>
-      </div>
-      <hr />
-      <div className="space-y-4 mt-5">
-        {signUpOtpId ? (
-          <p className="flex items-start text-xs text-gray-400">
-            {`Note: Please check your spam / trash folder if you don't find the verification code in your inbox.`}
-          </p>
-        ) : null}
-        <div>
-          <label
-            htmlFor="otp"
-            className="block text-base font-medium text-gray-700"
-          >
-            {signUpOtpId
-              ? " Enter the code we sent on your mail"
-              : " Enter the code we sent on your mobile phone"}
-          </label>
-          <input
-            type="text"
-            id="otp"
-            className={`mt-1 block w-full border ${
-              errors.otp ? "border-red-500" : "border-gray-300"
-            } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
-            value={otp}
-            onChange={handleOtpChange}
-            placeholder="Enter 6 digit OTP"
-          />
-          {errors.otp && (
-            <p className="mt-1 text-sm text-red-500">{errors.otp}</p>
-          )}
-        </div>
-        <div className="flex justify-end mt-1">
+  const renderOtpForm = () => {
+    const isShowingSmsVerification = isResendClicked || !signUpOtpId;
+
+    return (
+      <form onSubmit={handleOtpSubmit} className="font-online-ordering">
+        <div className="flex items-center mb-4">
           <button
             type="button"
-            onClick={handleResendOtp}
-            className="text-sm text-gray-600 hover:underline transition-colors"
+            onClick={handleBack}
+            className="text-gray-500 hover:text-gray-700 mr-2"
           >
-            Resend OTP
+            <IoArrowBack size={24} />
           </button>
+          <h2 className="text-2xl font-bold font-online-ordering">
+            {isShowingSmsVerification ? "Verify SMS OTP" : "Verfify Email OTP"}
+          </h2>
         </div>
-        <div className="flex justify-between">
-          <button
-            type="submit"
-            className="w-full bg-primary text-white py-2 px-4 rounded-full font-online-ordering capitalize hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            style={{
-              color: isContrastOkay(
-                Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                Env.NEXT_PUBLIC_BACKGROUND_COLOR
-              )
-                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                : Env.NEXT_PUBLIC_TEXT_COLOR,
-            }}
-          >
-            Verify OTP
-          </button>
+        <hr />
+        <div className="space-y-4 mt-5">
+          {!isShowingSmsVerification ? (
+            <p className="flex items-start text-xs text-gray-400 SMS">
+              {`Note: Please check your spam / trash folder if you don't find the verification code in your inbox.`}
+            </p>
+          ) : null}
+          <div>
+            <label
+              htmlFor="otp"
+              className="block text-base font-medium text-gray-700"
+            >
+              {isShowingSmsVerification
+                ? " Enter the code we sent on your SMS"
+                : " Enter the code we sent on your mail"}
+            </label>
+            <input
+              type="text"
+              id="otp"
+              className={`mt-1 block w-full border ${
+                errors.otp ? "border-red-500" : "border-gray-300"
+              } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
+              value={otp}
+              onChange={handleOtpChange}
+              placeholder="Enter 6 digit OTP"
+            />
+            {errors.otp && (
+              <p className="mt-1 text-sm text-red-500">{errors.otp}</p>
+            )}
+          </div>
+          <div className="flex justify-end mt-1">
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              disabled={resendTimer > 0}
+              className={`text-sm transition-colors ${
+                resendTimer > 0
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-600 hover:underline"
+              }`}
+            >
+              {resendTimer > 0
+                ? `Resend in ${resendTimer}s`
+                : "Not received? Resend on SMS"}
+            </button>
+
+          </div>
+          <div className="flex justify-between">
+            <button
+              type="submit"
+              className="w-full bg-primary text-white py-2 px-4 rounded-full font-online-ordering capitalize hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              style={{
+                color: isContrastOkay(
+                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                )
+                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  : Env.NEXT_PUBLIC_TEXT_COLOR,
+              }}
+            >
+              Verify OTP
+            </button>
+          </div>
         </div>
-      </div>
-    </form>
-  );
+      </form>
+    );
+  };
 
   return (
     <>
