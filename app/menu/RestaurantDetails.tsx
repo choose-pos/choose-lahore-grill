@@ -852,7 +852,7 @@ RestaurantDetailsProps) {
             >
               <>
                 <div className="flex items-center justify-between font-online-ordering py-2 px-3 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Categories</h2>
+                  <h2 className="text-lg font-semibold">Categories ({filteredCategories?.length || 0})</h2>
                   <button
                     onClick={() => setIsCategoriesPopupOpen(false)}
                     className="text-gray-500 hover:text-gray-700"

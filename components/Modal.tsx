@@ -132,6 +132,13 @@ const Modal: React.FC<{
   //   };
   // }, [showMenu]);
 
+    useEffect(() => {
+    // Assuming there's only one restaurant, auto-select it when modal opens
+    if (!showCalendar) {
+      setShowCalendar(true);
+    }
+  }, [showCalendar]);
+
   // useEffect(()=> {
   //   const updateCartSession = async () => {
 
