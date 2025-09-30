@@ -21,7 +21,7 @@ const Footer: React.FC<FooterProps> = ({ isProfile }) => {
         {/* Footer Bottom Section */}
         <div
           className={`flex flex-col md:flex-row justify-between items-center w-full h-full gap-4 sm:gap-0
-          ${isProfile ? "pb-0" : "md:pb-0 pb-20"}
+          ${isProfile ? "md:pb-0 pb-5" : "md:pb-0 pb-5"}
           `}
         >
           {/* Social Icons */}

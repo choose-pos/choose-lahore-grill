@@ -847,7 +847,7 @@ const Modal: React.FC<{
               <div className="grid grid-cols-1 gap-2 sm:gap-3 mb-6 max-h-[33vh]  pr-2 ">
                 {timesList.length === 0 && restaurantClose ? (
                   <div className="w-full justify-center flex items-center">
-                    <p className="teext-lg md:text-xl mt-10 text-center">
+                     <p className="text-lg md:text-xl mt-10 text-center">
                       Restaurant is closed for today! 
                       <br />
                       We&apos;ll back tommorow...

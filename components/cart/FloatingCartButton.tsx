@@ -82,15 +82,17 @@ const FloatingCartButton = ({ count }: { count: number }) => {
   // Show button logic: always show on mobile, use scroll position on desktop
   const shouldShow = isMobile || showButton;
 
-  return (
-    <Link href={`/menu/cart`}>
+  return ( 
+    <div className="sticky bottom-0 pb-6 pointer-events-none z-40 flex justify-center">
+
+      <Link href={`/menu/cart`} className="pointer-events-auto w-[90%]">
       <button
-        className={`bg-primary font-online-ordering text-white px-4 py-3 rounded-full flex items-center justify-center text-base fixed bottom-6 z-40 shadow-lg
+          className={`bg-primary font-online-ordering text-white px-4 py-3 rounded-full flex items-center justify-center text-base shadow-lg w-full
         ${
           isMobile
-            ? "left-6 right-6" // Full width with margins on mobile
+            ? "" // Full width with margins on mobile
             : shouldShow
-            ? "right-5 hidden"
+            ? "hidden"
             : "hidden" // Hide on desktop based on scroll position
         }`}
         style={{
@@ -117,6 +119,7 @@ const FloatingCartButton = ({ count }: { count: number }) => {
 
       </button>
     </Link>
+  </div>
   );
 };
 

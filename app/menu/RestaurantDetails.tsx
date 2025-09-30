@@ -587,7 +587,7 @@ RestaurantDetailsProps) {
     }
   }, [restaurant, setDaysList]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (filteredCategories && scrollContainerRef.current) {
       setTimeout(checkScrollPosition, 100);
     }
@@ -753,7 +753,7 @@ RestaurantDetailsProps) {
                   loyaltyOffers={loyaltyOffers}
                 />
               )}
-              <div className="space-y-10  mb-8 md:mb-0 ">
+              <div className="space-y-10  mb-2 md:mb-0 ">
                 {filteredCategories && filteredCategories.length === 0 ? (
                   <div className="py-4 h-[40rem]">
                     {!searchQuery && !categoryType ? (
@@ -814,12 +814,16 @@ RestaurantDetailsProps) {
       </div>
 
       {loading ? null : (
-        <div>
+        <div
+          className={`${
+            cartCountInfo > 0 ? "bottom-[4.5rem]" : "bottom-[1.5rem]"
+          } sticky  pb-2 pointer-events-none z-40 flex justify-end`}
+        >
           <button
             onClick={() => {
               setIsCategoriesPopupOpen(!isCategoriesPopupOpen);
             }}
-            className={`${cartCountInfo > 0 ? "bottom-20" : "bottom-10"} font-online-ordering flex-col text-white px-3 py-3 rounded-full flex items-center justify-center text-base fixed right-6 w-fit z-10 shadow-lg bg-primary md:hidden`}
+            className={`font-online-ordering flex-col text-white px-3 py-3 rounded-full flex items-center text-base mr-6 w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
