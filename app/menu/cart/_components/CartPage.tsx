@@ -421,7 +421,7 @@ const CartPage = ({
 
       {/* Floating Button */}
 
-      <div className="block lg:hidden fixed bottom-0 right-0 left-0 px-6 py-4 bg-white border-t">
+      <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t">
         <button
           // onClick={() => {
           //   push("/menu/checkout");
