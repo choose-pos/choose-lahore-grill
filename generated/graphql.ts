@@ -628,6 +628,7 @@ export type CustomerSignupVerificationInput = {
   otp: Scalars['String']['input'];
   phone: Scalars['String']['input'];
   sendSms?: InputMaybe<Scalars['Boolean']['input']>;
+  visitorHash: Scalars['String']['input'];
 };
 
 /** The day */

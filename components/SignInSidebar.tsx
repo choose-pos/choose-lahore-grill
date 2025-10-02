@@ -9,6 +9,7 @@ import RestaurantStore from "@/store/restaurant";
 import { useSidebarStore } from "@/store/sidebar";
 import ToastStore from "@/store/toast";
 import { extractErrorMessage } from "@/utils/UtilFncs";
+import { getOrCreateUserHash } from "@/utils/analytics";
 import { getMeCustomer } from "@/utils/getMeCustomer";
 import { sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
@@ -216,6 +217,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
     e.preventDefault();
     setErrors({});
 
+    const userHash = getOrCreateUserHash();
+
     try {
       if (signUpOtpId) {
         const input: CustomerSignupVerificationInput = {
@@ -227,6 +230,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           dob: new Date(dob).toISOString(),
           // dateOfBirth: new Date(dob).toISOString(),
           accountPreferences: accountPreference,
+          visitorHash: userHash,
+          sendSms: isResendClicked,
         };
 
         const data = await sdk.customerSignUpVerification({ input });
@@ -671,7 +676,6 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
                 ? `Resend in ${resendTimer}s`
                 : "Not received? Resend on SMS"}
             </button>
-
           </div>
           <div className="flex justify-between">
             <button
