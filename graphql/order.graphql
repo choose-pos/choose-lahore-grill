@@ -26,6 +26,8 @@ query fetchCustomerOrders($lastThreeOrders: Boolean) {
     _id
     createdAt
     orderType
+    status
+    systemRemark
     orderId
     totalAmount
     items {

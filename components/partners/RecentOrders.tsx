@@ -4,6 +4,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { OrderStatus } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import meCustomerStore from "@/store/meCustomer";
 import ToastStore from "@/store/toast";
@@ -87,7 +88,12 @@ const RecentOrders = () => {
         const response = await sdk.fetchCustomerOrders({
           lastThreeOrders: true,
         });
-        setRecentOrders(response.fetchCustomerOrders || []);
+         const filteredOrders = (response.fetchCustomerOrders || []).filter(
+          (order: any) =>
+            order.status === OrderStatus.Placed || order.status === OrderStatus.Fulfilled
+        );
+
+        setRecentOrders(filteredOrders || []);
       } catch (error) {
         console.error("Failed to fetch recent orders:", error);
       }
