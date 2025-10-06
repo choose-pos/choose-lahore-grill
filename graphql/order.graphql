@@ -225,3 +225,7 @@ mutation reorderItemsToCart($orderId: String!) {
     specialMessage
   }
 }
+
+mutation handleOrderCreationFailure($orderId: String!, $error: String!) {
+  handleOrderCreationFailure(orderId: $orderId, error: $error)
+}

@@ -115,7 +115,16 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             extractErrorMessage(error.message) ||
               "An error occurred while processing your payment"
           );
-
+           try {
+            const j = sdk.handleOrderCreationFailure({
+              orderId: resp.createOrder.orderId ?? "",
+              error: error.message
+                ? extractErrorMessage(error.message)
+                : "An error occurred while processing your payment",
+            });
+          } catch (e) {
+            console.warn(e, "Failed to handle Order Creation failure");
+          }
           return;
         }
       } catch (err) {

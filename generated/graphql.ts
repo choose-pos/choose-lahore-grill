@@ -1179,6 +1179,7 @@ export type Mutation = {
   createOrderWithoutPayment: OrderPlacedInfo;
   decreaseItemQty: Scalars['Boolean']['output'];
   deleteCartItem: Scalars['Boolean']['output'];
+  handleOrderCreationFailure: Scalars['Boolean']['output'];
   increaseItemQty: Scalars['Boolean']['output'];
   reorderItemsToCart: ReorderOrderResponse;
   updateCartDetails: Scalars['Boolean']['output'];
@@ -1216,6 +1217,12 @@ export type MutationDecreaseItemQtyArgs = {
 
 export type MutationDeleteCartItemArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationHandleOrderCreationFailureArgs = {
+  error: Scalars['String']['input'];
+  orderId: Scalars['String']['input'];
 };
 
 
@@ -2359,6 +2366,14 @@ export type ReorderItemsToCartMutationVariables = Exact<{
 
 export type ReorderItemsToCartMutation = { __typename?: 'Mutation', reorderItemsToCart: { __typename?: 'ReorderOrderResponse', success: boolean, specialMessage?: string | null } };
 
+export type HandleOrderCreationFailureMutationVariables = Exact<{
+  orderId: Scalars['String']['input'];
+  error: Scalars['String']['input'];
+}>;
+
+
+export type HandleOrderCreationFailureMutation = { __typename?: 'Mutation', handleOrderCreationFailure: boolean };
+
 export type GetCmsPromoRouteDetailsQueryVariables = Exact<{
   slug: Scalars['String']['input'];
 }>;
@@ -3062,6 +3077,11 @@ export const ReorderItemsToCartDocument = gql`
   }
 }
     `;
+export const HandleOrderCreationFailureDocument = gql`
+    mutation handleOrderCreationFailure($orderId: String!, $error: String!) {
+  handleOrderCreationFailure(orderId: $orderId, error: $error)
+}
+    `;
 export const GetCmsPromoRouteDetailsDocument = gql`
     query getCmsPromoRouteDetails($slug: String!) {
   getCmsPromoRouteDetails(slug: $slug) {
@@ -3484,6 +3504,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     reorderItemsToCart(variables: ReorderItemsToCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ReorderItemsToCartMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ReorderItemsToCartMutation>(ReorderItemsToCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'reorderItemsToCart', 'mutation', variables);
+    },
+    handleOrderCreationFailure(variables: HandleOrderCreationFailureMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<HandleOrderCreationFailureMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<HandleOrderCreationFailureMutation>(HandleOrderCreationFailureDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'handleOrderCreationFailure', 'mutation', variables);
     },
     getCmsPromoRouteDetails(variables: GetCmsPromoRouteDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoRouteDetailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoRouteDetailsQuery>(GetCmsPromoRouteDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoRouteDetails', 'query', variables);
