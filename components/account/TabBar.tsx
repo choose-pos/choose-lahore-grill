@@ -895,12 +895,7 @@ export const OrdersContent: React.FC = () => {
       try {
         setIsLoading(true);
         const res = await fetchWithAuth(() => sdk.fetchCustomerOrders());
-        const filteredOrders = (res.fetchCustomerOrders || []).filter(
-          (order: any) =>
-            order.status === OrderStatus.Placed ||
-            order.status === OrderStatus.Fulfilled
-        );
-        setOrders(filteredOrders);
+        setOrders(res.fetchCustomerOrders || []);
       } catch (error) {
         setError("Failed to fetch orders. Please try again later.");
       } finally {

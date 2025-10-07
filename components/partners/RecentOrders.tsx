@@ -88,12 +88,7 @@ const RecentOrders = () => {
         const response = await sdk.fetchCustomerOrders({
           lastThreeOrders: true,
         });
-         const filteredOrders = (response.fetchCustomerOrders || []).filter(
-          (order: any) =>
-            order.status === OrderStatus.Placed || order.status === OrderStatus.Fulfilled
-        );
-
-        setRecentOrders(filteredOrders || []);
+        setRecentOrders(response.fetchCustomerOrders || []);
       } catch (error) {
         console.error("Failed to fetch recent orders:", error);
       }
