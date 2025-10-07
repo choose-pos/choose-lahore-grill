@@ -3,6 +3,7 @@ import { CreateOrderInput } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import CustomerDataStore from "@/store/customerData";
 import ToastStore from "@/store/toast";
+import { getOrCreateUserHash } from "@/utils/analytics";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { refreshCart } from "@/utils/refreshCart";
@@ -75,10 +76,12 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
         const clientSecret = response.createCheckoutPaymentIntent.cs;
         const intententId = response.createCheckoutPaymentIntent.id;
+        const userHash = getOrCreateUserHash();
 
         const formattedOrderDatawitId: CreateOrderInput = {
           ...OrderData,
           paymentIntentId: intententId,
+          visitorHash: userHash,
         };
         try {
           await fetchWithAuth(() => sdk.meCustomer());
@@ -112,7 +115,16 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             extractErrorMessage(error.message) ||
               "An error occurred while processing your payment"
           );
-
+           try {
+            const j = sdk.handleOrderCreationFailure({
+              orderId: resp.createOrder.orderId ?? "",
+              error: error.message
+                ? extractErrorMessage(error.message)
+                : "An error occurred while processing your payment",
+            });
+          } catch (e) {
+            console.warn(e, "Failed to handle Order Creation failure");
+          }
           return;
         }
       } catch (err) {
@@ -158,8 +170,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
         {isLoading
           ? "Processing..."
           : cartData.length > 0
-          ? "Pay"
-          : "Place Order"}
+            ? "Pay"
+            : "Place Order"}
       </button>
       {errorMessage && (
         <div className="mt-4 p-3 bg-red-100 text-red-700 rounded max-w-[500px] overflow-hidden">

@@ -1,6 +1,7 @@
 import {
   DiscountType,
   OrderDiscountType,
+  OrderStatus,
   OrderType,
   PromoDiscountType,
   TransactionType,
@@ -749,6 +750,8 @@ export type Order = {
   taxRate?: number | null;
   totalAmount?: number;
   items: Item[];
+  status?: string | null;
+  systemRemark?: string;
 };
 
 export interface Modifier {
@@ -788,6 +791,8 @@ export interface OrderById {
   platformFees?: number | null;
   finalAmount?: number | null;
   paymentMethod?: string | null;
+  status?: string;
+  systemRemark?: string;
   createdAt: string;
   pickUpDateAndTime?: string | null;
   deliveryDateAndTime?: string | null;
@@ -838,6 +843,38 @@ const calculateModifierPrice = (modifier: Modifier): number => {
   return modifier.modifierPrice * modifier.qty;
 };
 
+// const getOrderStatusDisplay = (status?: string) => {
+//   switch (status) {
+//     case OrderStatus.Placed:
+//       return { text: "Placed", color: "text-blue-600 bg-blue-100" };
+//     case OrderStatus.Processing:
+//       return { text: "Processing", color: "text-yellow-600 bg-yellow-100" };
+//     case OrderStatus.Fulfilled:
+//       return { text: "Fulfilled", color: "text-green-600 bg-green-100" };
+//     case OrderStatus.Scheduled:
+//       return { text: "Scheduled", color: "text-purple-600 bg-purple-100" };
+//     case OrderStatus.Failed:
+//       return { text: "Failed", color: "text-red-600 bg-red-100" };
+//     case OrderStatus.CancelledFullRefund:
+//       return {
+//         text: "Cancelled (Full Refund)",
+//         color: "text-gray-600 bg-gray-100",
+//       };
+//     case OrderStatus.CancelledPartialRefund:
+//       return {
+//         text: "Cancelled (Partial Refund)",
+//         color: "text-gray-600 bg-gray-100",
+//       };
+//     case OrderStatus.CancelledLoyaltyRefund:
+//       return {
+//         text: "Cancelled (Loyalty Refund)",
+//         color: "text-gray-600 bg-gray-100",
+//       };
+//     default:
+//       return { text: "Unknown", color: "text-gray-600 bg-gray-100" };
+//   }
+// };
+
 export const OrdersContent: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -858,7 +895,7 @@ export const OrdersContent: React.FC = () => {
       try {
         setIsLoading(true);
         const res = await fetchWithAuth(() => sdk.fetchCustomerOrders());
-        setOrders(res.fetchCustomerOrders);
+        setOrders(res.fetchCustomerOrders || []);
       } catch (error) {
         setError("Failed to fetch orders. Please try again later.");
       } finally {
@@ -1181,7 +1218,29 @@ export const OrdersContent: React.FC = () => {
                     {selectedOrder.paymentMethod ?? "N/A"}
                   </p>
                 </div>
+                {/* <div className="flex flex-row justify-between items-center">
+                  <p className="text-gray-500 text-left">Status:</p>
+                  <span
+                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                      getOrderStatusDisplay(selectedOrder.status).color
+                    }`}
+                  >
+                    {getOrderStatusDisplay(selectedOrder.status).text}
+                  </span>
+                </div> */}
               </div>
+              {/* Failure Reason in Modal */}
+              {/* {selectedOrder.status === OrderStatus.Failed &&
+                selectedOrder.systemRemark !== "" && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <div className="text-sm font-medium text-red-800 mb-1">
+                      Order Failed
+                    </div>
+                    <div className="text-sm text-red-700">
+                      {selectedOrder.systemRemark}
+                    </div>
+                  </div>
+                )} */}
 
               <div className="border-t border-b py-2 mb-4">
                 <div className="grid grid-cols-12 font-bold">
@@ -1361,27 +1420,27 @@ export const OrdersContent: React.FC = () => {
                         PromoDiscountType.Free
                         ? `$${selectedOrder.appliedDiscount?.promoData?.discountValue} off`
                         : selectedOrder.appliedDiscount.promoData
-                              ?.discountValue &&
-                            selectedOrder.appliedDiscount.promoData
-                              .discountType === PromoDiscountType.FreeDelivery
-                          ? "free delivery"
-                          : selectedOrder.appliedDiscount.promoData
-                                ?.discountValue &&
-                              selectedOrder.appliedDiscount.promoData
-                                .discountType === PromoDiscountType.FixedAmount
-                            ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
-                                2
-                              )} off`
-                            : selectedOrder.appliedDiscount.promoData
-                                  ?.discountValue &&
-                                selectedOrder.appliedDiscount.promoData
-                                  .discountType === PromoDiscountType.Percentage
-                              ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
-                                  2
-                                )} off`
-                              : selectedOrder.appliedDiscount.promoData
-                                  ?.discountItemName &&
-                                `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
+                            ?.discountValue &&
+                          selectedOrder.appliedDiscount.promoData
+                            .discountType === PromoDiscountType.FreeDelivery
+                        ? "free delivery"
+                        : selectedOrder.appliedDiscount.promoData
+                            ?.discountValue &&
+                          selectedOrder.appliedDiscount.promoData
+                            .discountType === PromoDiscountType.FixedAmount
+                        ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
+                            2
+                          )} off`
+                        : selectedOrder.appliedDiscount.promoData
+                            ?.discountValue &&
+                          selectedOrder.appliedDiscount.promoData
+                            .discountType === PromoDiscountType.Percentage
+                        ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
+                            2
+                          )} off`
+                        : selectedOrder.appliedDiscount.promoData
+                            ?.discountItemName &&
+                          `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
                     </p>
                   </div>
                 )}
@@ -1479,6 +1538,24 @@ export const OrdersContent: React.FC = () => {
               key={index}
               className="flex flex-col lg:flex-row gap-4 transition-shadow duration-300 relative bg-white border rounded-lg shadow-md border-gray-300 sm:p-6 p-4"
             >
+              {/* Status Badge - Top Right */}
+              {/* <div
+                className={`absolute  ${
+                  order.status === OrderStatus.Failed &&
+                  order.systemRemark !== ""
+                    ? "top-4 right-4 md:top-7 md:right-7"
+                    : "top-4 right-4 "
+                }`}
+              >
+                <span
+                  className={`inline-flex px-2 py-1 rounded-full text-sm font-medium ${
+                    getOrderStatusDisplay(order.status ?? "").color
+                  }`}
+                >
+                  {getOrderStatusDisplay(order.status ?? "").text}
+                </span>
+              </div> */}
+
               {/* Left Column - Order Info */}
               <div className="w-full lg:w-1/4 grid grid-cols-2  sm:grid-cols-2 lg:grid-cols-1 gap-4 pr-4">
                 <div className="space-y-2">
@@ -1512,6 +1589,18 @@ export const OrdersContent: React.FC = () => {
 
               {/* Right Column - Items & Action */}
               <div className="flex-1 flex flex-col pl-0 lg:pl-8 border-l border-gray-200">
+                {/* Failure Reason Display */}
+                {/* {order.status === OrderStatus.Failed &&
+                  order.systemRemark !== "" && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                      <div className="text-sm font-medium text-red-800 mb-1">
+                        Order Failed
+                      </div>
+                      <div className="text-sm text-red-700">
+                        Reason: {order.systemRemark}
+                      </div>
+                    </div>
+                  )} */}
                 {/* Items Section with Scroll */}
                 <div className="flex-1 mb-4">
                   <div className="text-base font-medium text-gray-600 mb-2">

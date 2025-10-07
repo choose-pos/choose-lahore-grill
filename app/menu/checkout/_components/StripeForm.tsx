@@ -8,6 +8,7 @@ import { useCartStore } from "@/store/cart";
 import CustomerDataStore from "@/store/customerData";
 import meCustomerStore from "@/store/meCustomer";
 import ToastStore from "@/store/toast";
+import { getOrCreateUserHash } from "@/utils/analytics";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { extractErrorMessage } from "@/utils/UtilFncs";
 import {
@@ -105,6 +106,7 @@ const CheckoutStripeForm = forwardRef<
 
         const clientSecret = response.createCheckoutPaymentIntent.cs;
         const intententId = response.createCheckoutPaymentIntent.id;
+        const userHash = getOrCreateUserHash();
 
         const formattedOrderDatawitId: CreateOrderInput = {
           paymentIntentId: intententId,
@@ -116,22 +118,23 @@ const CheckoutStripeForm = forwardRef<
                     promoCode: discountData.discountCode,
                   }
                 : (discountData.loyaltyPointsRedeemed ?? 0) > 0
-                ? {
-                    discountType: OrderDiscountType.Loyalty,
-                    loyaltyInput: {
-                      loyaltyPointsRedeemed:
-                        discountData.loyaltyPointsRedeemed ?? 0,
-                      redeemType:
+                  ? {
+                      discountType: OrderDiscountType.Loyalty,
+                      loyaltyInput: {
+                        loyaltyPointsRedeemed:
+                          discountData.loyaltyPointsRedeemed ?? 0,
+                        redeemType:
                         discountData.loyaltyType ?? LoyaltyRedeemType.Discount,
-                    },
-                  }
-                : null
+                      },
+                    }
+                  : null
               : null,
           guestCustomerDetails:
             meCustomerData === null && customerData !== null
               ? customerData
               : null,
           specialRemark: specialRemarks.length > 0 ? specialRemarks : null,
+          visitorHash: userHash,
         };
 
         const resp = await fetchWithAuth(() =>
@@ -163,6 +166,16 @@ const CheckoutStripeForm = forwardRef<
             extractErrorMessage(error.message) ||
               "An error occurred while processing your payment"
           );
+           try {
+            const j = sdk.handleOrderCreationFailure({
+              orderId: resp.createOrder.orderId ?? "",
+              error: error.message
+                ? extractErrorMessage(error.message)
+                : "An error occurred while processing your payment",
+            });
+          } catch (e) {
+            console.warn(e, "Failed to handle Order Creation failure");
+          }
           return;
         }
 

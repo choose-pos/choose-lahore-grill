@@ -26,6 +26,8 @@ query fetchCustomerOrders($lastThreeOrders: Boolean) {
     _id
     createdAt
     orderType
+    status
+    systemRemark
     orderId
     totalAmount
     items {
@@ -222,4 +224,8 @@ mutation reorderItemsToCart($orderId: String!) {
     success
     specialMessage
   }
+}
+
+mutation handleOrderCreationFailure($orderId: String!, $error: String!) {
+  handleOrderCreationFailure(orderId: $orderId, error: $error)
 }

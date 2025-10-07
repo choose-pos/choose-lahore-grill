@@ -4,6 +4,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { OrderStatus } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import meCustomerStore from "@/store/meCustomer";
 import ToastStore from "@/store/toast";

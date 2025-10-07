@@ -507,6 +507,7 @@ export type CreateOrderInput = {
   guestCustomerDetails?: InputMaybe<CustomerDetailsInput>;
   paymentIntentId: Scalars['String']['input'];
   specialRemark?: InputMaybe<Scalars['String']['input']>;
+  visitorHash: Scalars['String']['input'];
 };
 
 export type CreateOrderWihoutPaymentInput = {
@@ -1178,6 +1179,7 @@ export type Mutation = {
   createOrderWithoutPayment: OrderPlacedInfo;
   decreaseItemQty: Scalars['Boolean']['output'];
   deleteCartItem: Scalars['Boolean']['output'];
+  handleOrderCreationFailure: Scalars['Boolean']['output'];
   increaseItemQty: Scalars['Boolean']['output'];
   reorderItemsToCart: ReorderOrderResponse;
   updateCartDetails: Scalars['Boolean']['output'];
@@ -1215,6 +1217,12 @@ export type MutationDecreaseItemQtyArgs = {
 
 export type MutationDeleteCartItemArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationHandleOrderCreationFailureArgs = {
+  error: Scalars['String']['input'];
+  orderId: Scalars['String']['input'];
 };
 
 
@@ -1303,12 +1311,14 @@ export type Order = {
   specialRemark?: Maybe<Scalars['String']['output']>;
   status: OrderStatus;
   subTotal: Scalars['Float']['output'];
+  systemRemark?: Maybe<Scalars['JSONObject']['output']>;
   taxName?: Maybe<Scalars['String']['output']>;
   taxPercent: Scalars['Float']['output'];
   thirdPartyTip: Scalars['Boolean']['output'];
   tipPercent?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['DateTimeISO']['output'];
   utmDetails: UtmDetails;
+  visitorHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type OrderItem = {
@@ -1357,6 +1367,7 @@ export enum OrderStatus {
   CancelledFullRefund = 'CancelledFullRefund',
   CancelledLoyaltyRefund = 'CancelledLoyaltyRefund',
   CancelledPartialRefund = 'CancelledPartialRefund',
+  Failed = 'Failed',
   Fulfilled = 'Fulfilled',
   Placed = 'Placed',
   Processing = 'Processing',
@@ -1412,6 +1423,7 @@ export type OrderWithTotals = {
   status: OrderStatus;
   subTotal: Scalars['Float']['output'];
   subTotalAmount: Scalars['Float']['output'];
+  systemRemark?: Maybe<Scalars['JSONObject']['output']>;
   taxAmount: Scalars['Float']['output'];
   taxName?: Maybe<Scalars['String']['output']>;
   taxPercent: Scalars['Float']['output'];
@@ -1420,6 +1432,7 @@ export type OrderWithTotals = {
   tipPercent?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['DateTimeISO']['output'];
   utmDetails: UtmDetails;
+  visitorHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type PaymentIntent = {
@@ -1509,6 +1522,7 @@ export type PopulatedOrder = {
   refundAmount: Scalars['Float']['output'];
   specialRemark?: Maybe<Scalars['String']['output']>;
   status?: Maybe<Scalars['String']['output']>;
+  systemRemark: Scalars['String']['output'];
   taxRatePercent: Scalars['Float']['output'];
   tipAmount: Scalars['Float']['output'];
   totalAmount: Scalars['Float']['output'];
@@ -2282,7 +2296,7 @@ export type FetchCustomerOrdersQueryVariables = Exact<{
 }>;
 
 
-export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, totalAmount: number, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemId: { __typename?: 'Item', name: string, desc?: string | null }, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
+export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, status?: string | null, systemRemark: string, orderId: string, totalAmount: number, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemId: { __typename?: 'Item', name: string, desc?: string | null }, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
 
 export type FetchOrderByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2351,6 +2365,14 @@ export type ReorderItemsToCartMutationVariables = Exact<{
 
 
 export type ReorderItemsToCartMutation = { __typename?: 'Mutation', reorderItemsToCart: { __typename?: 'ReorderOrderResponse', success: boolean, specialMessage?: string | null } };
+
+export type HandleOrderCreationFailureMutationVariables = Exact<{
+  orderId: Scalars['String']['input'];
+  error: Scalars['String']['input'];
+}>;
+
+
+export type HandleOrderCreationFailureMutation = { __typename?: 'Mutation', handleOrderCreationFailure: boolean };
 
 export type GetCmsPromoRouteDetailsQueryVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -2859,6 +2881,8 @@ export const FetchCustomerOrdersDocument = gql`
     _id
     createdAt
     orderType
+    status
+    systemRemark
     orderId
     totalAmount
     items {
@@ -3051,6 +3075,11 @@ export const ReorderItemsToCartDocument = gql`
     success
     specialMessage
   }
+}
+    `;
+export const HandleOrderCreationFailureDocument = gql`
+    mutation handleOrderCreationFailure($orderId: String!, $error: String!) {
+  handleOrderCreationFailure(orderId: $orderId, error: $error)
 }
     `;
 export const GetCmsPromoRouteDetailsDocument = gql`
@@ -3475,6 +3504,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     reorderItemsToCart(variables: ReorderItemsToCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ReorderItemsToCartMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ReorderItemsToCartMutation>(ReorderItemsToCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'reorderItemsToCart', 'mutation', variables);
+    },
+    handleOrderCreationFailure(variables: HandleOrderCreationFailureMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<HandleOrderCreationFailureMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<HandleOrderCreationFailureMutation>(HandleOrderCreationFailureDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'handleOrderCreationFailure', 'mutation', variables);
     },
     getCmsPromoRouteDetails(variables: GetCmsPromoRouteDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoRouteDetailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoRouteDetailsQuery>(GetCmsPromoRouteDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoRouteDetails', 'query', variables);
