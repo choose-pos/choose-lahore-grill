@@ -2296,14 +2296,14 @@ export type FetchCustomerOrdersQueryVariables = Exact<{
 }>;
 
 
-export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, status?: string | null, systemRemark: string, orderId: string, totalAmount: number, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemId: { __typename?: 'Item', name: string, desc?: string | null }, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
+export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemId: { __typename?: 'Item', name: string, desc?: string | null }, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgId: { __typename?: 'ModifierGroup', _id: string, pricingType: PriceTypeEnum, price?: number | null }, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
 
 export type FetchOrderByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
+export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, pricingType: PriceTypeEnum, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
 
 export type CreateCheckoutPaymentIntentQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2881,10 +2881,35 @@ export const FetchCustomerOrdersDocument = gql`
     _id
     createdAt
     orderType
+    orderId
     status
     systemRemark
-    orderId
     totalAmount
+    appliedDiscount {
+      discountType
+      discountAmount
+      loyaltyData {
+        redeemItem {
+          itemName
+          itemPrice
+          itemId
+        }
+        redeemType
+        redeemDiscount {
+          discountValue
+          discountType
+          uptoAmount
+        }
+        loyaltyPointsRedeemed
+      }
+      promoData {
+        discountType
+        code
+        discountItemId
+        discountItemName
+        uptoAmount
+      }
+    }
     items {
       qty
       itemPrice
@@ -2893,6 +2918,11 @@ export const FetchCustomerOrdersDocument = gql`
         desc
       }
       modifierGroups {
+        mgId {
+          _id
+          pricingType
+          price
+        }
         selectedModifiers {
           modifierName
           modifierPrice
@@ -2969,6 +2999,7 @@ export const FetchOrderByIdDocument = gql`
       modifierGroups {
         mgName
         price
+        pricingType
         selectedModifiers {
           modifierName
           modifierPrice

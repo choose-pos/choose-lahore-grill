@@ -10,13 +10,14 @@ import {
   DiscountType,
   OrderDiscountType,
   OrderType,
+  PriceTypeEnum,
   PromoDiscountType,
 } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import RestaurantStore from "@/store/restaurant";
 import { convertToRestoTimezone } from "@/utils/formattedTime";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
-import { formattedNumber } from "@/utils/UtilFncs";
+import { calculateTotalModifiersPrice, formattedNumber } from "@/utils/UtilFncs";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -261,34 +262,18 @@ const PaymentStatusPage = () => {
     );
   }
 
-  const calculateModifierPrice = (modifier: Modifier): number => {
-    return modifier.modifierPrice * modifier.qty;
-  };
 
-  const calculateTotalModifiersPrice = (
-    modifierGroups: ModifierGroup[]
-  ): number => {
-    return modifierGroups.reduce((total, group) => {
-      return (
-        total +
-        group.selectedModifiers.reduce((groupTotal, modifier) => {
-          return groupTotal + calculateModifierPrice(modifier);
-        }, 0)
-      );
-    }, 0);
-  };
+
+
+
+
 
   const calcDiscountAmt = (): number => {
     if (!selectedOrder) {
       return 0;
     }
 
-    if (
-      selectedOrder.discountAmount &&
-      selectedOrder.discountAmount !== 0 &&
-      (selectedOrder.appliedDiscount?.loyaltyData?.redeemItem === null ||
-        selectedOrder.appliedDiscount?.promoData?.discountItemName === null)
-    ) {
+    if (selectedOrder.discountAmount && selectedOrder.discountAmount !== 0) {
       return selectedOrder.discountAmount;
     }
 
@@ -385,7 +370,12 @@ const PaymentStatusPage = () => {
                       x 1
                     </span>
                     {/* <span className="col-span-3 text-center">{1}</span> */}
-                    <span className="col-span-3 text-right">FREE</span>
+                    <span className="col-span-3 text-right">
+                      $
+                      {selectedOrder.appliedDiscount?.loyaltyData?.redeemItem?.itemPrice?.toFixed(
+                        2
+                      )}
+                    </span>
                   </div>
                 </li>
               ) : null}
@@ -401,7 +391,12 @@ const PaymentStatusPage = () => {
                       x 1
                     </span>
                     {/* <span className="col-span-3 text-center">{1}</span> */}
-                    <span className="col-span-3 text-right">FREE</span>
+                    <span className="col-span-3 text-right">
+                      $
+                      {selectedOrder.appliedDiscount?.promoData?.discountValue?.toFixed(
+                        2
+                      ) || "0.00"}
+                    </span>
                   </div>
                 </li>
               ) : null}
@@ -449,18 +444,12 @@ const PaymentStatusPage = () => {
                 <span>${selectedOrder.subTotalAmount?.toFixed(2)}</span>
               </div>
               {selectedOrder.discountAmount &&
-              selectedOrder.discountAmount !== 0 &&
-              (selectedOrder.appliedDiscount?.loyaltyData?.redeemItem ===
-                null ||
-                selectedOrder.appliedDiscount?.promoData?.discountItemName ===
-                  null) ? (
+              selectedOrder.discountAmount !== 0 ? (
                 <div className="flex justify-between">
                   <span>Discount</span>
-                  <span>${selectedOrder.discountAmount.toFixed(2)}</span>
+                  <span>-${selectedOrder.discountAmount.toFixed(2)}</span>
                 </div>
-              ) : (
-                ""
-              )}
+              ) : null}
 
               {calcDiscountAmt() > 0 ? (
                 <div className="flex justify-between">
@@ -540,27 +529,27 @@ const PaymentStatusPage = () => {
                       PromoDiscountType.Free
                       ? `${selectedOrder.appliedDiscount?.promoData?.discountValue} off`
                       : selectedOrder.appliedDiscount.promoData
-                            ?.discountValue &&
+                          ?.discountValue &&
                           selectedOrder.appliedDiscount.promoData
                             .discountType === PromoDiscountType.FreeDelivery
-                        ? "free delivery"
-                        : selectedOrder.appliedDiscount.promoData
-                              ?.discountValue &&
+                      ? "free delivery"
+                      : selectedOrder.appliedDiscount.promoData
+                          ?.discountValue &&
                             selectedOrder.appliedDiscount.promoData
                               .discountType === PromoDiscountType.FixedAmount
-                          ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
-                              2
-                            )} off`
-                          : selectedOrder.appliedDiscount.promoData
-                                ?.discountValue &&
+                      ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
+                          2
+                        )} off`
+                      : selectedOrder.appliedDiscount.promoData
+                          ?.discountValue &&
                               selectedOrder.appliedDiscount.promoData
                                 .discountType === PromoDiscountType.Percentage
-                            ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
-                                2
-                              )} off`
-                            : selectedOrder.appliedDiscount.promoData
-                                ?.discountItemName &&
-                              `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
+                      ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
+                          2
+                        )} off`
+                      : selectedOrder.appliedDiscount.promoData
+                          ?.discountItemName &&
+                        `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
                   </p>
                 </div>
               )}

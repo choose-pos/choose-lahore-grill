@@ -26,10 +26,35 @@ query fetchCustomerOrders($lastThreeOrders: Boolean) {
     _id
     createdAt
     orderType
+    orderId
     status
     systemRemark
-    orderId
     totalAmount
+    appliedDiscount{
+      discountType
+      discountAmount
+      loyaltyData{
+        redeemItem{
+          itemName
+          itemPrice
+          itemId
+        }
+        redeemType
+        redeemDiscount{
+          discountValue
+          discountType
+          uptoAmount
+        }
+        loyaltyPointsRedeemed
+      }
+      promoData{
+        discountType
+        code
+        discountItemId
+        discountItemName
+        uptoAmount
+      }
+    }
     items {
       qty
       itemPrice
@@ -38,16 +63,17 @@ query fetchCustomerOrders($lastThreeOrders: Boolean) {
         desc
       }
       modifierGroups {
-        # mgId {
-        #   _id
-        #   pricingType
-        #   price
-        # }
+         mgId {
+           _id
+           pricingType
+         price
+         }
         selectedModifiers {
           modifierName
           modifierPrice
           qty
         }
+        
       }
     }
     # orderType
@@ -126,6 +152,7 @@ query fetchOrderById($id: ID!) {
       modifierGroups {
         mgName
         price
+        pricingType
         selectedModifiers {
           modifierName
           modifierPrice
