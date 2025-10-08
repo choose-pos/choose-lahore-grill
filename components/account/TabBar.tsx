@@ -1657,7 +1657,7 @@ export const OrdersContent: React.FC = () => {
                           <TableRow key={1}>
                               <TableCell className="py-3 w-1/2">
                                 <span className="text-base font-medium">
-                                  {order.appliedDiscount.loyaltyData.redeemItem?.itemName} (Loyalty Redeemption)
+                                  {order.appliedDiscount.loyaltyData.redeemItem?.itemName} (Loyalty Redemption)
                                 </span>
                               </TableCell>
                               <TableCell className="text-center py-3 text-base">
