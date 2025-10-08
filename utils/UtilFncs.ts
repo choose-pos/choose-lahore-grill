@@ -1,7 +1,8 @@
 // errorUtils.ts
 
-import { LoyaltyRedeemType } from "@/generated/graphql";
+import { LoyaltyRedeemType, PriceTypeEnum } from "@/generated/graphql";
 import { FetchCartDetails } from "./types";
+import { ModifierGroup } from "@/components/account/TabBar";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const extractErrorMessage = (error: any): string => {
@@ -127,3 +128,28 @@ export function getCookie(name: string): string | null {
   if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
   return null;
 }
+
+export const calculateTotalModifiersPrice = (
+  modifierGroups: ModifierGroup[]
+): number => {
+  return modifierGroups.reduce((total, group) => {
+    switch (group.pricingType) {
+      case PriceTypeEnum.SamePrice:
+        return total + (group?.price ?? 0) * group.selectedModifiers.length;
+
+      case PriceTypeEnum.IndividualPrice:
+        return (
+          total +
+          group.selectedModifiers.reduce((groupTotal, modifier) => {
+            return groupTotal + modifier.modifierPrice * modifier.qty;
+          }, 0)
+        );
+
+      case PriceTypeEnum.FreeOfCharge:
+        return total;
+
+      default:
+        return total;
+    }
+  }, 0);
+};

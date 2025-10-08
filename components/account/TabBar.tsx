@@ -3,6 +3,7 @@ import {
   OrderDiscountType,
   OrderStatus,
   OrderType,
+  PriceTypeEnum,
   PromoDiscountType,
   TransactionType,
   UpdateCustomerDetailsInput,
@@ -17,6 +18,7 @@ import { FaExclamationCircle, FaShoppingCart, FaSpinner } from "react-icons/fa";
 // import { FaSpinner, FaExclamationCircle, FaShoppingCart } from 'react-icons/fa';
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  calculateTotalModifiersPrice,
   extractErrorMessage,
   formattedNumber,
   isRewardApplied,
@@ -752,6 +754,30 @@ export type Order = {
   items: Item[];
   status?: string | null;
   systemRemark?: string;
+    appliedDiscount?: {
+    discountType: OrderDiscountType;
+    discountAmount?: number | null;
+    promoData?: {
+      code: string;
+      discountType: PromoDiscountType;
+      discountValue?: number | null;
+      uptoAmount?: number | null;
+      discountItemName?: string | null;
+    } | null;
+    loyaltyData?: {
+      loyaltyPointsRedeemed: number;
+      redeemType: LoyaltyRedeemType;
+      redeemItem?: {
+        itemName: string;
+        itemPrice: number;
+        itemId: string;
+      } | null;
+      redeemDiscount?: {
+        discountType: string;
+        discountValue?: number | null;
+      } | null;
+    } | null;
+  } | null;
 };
 
 export interface Modifier {
@@ -764,6 +790,7 @@ export interface ModifierGroup {
   mgName: string;
   price?: number | null | undefined;
   selectedModifiers: Modifier[];
+  pricingType: PriceTypeEnum
 }
 
 export interface Items {
@@ -1111,18 +1138,6 @@ export const OrdersContent: React.FC = () => {
     );
   }
 
-  const calculateTotalModifiersPrice = (
-    modifierGroups: ModifierGroup[]
-  ): number => {
-    return modifierGroups.reduce((total, group) => {
-      return (
-        total +
-        group.selectedModifiers.reduce((groupTotal, modifier) => {
-          return groupTotal + calculateModifierPrice(modifier);
-        }, 0)
-      );
-    }, 0);
-  };
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only close if the click is directly on the overlay
     if (e.target === e.currentTarget) {
@@ -1135,12 +1150,7 @@ export const OrdersContent: React.FC = () => {
       return 0;
     }
 
-    if (
-      selectedOrder.discountAmount &&
-      selectedOrder.discountAmount !== 0 &&
-      (selectedOrder.appliedDiscount?.loyaltyData?.redeemItem === null ||
-        selectedOrder.appliedDiscount?.promoData?.discountItemName === null)
-    ) {
+    if (selectedOrder.discountAmount && selectedOrder.discountAmount !== 0) {
       return selectedOrder.discountAmount;
     }
 
@@ -1262,7 +1272,12 @@ export const OrdersContent: React.FC = () => {
                         x 1
                       </span>
                       {/* <span className="col-span-3 text-center">{1}</span> */}
-                      <span className="col-span-3 text-right">FREE</span>
+                      <span className="col-span-3 text-right">
+                        $
+                        {selectedOrder.appliedDiscount?.loyaltyData?.redeemItem?.itemPrice?.toFixed(
+                          2
+                        )}
+                      </span>
                     </div>
                   </li>
                 ) : null}
@@ -1274,11 +1289,16 @@ export const OrdersContent: React.FC = () => {
                         {
                           selectedOrder.appliedDiscount?.promoData
                             ?.discountItemName
-                        }
-                      </span>{" "}
-                      x 1
+                        }{" "}
+                        x 1
+                      </span>
                       {/* <span className="col-span-3 text-center">{1}</span> */}
-                      <span className="col-span-3 text-right">FREE</span>
+                      <span className="col-span-3 text-right">
+                        $
+                        {selectedOrder.appliedDiscount?.promoData?.discountValue?.toFixed(
+                          2
+                        ) || "0.00"}
+                      </span>
                     </div>
                   </li>
                 ) : null}
@@ -1329,18 +1349,12 @@ export const OrdersContent: React.FC = () => {
                   <span>${selectedOrder.subTotalAmount?.toFixed(2)}</span>
                 </div>
                 {selectedOrder.discountAmount &&
-                selectedOrder.discountAmount !== 0 &&
-                (selectedOrder.appliedDiscount?.loyaltyData?.redeemItem ===
-                  null ||
-                  selectedOrder.appliedDiscount?.promoData?.discountItemName ===
-                    null) ? (
+                selectedOrder.discountAmount !== 0 ? (
                   <div className="flex justify-between">
                     <span>Discount</span>
-                    <span>${selectedOrder.discountAmount.toFixed(2)}</span>
+                    <span>-${selectedOrder.discountAmount.toFixed(2)}</span>
                   </div>
-                ) : (
-                  ""
-                )}
+                ) : null}
 
                 {calcDiscountAmt() > 0 ? (
                   <div className="flex justify-between">
@@ -1622,6 +1636,38 @@ export const OrdersContent: React.FC = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
+                        {order.appliedDiscount?.promoData
+                          ?.discountItemName ? (
+                          <TableRow key={0}>
+                              <TableCell className="py-3 w-1/2">
+                                <span className="text-base font-medium">
+                                  {order.appliedDiscount.promoData.discountItemName} (Promo Item)
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-center py-3 text-base">
+                                1
+                              </TableCell>
+                              <TableCell className="text-right py-3 text-base">
+                                ${(order.appliedDiscount.discountAmount ?? 0).toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                        ) : null}
+                        {order.appliedDiscount?.loyaltyData
+                          ?.redeemItem?.itemName ? (
+                          <TableRow key={1}>
+                              <TableCell className="py-3 w-1/2">
+                                <span className="text-base font-medium">
+                                  {order.appliedDiscount.loyaltyData.redeemItem?.itemName} (Loyalty Redeemption)
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-center py-3 text-base">
+                                1
+                              </TableCell>
+                              <TableCell className="text-right py-3 text-base">
+                                ${(order.appliedDiscount.discountAmount ?? 0).toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                        ) : null}
                         {order.items.map((item, itemIndex) => {
                           const finalPrice = item.qty * item.itemPrice;
                           return (
