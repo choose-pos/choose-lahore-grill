@@ -168,21 +168,6 @@ const RecentOrders = () => {
     return null;
   }
 
-  const getOrderPriceDisplay = (order: any) => {
-    const hasPromoItem = order.appliedDiscount?.promoData?.discountItemName;
-    const hasLoyaltyItem =
-      order.appliedDiscount?.loyaltyData?.redeemItem?.itemName;
-    const totalAmount = order.totalAmount || 0;
-
-    // If there are only free items and the total is 0, show FREE
-    if ((hasPromoItem || hasLoyaltyItem) && totalAmount === 0) {
-      return "FREE";
-    }
-
-    // Otherwise show the total amount
-    return `$${totalAmount.toFixed(2)}`;
-  };
-
   return (
     <div className="font-online-ordering z-40">
       <h2 className="text-xl sm:text-3xl font-bold mb-4 font-online-ordering">
@@ -224,9 +209,11 @@ const RecentOrders = () => {
 
                             <div className="mb-2">
                               <p className="text-lg font-bold text-gray-900 font-online-ordering">
-                                {getOrderPriceDisplay(order)}{" "}
+                                {(order.totalAmount || 0) === 0
+                                  ? "FREE"
+                                  : `$${(order.totalAmount || 0).toFixed(2)}`}
                               </p>
-                               <p className="text-xs text-gray-600 capitalize font-online-ordering">
+                              <p className="text-xs text-gray-600 capitalize font-online-ordering">
                                 {order.orderType.toLowerCase()} •{" "}
                                 {order.items.reduce(
                                   (total: any, item: any) => total + item.qty,
