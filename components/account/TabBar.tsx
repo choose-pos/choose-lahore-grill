@@ -1618,7 +1618,15 @@ export const OrdersContent: React.FC = () => {
                 {/* Items Section with Scroll */}
                 <div className="flex-1 mb-4">
                   <div className="text-base font-medium text-gray-600 mb-2">
-                    Items ({order.items.length})
+                    Items (
+                    {order.items.length +
+                      (order.appliedDiscount?.promoData?.discountItemName
+                        ? 1
+                        : 0) +
+                      (order.appliedDiscount?.loyaltyData?.redeemItem?.itemName
+                        ? 1
+                        : 0)}
+                    )
                   </div>
                   <div className=" md:max-h-40 overflow-y-auto rounded-md border border-gray-100">
                     <Table>

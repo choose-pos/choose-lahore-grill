@@ -136,10 +136,30 @@ const RecentOrders = () => {
     });
   };
 
-  const getItemsPreview = (items: OrderItem[], maxItems: number = 3) => {
-    const itemNames = items.slice(0, maxItems).map((item) => item.itemId.name);
-    if (items.length > maxItems) {
-      return `${itemNames.join(", ")} +${items.length - maxItems} more`;
+  const getItemsPreview = (order: any, maxItems: number = 3) => {
+    const allItems = [];
+
+    // Add promo item if exists
+    if (order.appliedDiscount?.promoData?.discountItemName) {
+      allItems.push(
+        `${order.appliedDiscount.promoData.discountItemName} (Promo)`
+      );
+    }
+
+    // Add loyalty item if exists
+    if (order.appliedDiscount?.loyaltyData?.redeemItem?.itemName) {
+      allItems.push(
+        `${order.appliedDiscount.loyaltyData.redeemItem.itemName} (Loyalty)`
+      );
+    }
+
+    // Add regular items
+    const regularItems = order.items.map((item: OrderItem) => item.itemId.name);
+    allItems.push(...regularItems);
+
+    const itemNames = allItems.slice(0, maxItems);
+    if (allItems.length > maxItems) {
+      return `${itemNames.join(", ")} +${allItems.length - maxItems} more`;
     }
     return itemNames.join(", ");
   };
@@ -189,21 +209,31 @@ const RecentOrders = () => {
 
                             <div className="mb-2">
                               <p className="text-lg font-bold text-gray-900 font-online-ordering">
-                                ${order.totalAmount.toFixed(2)}
+                                {(order.totalAmount || 0) === 0
+                                  ? "FREE"
+                                  : `$${(order.totalAmount || 0).toFixed(2)}`}
                               </p>
                               <p className="text-xs text-gray-600 capitalize font-online-ordering">
                                 {order.orderType.toLowerCase()} •{" "}
                                 {order.items.reduce(
                                   (total: any, item: any) => total + item.qty,
                                   0
-                                )}{" "}
+                                ) +
+                                  (order.appliedDiscount?.promoData
+                                    ?.discountItemName
+                                    ? 1
+                                    : 0) +
+                                  (order.appliedDiscount?.loyaltyData
+                                    ?.redeemItem?.itemName
+                                    ? 1
+                                    : 0)}{" "}
                                 items
                               </p>
                             </div>
 
                             <div className="mb-3">
                               <p className="text-sm text-gray-700 line-clamp-2 font-online-ordering">
-                                {getItemsPreview(order.items)}
+                                {getItemsPreview(order)}
                               </p>
                             </div>
                           </div>
