@@ -136,10 +136,30 @@ const RecentOrders = () => {
     });
   };
 
-  const getItemsPreview = (items: OrderItem[], maxItems: number = 3) => {
-    const itemNames = items.slice(0, maxItems).map((item) => item.itemId.name);
-    if (items.length > maxItems) {
-      return `${itemNames.join(", ")} +${items.length - maxItems} more`;
+  const getItemsPreview = (order: any, maxItems: number = 3) => {
+    const allItems = [];
+
+    // Add promo item if exists
+    if (order.appliedDiscount?.promoData?.discountItemName) {
+      allItems.push(
+        `${order.appliedDiscount.promoData.discountItemName} (Promo)`
+      );
+    }
+
+    // Add loyalty item if exists
+    if (order.appliedDiscount?.loyaltyData?.redeemItem?.itemName) {
+      allItems.push(
+        `${order.appliedDiscount.loyaltyData.redeemItem.itemName} (Loyalty)`
+      );
+    }
+
+    // Add regular items
+    const regularItems = order.items.map((item: OrderItem) => item.itemId.name);
+    allItems.push(...regularItems);
+
+    const itemNames = allItems.slice(0, maxItems);
+    if (allItems.length > maxItems) {
+      return `${itemNames.join(", ")} +${allItems.length - maxItems} more`;
     }
     return itemNames.join(", ");
   };
@@ -147,6 +167,21 @@ const RecentOrders = () => {
   if (!meCustomerData || recentOrders.length === 0) {
     return null;
   }
+
+  const getOrderPriceDisplay = (order: any) => {
+    const hasPromoItem = order.appliedDiscount?.promoData?.discountItemName;
+    const hasLoyaltyItem =
+      order.appliedDiscount?.loyaltyData?.redeemItem?.itemName;
+    const totalAmount = order.totalAmount || 0;
+
+    // If there are only free items and the total is 0, show FREE
+    if ((hasPromoItem || hasLoyaltyItem) && totalAmount === 0) {
+      return "FREE";
+    }
+
+    // Otherwise show the total amount
+    return `$${totalAmount.toFixed(2)}`;
+  };
 
   return (
     <div className="font-online-ordering z-40">
@@ -189,21 +224,29 @@ const RecentOrders = () => {
 
                             <div className="mb-2">
                               <p className="text-lg font-bold text-gray-900 font-online-ordering">
-                                ${order.totalAmount.toFixed(2)}
+                                {getOrderPriceDisplay(order)}{" "}
                               </p>
-                              <p className="text-xs text-gray-600 capitalize font-online-ordering">
+                               <p className="text-xs text-gray-600 capitalize font-online-ordering">
                                 {order.orderType.toLowerCase()} •{" "}
                                 {order.items.reduce(
                                   (total: any, item: any) => total + item.qty,
                                   0
-                                )}{" "}
+                                ) +
+                                  (order.appliedDiscount?.promoData
+                                    ?.discountItemName
+                                    ? 1
+                                    : 0) +
+                                  (order.appliedDiscount?.loyaltyData
+                                    ?.redeemItem?.itemName
+                                    ? 1
+                                    : 0)}{" "}
                                 items
                               </p>
                             </div>
 
                             <div className="mb-3">
                               <p className="text-sm text-gray-700 line-clamp-2 font-online-ordering">
-                                {getItemsPreview(order.items)}
+                                {getItemsPreview(order)}
                               </p>
                             </div>
                           </div>
