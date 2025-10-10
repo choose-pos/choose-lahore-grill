@@ -9,6 +9,8 @@ import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import Script from "next/script";
 import { getCookie, setCookie } from "@/utils/UtilFncs";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+
 import { sdk } from "@/utils/graphqlClient";
 import { CmsPopupContent, CmsPromoPopup } from "@/generated/graphql";
 import { Env } from "@/env";
@@ -177,6 +179,16 @@ export default function RootLayout({
       </body>
 
       {toastData && <Toast message={toastData.message} type={toastData.type} />}
+      {process.env.NEXT_PUBLIC_GTAG_ID && (
+        <>
+          {process.env.NEXT_PUBLIC_GTAG_ID.toUpperCase().startsWith("G-") && (
+            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GTAG_ID} />
+          )}
+          {process.env.NEXT_PUBLIC_GTAG_ID.toUpperCase().startsWith("GTM-") && (
+            <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTAG_ID} />
+          )}
+        </>
+      )}
     </html>
   );
 }
