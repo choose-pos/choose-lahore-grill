@@ -674,6 +674,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             >
               {resendTimer > 0
                 ? `Resend in ${resendTimer}s`
+                : signInOtpId
+                ? "Didn't receive the Otp? Resend"
                 : "Not received? Resend on SMS"}
             </button>
           </div>
