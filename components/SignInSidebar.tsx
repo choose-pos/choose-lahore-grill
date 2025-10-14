@@ -676,7 +676,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
                 ? `Resend in ${resendTimer}s`
                 : isSignUpOpen
                 ? "Not received? Resend on SMS"
-                : "Didn't receive the Otp? Resend"}
+                : "Didn't receive the OTP? Resend"}
             </button>
           </div>
           <div className="flex justify-between">
