@@ -672,9 +672,11 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
                   : "text-gray-600 hover:underline"
               }`}
             >
-              {resendTimer > 0
+               {resendTimer > 0
                 ? `Resend in ${resendTimer}s`
-                : "Not received? Resend on SMS"}
+                : isSignUpOpen
+                ? "Not received? Resend on SMS"
+                : "Didn't receive the OTP? Resend"}
             </button>
           </div>
           <div className="flex justify-between">
