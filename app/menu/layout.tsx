@@ -169,6 +169,7 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
       {!pathname.includes("checkout") &&
         !pathname.includes("payment-status") &&
         !pathname.includes("cart") &&
+        !pathname.includes("order") &&
         !pathname.includes("free-order") && (
           <Navbar myaccount={pathname.includes("my-account")} />
         )}

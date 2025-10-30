@@ -14,21 +14,6 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-interface OrderItem {
-  qty: number;
-  itemPrice: number;
-  itemId: {
-    name: string;
-    desc: string;
-  };
-  modifierGroups: {
-    selectedModifiers: {
-      modifierName: string;
-      modifierPrice: number;
-      qty: number;
-    }[];
-  }[];
-}
 
 const RecentOrders = () => {
   // Stores
@@ -154,7 +139,7 @@ const RecentOrders = () => {
     }
 
     // Add regular items
-    const regularItems = order.items.map((item: OrderItem) => item.itemId.name);
+    const regularItems = order.items.map((item: any) => item.itemName);
     allItems.push(...regularItems);
 
     const itemNames = allItems.slice(0, maxItems);

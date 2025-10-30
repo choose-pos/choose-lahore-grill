@@ -29,7 +29,10 @@ interface ICheckoutPageProps {
   restaurantInfo: CustomerRestaurant;
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   loyaltyOffers: RestaurantRedeemOffers | null;
-  platformFee: number;
+  processingConfig?: {
+    feePercent?: number | null;
+    maxFeeAmount?: number | null;
+  };
   deliveryFee: number | null;
   stripeId: string;
 }
@@ -38,7 +41,7 @@ const CheckoutPage = ({
   loyaltyRule,
   restaurantInfo,
   deliveryFee,
-  platformFee,
+  processingConfig,
   stripeId,
 }: ICheckoutPageProps) => {
   // Configs
@@ -219,13 +222,31 @@ const CheckoutPage = ({
     finalAmts.tipAmt = parseFloat(
       (((cartAmts.tipPercent ?? 0) / 100) * finalAmts.subTotalAmt).toFixed(2)
     );
-    finalAmts.platformFeeAmt = parseFloat(
-      ((platformFee / 100) * finalAmts.netAmt).toFixed(2)
-    );
+    let feePercent = 0;
+    let maxFeeAmount: number | null = null;
+
+    // Check if restaurant has custom processing config
+    if (
+      processingConfig?.feePercent != null &&
+      processingConfig.feePercent > 0
+    ) {
+      // Use restaurant-specific config
+      feePercent = processingConfig.feePercent;
+      maxFeeAmount = processingConfig.maxFeeAmount ?? null;
+    }
+    // Calculate fee
+    let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
+
+    // Cap to max amount if specified
+    if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
+      calculatedPlatformFee = maxFeeAmount;
+    }
+
+    finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
     finalAmts.deliveryFeeAmt = deliveryFee;
 
     setAmounts(finalAmts);
-  }, [restaurantData, cartDetails, deliveryFee, platformFee, freeItemInCart]);
+  }, [restaurantData, cartDetails, deliveryFee, processingConfig,freeItemInCart]);
 
   return (
     <div className="w-full h-full min-h-screen bg-white flex flex-col justify-between items-center mb-1">

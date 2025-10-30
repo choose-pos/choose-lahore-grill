@@ -8,6 +8,10 @@ query GetCustomerRestaurantDetails {
       onlineOrdering
       scheduleOrders
     }
+    processingConfig {
+      feePercent
+      maxFeeAmount
+    }
     fulfillmentConfig {
       prepTime
       deliveryTime
@@ -175,6 +179,7 @@ query getCustomerItem($id: String!) {
       minSelections
       maxSelections
       pricingType
+      order
       allowMultiSelctSingleModsInGroup
       maxSelctSingleModsInGroup
       isMaxSelctSingleModsInGroupUnlimited

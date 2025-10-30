@@ -54,6 +54,10 @@ export interface CustomerRestaurant {
     onlineOrdering?: boolean | null;
     scheduleOrders?: boolean | null;
   };
+     processingConfig?: {
+    feePercent?: number | null;
+    maxFeeAmount?: number | null;
+  };
   fulfillmentConfig: {
     prepTime?: number;
     deliveryTime?: number;
