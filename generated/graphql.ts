@@ -462,6 +462,8 @@ export type CmsRestaurant = {
   isCustom: Scalars['Boolean']['output'];
   menuSection: CmsMenuSection;
   onlineOrderingConfig: CmsOnlineOrderingConfig;
+  posthogHost?: Maybe<Scalars['String']['output']>;
+  posthogKey?: Maybe<Scalars['String']['output']>;
   restaurant: Restaurant;
   reviewSection: CmsReviewSection;
   themeConfig: CmsThemeConfig;
@@ -908,13 +910,13 @@ export type Item = {
 export type ItemFeedback = {
   __typename?: 'ItemFeedback';
   itemName: Scalars['String']['output'];
-  rating: Scalars['Float']['output'];
+  rating?: Maybe<Scalars['Float']['output']>;
   remarks?: Maybe<Scalars['String']['output']>;
 };
 
 export type ItemFeedbackInput = {
   itemName: Scalars['String']['input'];
-  rating: Scalars['Float']['input'];
+  rating?: InputMaybe<Scalars['Float']['input']>;
   remarks?: InputMaybe<Scalars['String']['input']>;
 };
 

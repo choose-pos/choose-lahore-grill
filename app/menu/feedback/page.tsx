@@ -150,7 +150,26 @@ const OrderFeedbackComponent = () => {
           rating: 0,
           remarks: "",
         }));
-        setItemFeedbacks(initialItemFeedbacks);
+        const loyaltyRedeemItem =
+          data.fetchCustomerOrderById.appliedDiscount?.loyaltyData?.redeemItem;
+        if (loyaltyRedeemItem) {
+          initialItemFeedbacks.push({
+            itemName: loyaltyRedeemItem.itemName,
+            rating: 0,
+            remarks: "",
+          });
+        }
+
+        const FreeReedeemItem =
+          data.fetchCustomerOrderById.appliedDiscount?.promoData
+            ?.discountItemName;
+        if (FreeReedeemItem) {
+          initialItemFeedbacks.push({
+            itemName: FreeReedeemItem ?? "",
+            rating: 0,
+            remarks: "",
+          });
+        }
         setItemFeedbacks(initialItemFeedbacks);
         initialItemFeedbacks.map((e) => {
           setHoveredItemRatings((prev) => {
@@ -212,10 +231,21 @@ const OrderFeedbackComponent = () => {
       deliveryTime: deliveryTime || undefined,
       packagingQuality: packagingQuality || undefined,
       valueForMoney: valueForMoney || undefined,
-      itemFeedbacks:
-        itemFeedbacks.filter((item) => item.rating > 0).length > 0
-          ? itemFeedbacks.filter((item) => item.rating > 0)
-          : undefined,
+      itemFeedbacks: (() => {
+        const filtered = itemFeedbacks.filter(
+          (item) =>
+            (item.rating ?? 0) > 0 ||
+            (item.remarks && item.remarks.trim() !== "")
+        );
+
+        return filtered.length > 0
+          ? filtered.map((item) => ({
+              itemName: item.itemName,
+              rating: (item.rating ?? 0) > 0 ? item.rating : null,
+              remarks: item.remarks,
+            }))
+          : undefined;
+      })(),
       wouldRecommend,
       meta: { visitorHash, cartId, restaurantId },
     };
@@ -499,9 +529,11 @@ const OrderFeedbackComponent = () => {
                       className="bg-gray-50 p-4 rounded-xl"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                        <span className="font-medium text-gray-900">
-                          {item.itemName}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">
+                            {item.itemName}
+                          </span>
+                        </div>
                         <StarRating
                           rating={item.rating}
                           hoveredRating={hoveredItemRatings[item.itemName] ?? 0}
@@ -558,11 +590,11 @@ const OrderFeedbackComponent = () => {
                 overallRating === 0 || isSubmitting
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : isContrastOkay(
-                      Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                      Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                    )
-                  ? `bg-primaryColor text-background hover:opacity-90`
-                  : `bg-primaryColor text-textColor hover:opacity-90`
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                      )
+                    ? `bg-primaryColor text-background hover:opacity-90`
+                    : `bg-primaryColor text-textColor hover:opacity-90`
               }`}
             >
               {isSubmitting ? (

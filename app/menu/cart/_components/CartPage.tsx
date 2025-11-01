@@ -298,7 +298,7 @@ const CartPage = ({
     if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
       calculatedPlatformFee = maxFeeAmount;
     }
-
+    finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
     finalAmts.deliveryFeeAmt = deliveryFee;
 
     setAmounts(finalAmts);
