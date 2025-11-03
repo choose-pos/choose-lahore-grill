@@ -58,16 +58,12 @@ query fetchCustomerOrders($lastThreeOrders: Boolean) {
     items {
       qty
       itemPrice
-      itemId {
-        name
-        desc
-      }
+      itemName
+      itemRemarks
       modifierGroups {
-         mgId {
-           _id
-           pricingType
-         price
-         }
+        mgName
+        pricingType
+        price
         selectedModifiers {
           modifierName
           modifierPrice
@@ -255,4 +251,16 @@ mutation reorderItemsToCart($orderId: String!) {
 
 mutation handleOrderCreationFailure($orderId: String!, $error: String!) {
   handleOrderCreationFailure(orderId: $orderId, error: $error)
+}
+
+mutation submitChooseOrderingFeedback($input: ChooseOrderingFeedBackInput!) {
+  submitChooseOrderingFeedback(input: $input) {
+    _id
+  }
+}
+
+mutation submitRestaurantFeedback($input: RestaurantOrderingFeedBackInput!) {
+  submitRestaurantFeedback(input: $input) {
+    _id
+  }
 }

@@ -62,6 +62,30 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+    // Don't apply session validation for feedback-related routes
+  // Allow users to access feedback pages without a session
+  const isFeedbackRoute =
+    pathname.includes("/feedback") ||
+    pathname.includes("/payment-status") ||
+    pathname.includes("/free-order");
+
+  if (isFeedbackRoute) {
+    // Still set UTM cookies and restaurant cookie, but don't redirect
+    const resp = NextResponse.next();
+    if (utmParams.length > 0) {
+      utmParams.forEach(({ key, value }) => {
+        resp.cookies.set(key, value ?? "", { maxAge: 60 * 60 * 24 * 30 });
+      });
+    }
+    if (campaignId.value) {
+      resp.cookies.set(campaignId.key, campaignId.value, {
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+    resp.cookies.set(cookieKeys.restaurantCookie, partnerId);
+    return resp;
+  }
+  
   // Only redirect if there's no cartId and we're not already on cart-session
   if ((!cartId || partnerId !== restaurantId) && pathname.includes("/menu")) {
     const utmString =

@@ -11,17 +11,23 @@ import {
   OrderDiscountType,
   OrderType,
 } from "@/generated/graphql";
+import { cookieKeys } from "@/constants";
+import { Env } from "@/env";
 import { useCartStore } from "@/store/cart";
 import RestaurantStore from "@/store/restaurant";
 import { convertToRestoTimezone } from "@/utils/formattedTime";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
-import { calculateTotalModifiersPrice, formattedNumber } from "@/utils/UtilFncs";
+import { calculateTotalModifiersPrice, formattedNumber, getCookie} from "@/utils/UtilFncs";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaExclamationCircle } from "react-icons/fa";
 import { FaSpinner } from "react-icons/fa6";
 import { IoMdArrowBack } from "react-icons/io";
+import ToastStore from "@/store/toast";
+import { getOrCreateUserHash } from "@/utils/analytics";
+import { isContrastOkay } from "@/utils/isContrastOkay";
+import { getCartId } from "@/app/actions/cookies";
 
 const PaymentStatusPage = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,14 +35,17 @@ const PaymentStatusPage = () => {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
-  const [message, setMessage] = useState(null);
   const { setCartCountInfo, setCartData } = useCartStore();
-  const [paymentFailed, setPaymentFailed] = useState(false);
   const [loyaltyRule, setLoyaltyRule] = useState<{
     value: number;
     name: string;
     signUpValue: number;
   } | null>(null);
+
+  const [rating, setRating] = useState<number>(0);
+  const [hoveredRating, setHoveredRating] = useState<number>(0);
+  const [feedbackRemark, setFeedbackRemark] = useState<string>("");
+  const { setToastData } = ToastStore();
 
   const { setRestaurantData, restaurantData } = RestaurantStore();
 
@@ -225,6 +234,77 @@ const PaymentStatusPage = () => {
 
     return 0;
   };
+
+  const getRatingMessage = (rating: number): string => {
+    const messages = [
+      "We'd love to hear your feedback",
+      "We're sorry you had a poor experience",
+      "We can do better! Tell us how",
+      "Good! We appreciate your feedback",
+      "Great! We're glad you enjoyed",
+      "Excellent! Thank you for your support!",
+    ];
+    return messages[rating];
+  };
+  const handleSubmitFeedback = async () => {
+    if (!orderId) {
+      setToastData({
+        message: "Sorry we couldnt find your order",
+        type: "error",
+      });
+    }
+
+    if (rating === 0) {
+      setToastData({
+        message: "Please Provide a rating before submitting.",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const cartId = await getCartId();
+      const visitorHash = getOrCreateUserHash();
+      const restaurantId = getCookie(cookieKeys.restaurantCookie);
+
+      const response = await fetchWithAuth(() =>
+        sdk.submitChooseOrderingFeedback({
+          input: {
+            orderId: orderId ?? "",
+            rating: rating,
+            remarks: feedbackRemark || undefined,
+            meta: { visitorHash, cartId, restaurantId },
+          },
+        })
+      );
+
+      if (response.submitChooseOrderingFeedback?._id) {
+        // Save to session storage on success
+        const submittedOrders = JSON.parse(
+          sessionStorage.getItem("feedbackSubmittedOrders") || "[]"
+        );
+        if (!submittedOrders.includes(orderId)) {
+          submittedOrders.push(orderId);
+          sessionStorage.setItem(
+            "feedbackSubmittedOrders",
+            JSON.stringify(submittedOrders)
+          );
+        }
+      } else {
+        setToastData({
+          message: "Failed to submit feedback. Please try again.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      setToastData({
+        message: "Failed to submit feedback. Please try again.",
+        type: "error",
+      });
+    }
+  };
+
 
   return (
     <div className="flex items-center justify-center z-50 min-h-screen mx-2">
@@ -535,8 +615,92 @@ const PaymentStatusPage = () => {
             )}
 
             <div className="mt-6 text-center text-gray-500 text-xs">
-              <p>Thank you for your order!</p>
+              <div className="mt-6 text-center">
+              <p className="text-gray-500 text-xs mb-6">
+                Thank you for your order!
+              </p>
+
+              {/* Feedback Section */}
+              <div className="border-t pt-6">
+                <h4 className="font-bold mb-4 text-lg font-online-ordering">
+                  How was your ordering experience?
+                </h4>
+
+                {/* Star Rating */}
+                <div className="flex justify-center gap-2 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      onMouseEnter={() => setHoveredRating(star)}
+                      onMouseLeave={() => setHoveredRating(0)}
+                      className="transition-transform hover:scale-110 focus:outline-none"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className={`w-10 h-10 transition-colors ${
+                          star <= (hoveredRating || rating)
+                            ? "fill-yellow-400 stroke-yellow-400"
+                            : "fill-none stroke-gray-300"
+                        }`}
+                        strokeWidth="1.5"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Rating Message */}
+                <p className="text-sm text-gray-600 mb-4 min-h-[20px] font-online-ordering">
+                  {getRatingMessage(hoveredRating || rating)}
+                </p>
+
+                {/* Remarks Input */}
+                <div className="text-left">
+                  <label
+                    htmlFor="feedback-remark"
+                    className="mb-2 block font-semibold font-online-ordering text-base"
+                  >
+                    Your Feedback
+                  </label>
+                  <textarea
+                    id="feedback-remark"
+                    value={feedbackRemark}
+                    onChange={(e) => setFeedbackRemark(e.target.value)}
+                    maxLength={150}
+                    placeholder="Share your experience with us..."
+                    className="w-full p-2 border rounded-[20px] font-online-ordering focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
+                  />
+                  <p className="text-sm mt-1 text-right font-online-ordering">
+                    {feedbackRemark.length}/150 characters
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleSubmitFeedback}
+                    disabled={rating === 0}
+                    className={`inline-block mt-4 px-8 py-2 text-lg sm:text-xl font-medium font-online-ordering rounded-full transition-all duration-200 ${
+                      rating === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : isContrastOkay(
+                            Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                            Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                          )
+                        ? `bg-primaryColor text-background hover:opacity-90`
+                        : `bg-primaryColor text-textColor hover:opacity-90`
+                    }`}
+                  >
+                    Submit Feedback
+                  </button>
+                </div>
+              </div>              
             </div>
+          </div>
           </div>
         ) : (
           <p className="text-red-500">Failed to load order details.</p>

@@ -10,7 +10,7 @@ import { useSidebarStore } from "@/store/sidebar";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { getCmsSectionId } from "@/utils/theme-utils";
 import { AnimatePresence } from "framer-motion";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode, Suspense, useEffect, useState } from "react";
 import Loading from "./loading";
 import ItemModal from "./modal/page";
@@ -39,6 +39,7 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
     useCartStore();
   const { setMeCustomerData } = meCustomerStore();
   const { setNavData } = NavDataStore();
+  const router = useRouter(); 
 
   useEffect(() => {
     const fetchInitialCustomer = async () => {
@@ -134,6 +135,7 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
         setShowMenu(false);
       }
       setSelectedItem(itemId);
+      router.replace("/menu")
     }
   }, [itemId, setShowMenu,setSelectedItem, cartDetails]);
 
@@ -167,6 +169,7 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
       {!pathname.includes("checkout") &&
         !pathname.includes("payment-status") &&
         !pathname.includes("cart") &&
+        !pathname.includes("order") &&
         !pathname.includes("free-order") && (
           <Navbar myaccount={pathname.includes("my-account")} />
         )}

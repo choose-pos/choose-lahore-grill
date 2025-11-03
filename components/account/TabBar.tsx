@@ -728,21 +728,6 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
     </div>
   );
 };
-type Item = {
-  qty: number;
-  itemPrice: number;
-  itemId: {
-    name: string;
-    desc?: string | null | undefined;
-  };
-  modifierGroups: {
-    selectedModifiers?: {
-      modifierName: string;
-      modifierPrice: number;
-      qty: number;
-    }[];
-  }[];
-};
 
 export type Order = {
   createdAt: Date;
@@ -751,7 +736,7 @@ export type Order = {
   _id: string;
   taxRate?: number | null;
   totalAmount?: number;
-  items: Item[];
+  items: Items[];
   status?: string | null;
   systemRemark?: string;
     appliedDiscount?: {
@@ -790,7 +775,7 @@ export interface ModifierGroup {
   mgName: string;
   price?: number | null | undefined;
   selectedModifiers: Modifier[];
-  pricingType: PriceTypeEnum
+  pricingType: PriceTypeEnum | string;
 }
 
 export interface Items {
@@ -1368,6 +1353,21 @@ export const OrdersContent: React.FC = () => {
                   </div>
                 ) : null}
 
+                 {selectedOrder.taxAmount &&
+                (selectedOrder.platformFees !== null ||
+                  selectedOrder.platformFees !== undefined) ? (
+                  <div className="flex justify-between">
+                    <span>Taxes & Fees</span>
+                    <span>
+                      $
+                      {(
+                        parseFloat((selectedOrder.taxAmount ?? 0).toFixed(2)) +
+                        parseFloat((selectedOrder.platformFees ?? 0).toFixed(2))
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                ) : null}
+
                 {selectedOrder.tipAmount !== null ||
                 selectedOrder.tipAmount !== undefined ? (
                   <div className="flex justify-between">
@@ -1381,21 +1381,6 @@ export const OrdersContent: React.FC = () => {
                       selectedOrder.tipAmount !== undefined
                         ? selectedOrder.tipAmount.toFixed(2)
                         : Number(0).toFixed(2)}
-                    </span>
-                  </div>
-                ) : null}
-
-                {selectedOrder.taxAmount &&
-                (selectedOrder.platformFees !== null ||
-                  selectedOrder.platformFees !== undefined) ? (
-                  <div className="flex justify-between">
-                    <span>Taxes & Fees</span>
-                    <span>
-                      $
-                      {(
-                        parseFloat((selectedOrder.taxAmount ?? 0).toFixed(2)) +
-                        parseFloat((selectedOrder.platformFees ?? 0).toFixed(2))
-                      ).toFixed(2)}
                     </span>
                   </div>
                 ) : null}
@@ -1639,7 +1624,7 @@ export const OrdersContent: React.FC = () => {
                             Qty
                           </TableHead>
                           <TableHead className="text-right py-3 text-base">
-                            Price
+                            Total
                           </TableHead>
                         </TableRow>
                       </TableHeader>
@@ -1682,14 +1667,21 @@ export const OrdersContent: React.FC = () => {
                             <TableRow key={itemIndex}>
                               <TableCell className="py-3 w-1/2">
                                 <span className="text-base font-medium">
-                                  {item.itemId.name}
+                                  {item.itemName}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center py-3 text-base">
                                 {item.qty}
                               </TableCell>
                               <TableCell className="text-right py-3 text-base">
-                                ${item.itemPrice.toFixed(2)}
+                                $
+                                {(
+                                  (item.itemPrice +
+                                    calculateTotalModifiersPrice(
+                                      item.modifierGroups
+                                    )) *
+                                  item.qty
+                                ).toFixed(2)}
                               </TableCell>
                             </TableRow>
                           );

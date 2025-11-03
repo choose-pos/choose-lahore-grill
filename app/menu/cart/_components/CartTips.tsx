@@ -171,7 +171,7 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
               Enter Custom Tip
             </h2>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <div className="w-full sm:flex-1">
+              {/* <div className="w-full sm:flex-1">
                 <label
                   htmlFor="customPercentage"
                   className="block text-xs sm:text-sm font-medium text-gray-700 font-online-ordering"
@@ -202,7 +202,7 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
                   }}
                   className="mt-1 block p-2 w-full rounded-md text-xs sm:text-sm border-gray-700 ring-2"
                 />
-              </div>
+              </div> */}
 
               <div className="w-full sm:flex-1">
                 <label

@@ -38,7 +38,10 @@ interface ICartPageProps {
   restaurantInfo: CustomerRestaurant;
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   loyaltyOffers: RestaurantRedeemOffers | null;
-  platformFee: number;
+  processingConfig?: {
+    feePercent?: number | null;
+    maxFeeAmount?: number | null;
+  };
   deliveryFee: number | null;
   checkDeliveryAvailable: boolean;
   mismatch: boolean | null;
@@ -48,7 +51,7 @@ const CartPage = ({
   loyaltyRule,
   restaurantInfo,
   deliveryFee,
-  platformFee,
+  processingConfig,
   loyaltyOffers,
   checkDeliveryAvailable,
   mismatch,
@@ -82,6 +85,7 @@ const CartPage = ({
   const { customerData } = CustomerDataStore();
   const { setToastData } = ToastStore();
   const { specialRemarks } = useCartStore();
+  const [isCartLoading, setIsCartLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!checkDeliveryAvailable) {
@@ -120,6 +124,7 @@ const CartPage = ({
   useEffect(() => {
     // Fetching cart details and setting in store
     const fetchCartDets = async () => {
+       setIsCartLoading(true);
       try {
         const [
           cartCountReq,
@@ -219,6 +224,8 @@ const CartPage = ({
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        setIsCartLoading(false);
       }
     };
 
@@ -258,24 +265,42 @@ const CartPage = ({
     };
 
     finalAmts.subTotalAmt = cartAmts.subTotalAmount ?? 0;
-    finalAmts.discAmt =
-      freeItemInCart !== null ? 0 : (cartAmts.discountAmount ?? 0);
+     finalAmts.discAmt = cartAmts.discountAmount ?? 0;
     finalAmts.netAmt = parseFloat(
       (finalAmts.subTotalAmt - finalAmts.discAmt).toFixed(2)
     );
     finalAmts.taxAmt = parseFloat(
       ((taxPercent / 100) * finalAmts.netAmt).toFixed(2)
     );
-    finalAmts.tipAmt = parseFloat(
-      (((cartAmts.tipPercent ?? 0) / 100) * finalAmts.subTotalAmt).toFixed(2)
-    );
-    finalAmts.platformFeeAmt = parseFloat(
-      ((platformFee / 100) * finalAmts.netAmt).toFixed(2)
-    );
+     const tipP = (cartAmts.tipPercent ?? 0) / 100;
+    finalAmts.tipAmt = parseFloat((tipP * finalAmts.subTotalAmt).toFixed(2));
+
+    // Calculate processing fee with restaurant-specific or global config (same logic as backend)
+    let feePercent = 0;
+    let maxFeeAmount: number | null = null;
+
+    // Check if restaurant has custom processing config
+    if (
+      processingConfig?.feePercent != null &&
+      processingConfig.feePercent > 0
+    ) {
+      // Use restaurant-specific config
+      feePercent = processingConfig.feePercent;
+      maxFeeAmount = processingConfig.maxFeeAmount ?? null;
+    }
+
+    // Calculate fee
+    let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
+
+    // Cap to max amount if specified
+    if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
+      calculatedPlatformFee = maxFeeAmount;
+    }
+    finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
     finalAmts.deliveryFeeAmt = deliveryFee;
 
     setAmounts(finalAmts);
-  }, [restaurantData, cartDetails, deliveryFee, platformFee, freeItemInCart]);
+  }, [restaurantData, cartDetails, deliveryFee, processingConfig, freeItemInCart]);
 
   const handleProceedToCheckout = async () => {
     if (!amounts) return;
@@ -396,7 +421,7 @@ const CartPage = ({
               // onClick={() => {
               //   push("/menu/checkout");
               // }}
-              disabled={actionLoading}
+              disabled={actionLoading || isCartLoading}
               onClick={handleProceedToCheckout}
               className="w-full bg-primary py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
               style={{
@@ -408,7 +433,9 @@ const CartPage = ({
                   : Env.NEXT_PUBLIC_TEXT_COLOR,
               }}
             >
-              {actionLoading
+              {isCartLoading
+                ? "Loading cart..."
+                : actionLoading
                 ? "Processing..."
                 : total === 0
                   ? "Place Order"
@@ -426,7 +453,7 @@ const CartPage = ({
           // onClick={() => {
           //   push("/menu/checkout");
           // }}
-          disabled={actionLoading}
+          disabled={actionLoading || isCartLoading}
           onClick={handleProceedToCheckout}
           className="w-full bg-primary py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
           style={{
@@ -438,7 +465,9 @@ const CartPage = ({
               : Env.NEXT_PUBLIC_TEXT_COLOR,
           }}
         >
-          {actionLoading
+          {isCartLoading
+            ? "Loading cart..."
+            : actionLoading
             ? "Processing..."
             : total === 0
               ? "Place Order"

@@ -41,6 +41,12 @@ async function getRestaurantDetails() {
         pickup: Restaurant.restaurantConfigs?.pickup,
         scheduleOrders: Restaurant.restaurantConfigs?.scheduleOrders,
       },
+      processingConfig: Restaurant.processingConfig
+        ? {
+            feePercent: Restaurant.processingConfig.feePercent,
+            maxFeeAmount: Restaurant.processingConfig.maxFeeAmount,
+          }
+        : undefined,
       deliveryConfig: {
         provideDelivery: Restaurant.deliveryConfig?.provideDelivery,
         deliveryZone: {
@@ -151,19 +157,6 @@ async function getCartCount() {
   } catch (error) {
     console.log(error);
     return 0;
-  }
-}
-
-async function getPlatformFee() {
-  try {
-    const cookieStore = await cookies();
-    const data = await sdk.fetchProcessingFee(
-      {},
-      { cookie: cookieStore.toString() }
-    );
-    return data.fetchProcessingFee;
-  } catch (error) {
-    console.log(error);
   }
 }
 
@@ -338,7 +331,6 @@ export default async function Page({
     RestaurantInfo,
     CartDetails,
     CartCount,
-    platformFee,
     loyaltyRule,
     loyaltyOffers,
     stripeId,
@@ -346,7 +338,6 @@ export default async function Page({
     getRestaurantDetails(),
     getCartDetails(),
     getCartCount(),
-    getPlatformFee(),
     getLoyaltyRule(),
     getLoyaltyOffers(),
     getStripeId(),
@@ -378,7 +369,7 @@ export default async function Page({
       loyaltyRule={loyaltyRule ?? null}
       loyaltyOffers={loyaltyOffers ?? null}
       restaurantInfo={RestaurantInfo}
-      platformFee={platformFee ?? 0}
+      processingConfig={RestaurantInfo.processingConfig}
       deliveryFee={DeliveryFee}
       stripeId={stripeId ?? ""}
     />

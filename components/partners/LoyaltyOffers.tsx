@@ -128,9 +128,11 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
     setLoadingOffers((prev) => ({ ...prev, [points]: true }));
 
     try {
-      const res = await sdk.validateLoyaltyRedemptionOnCart({
-        input: { loyaltyPointsRedeemed: points, redeemType: type },
-      });
+      const res = await fetchWithAuth(() =>
+        sdk.validateLoyaltyRedemptionOnCart({
+          input: { loyaltyPointsRedeemed: points, redeemType: type },
+        })
+      );
 
       if (res.validateLoyaltyRedemptionOnCart) {
         // Refresh cart details after applying loyalty

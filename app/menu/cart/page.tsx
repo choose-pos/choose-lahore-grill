@@ -41,6 +41,12 @@ async function getRestaurantDetails() {
         pickup: Restaurant.restaurantConfigs?.pickup,
         scheduleOrders: Restaurant.restaurantConfigs?.scheduleOrders,
       },
+      processingConfig: Restaurant.processingConfig
+        ? {
+            feePercent: Restaurant.processingConfig.feePercent,
+            maxFeeAmount: Restaurant.processingConfig.maxFeeAmount,
+          }
+        : undefined,
       fulfillmentConfig: {
         deliveryTime: Restaurant.fulfillmentConfig?.deliveryTime,
         prepTime: Restaurant.fulfillmentConfig?.prepTime,
@@ -160,18 +166,18 @@ async function getCartCount() {
   }
 }
 
-async function getPlatformFee() {
-  try {
-    const cookieStore = await cookies();
-    const data = await sdk.fetchProcessingFee(
-      {},
-      { cookie: cookieStore.toString() }
-    );
-    return data.fetchProcessingFee;
-  } catch (error) {
-    console.log(error);
-  }
-}
+// async function getPlatformFee() {
+//   try {
+//     const cookieStore = await cookies();
+//     const data = await sdk.fetchProcessingFee(
+//       {},
+//       { cookie: cookieStore.toString() }
+//     );
+//     return data.fetchProcessingFee;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
 async function getDeliveryFee() {
   try {
@@ -354,7 +360,6 @@ export default async function Page({
     RestaurantInfo,
     CartDetails,
     CartCount,
-    platformFee,
     loyaltyRule,
     loyaltyOffers,
     checkDeliveryAvailable,
@@ -362,7 +367,6 @@ export default async function Page({
     getRestaurantDetails(),
     getCartDetails(),
     getCartCount(),
-    getPlatformFee(),
     getLoyaltyRule(),
     getLoyaltyOffers(),
     getDeliveryCheck(),
@@ -395,7 +399,7 @@ export default async function Page({
       loyaltyRule={loyaltyRule ?? null}
       loyaltyOffers={loyaltyOffers ?? null}
       restaurantInfo={RestaurantInfo}
-      platformFee={platformFee ?? 0}
+      processingConfig={RestaurantInfo.processingConfig}
       deliveryFee={DeliveryFee}
       checkDeliveryAvailable={checkDeliveryAvailable}
     />

@@ -16,6 +16,7 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   DateTimeISO: { input: any; output: any; }
+  JSON: { input: any; output: any; }
   JSONObject: { input: any; output: any; }
 };
 
@@ -276,6 +277,30 @@ export type CategoryItem = {
   visibility: Array<Visibility>;
 };
 
+export type ChooseOrderingFeedBackInput = {
+  meta: Scalars['JSON']['input'];
+  orderId: Scalars['ID']['input'];
+  rating: Scalars['Float']['input'];
+  remarks?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ChooseOrderingReviewFeedBack = {
+  __typename?: 'ChooseOrderingReviewFeedBack';
+  _id: Scalars['ID']['output'];
+  createdAt: Scalars['DateTimeISO']['output'];
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
+  meta?: Maybe<Scalars['JSONObject']['output']>;
+  orderId: Scalars['ID']['output'];
+  phone: Scalars['String']['output'];
+  rating: Scalars['Float']['output'];
+  remarks?: Maybe<Scalars['String']['output']>;
+  restaurantId: Scalars['ID']['output'];
+  submittedAt: Scalars['DateTimeISO']['output'];
+  updatedAt: Scalars['DateTimeISO']['output'];
+};
+
 export type CmsButton = {
   __typename?: 'CmsButton';
   link?: Maybe<Scalars['String']['output']>;
@@ -432,16 +457,20 @@ export type CmsRestaurant = {
   domainConfig: CmsDomainConfig;
   favicon?: Maybe<Scalars['String']['output']>;
   gridSection: CmsGridSection;
+  gtag?: Maybe<Scalars['String']['output']>;
   heroSection: CmsHeroSection;
   isCustom: Scalars['Boolean']['output'];
   menuSection: CmsMenuSection;
   onlineOrderingConfig: CmsOnlineOrderingConfig;
+  posthogHost?: Maybe<Scalars['String']['output']>;
+  posthogKey?: Maybe<Scalars['String']['output']>;
   restaurant: Restaurant;
   reviewSection: CmsReviewSection;
   themeConfig: CmsThemeConfig;
   updatedAt: Scalars['DateTimeISO']['output'];
   updatedBy?: Maybe<User>;
   user: User;
+  websiteReviewLink?: Maybe<Scalars['String']['output']>;
   websiteSeo: CmsWebsiteSeoConfig;
 };
 
@@ -878,6 +907,19 @@ export type Item = {
   visibility: Array<Visibility>;
 };
 
+export type ItemFeedback = {
+  __typename?: 'ItemFeedback';
+  itemName: Scalars['String']['output'];
+  rating?: Maybe<Scalars['Float']['output']>;
+  remarks?: Maybe<Scalars['String']['output']>;
+};
+
+export type ItemFeedbackInput = {
+  itemName: Scalars['String']['input'];
+  rating?: InputMaybe<Scalars['Float']['input']>;
+  remarks?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ItemInfo = {
   __typename?: 'ItemInfo';
   _id: Item;
@@ -1144,6 +1186,7 @@ export type ModifierGroupResponse = {
   multiSelect: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   optional: Scalars['Boolean']['output'];
+  order: Scalars['Float']['output'];
   price?: Maybe<Scalars['Float']['output']>;
   pricingType: PriceTypeEnum;
 };
@@ -1182,6 +1225,8 @@ export type Mutation = {
   handleOrderCreationFailure: Scalars['Boolean']['output'];
   increaseItemQty: Scalars['Boolean']['output'];
   reorderItemsToCart: ReorderOrderResponse;
+  submitChooseOrderingFeedback: ChooseOrderingReviewFeedBack;
+  submitRestaurantFeedback: RestaurantOrderingFeedBack;
   updateCartDetails: Scalars['Boolean']['output'];
   updateCartItem: Scalars['Boolean']['output'];
   updateCustomerDetails: Customer;
@@ -1233,6 +1278,16 @@ export type MutationIncreaseItemQtyArgs = {
 
 export type MutationReorderItemsToCartArgs = {
   orderId: Scalars['String']['input'];
+};
+
+
+export type MutationSubmitChooseOrderingFeedbackArgs = {
+  input: ChooseOrderingFeedBackInput;
+};
+
+
+export type MutationSubmitRestaurantFeedbackArgs = {
+  input: RestaurantOrderingFeedBackInput;
 };
 
 
@@ -1290,6 +1345,7 @@ export type Order = {
   deliveryAmount?: Maybe<Scalars['Float']['output']>;
   deliveryDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
   deliveryPartnerType?: Maybe<DeliveryPartnerTypeEnum>;
+  deliveryTip?: Maybe<Scalars['Float']['output']>;
   delivery_events: Array<DeliveryEvent>;
   grossAmount: Scalars['Float']['output'];
   guestData?: Maybe<GuestData>;
@@ -1303,13 +1359,16 @@ export type Order = {
   pickUpDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
   /** This field stores the guest details entered by customer when placing a guest order but the number is already registered with restaurant */
   placedAsGuestData?: Maybe<GuestData>;
+  platformFeeAmount?: Maybe<Scalars['Float']['output']>;
   platformFeePercent: Scalars['Float']['output'];
   queryRecord?: Maybe<Scalars['JSONObject']['output']>;
   refundAmount: Scalars['Float']['output'];
   refundLoyalty: Scalars['Float']['output'];
   restaurant: Restaurant;
+  restaurantTip?: Maybe<Scalars['Float']['output']>;
   specialRemark?: Maybe<Scalars['String']['output']>;
   status: OrderStatus;
+  stripeFees?: Maybe<Scalars['Float']['output']>;
   subTotal: Scalars['Float']['output'];
   systemRemark?: Maybe<Scalars['JSONObject']['output']>;
   taxName?: Maybe<Scalars['String']['output']>;
@@ -1396,6 +1455,7 @@ export type OrderWithTotals = {
   deliveryAmount?: Maybe<Scalars['Float']['output']>;
   deliveryDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
   deliveryPartnerType?: Maybe<DeliveryPartnerTypeEnum>;
+  deliveryTip?: Maybe<Scalars['Float']['output']>;
   delivery_events: Array<DeliveryEvent>;
   discountAmount: Scalars['Float']['output'];
   finalAmount: Scalars['Float']['output'];
@@ -1412,6 +1472,7 @@ export type OrderWithTotals = {
   pickUpDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
   /** This field stores the guest details entered by customer when placing a guest order but the number is already registered with restaurant */
   placedAsGuestData?: Maybe<GuestData>;
+  platformFeeAmount?: Maybe<Scalars['Float']['output']>;
   platformFeePercent: Scalars['Float']['output'];
   platformFees: Scalars['Float']['output'];
   queryRecord?: Maybe<Scalars['JSONObject']['output']>;
@@ -1419,8 +1480,10 @@ export type OrderWithTotals = {
   refundLoyalty: Scalars['Float']['output'];
   restaurant: Restaurant;
   restaurantInfo: RestaurantReceiptInfo;
+  restaurantTip?: Maybe<Scalars['Float']['output']>;
   specialRemark?: Maybe<Scalars['String']['output']>;
   status: OrderStatus;
+  stripeFees?: Maybe<Scalars['Float']['output']>;
   subTotal: Scalars['Float']['output'];
   subTotalAmount: Scalars['Float']['output'];
   systemRemark?: Maybe<Scalars['JSONObject']['output']>;
@@ -1433,6 +1496,12 @@ export type OrderWithTotals = {
   updatedAt: Scalars['DateTimeISO']['output'];
   utmDetails: UtmDetails;
   visitorHash?: Maybe<Scalars['String']['output']>;
+};
+
+export type PaymentConfigUpdatedBy = {
+  __typename?: 'PaymentConfigUpdatedBy';
+  id?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type PaymentIntent = {
@@ -1574,6 +1643,13 @@ export enum PriceTypeEnum {
   IndividualPrice = 'IndividualPrice',
   SamePrice = 'SamePrice'
 }
+
+export type ProcessingConfig = {
+  __typename?: 'ProcessingConfig';
+  feePercent?: Maybe<Scalars['Float']['output']>;
+  maxFeeAmount?: Maybe<Scalars['Float']['output']>;
+  paymentConfigUpdatedBy?: Maybe<PaymentConfigUpdatedBy>;
+};
 
 export type ProgramSettings = {
   __typename?: 'ProgramSettings';
@@ -1824,6 +1900,7 @@ export type Restaurant = {
   name: Scalars['String']['output'];
   onlineOrderTimingConfig?: Maybe<OnlineOrderTimingConfig>;
   phone: Scalars['String']['output'];
+  processingConfig?: Maybe<ProcessingConfig>;
   restaurantConfigs?: Maybe<RestaurantConfigs>;
   socialInfo?: Maybe<SocialInfo>;
   status: RestaurantStatus;
@@ -1861,6 +1938,46 @@ export type RestaurantInfo = {
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   status: RestaurantStatus;
+};
+
+export type RestaurantOrderingFeedBack = {
+  __typename?: 'RestaurantOrderingFeedBack';
+  _id: Scalars['ID']['output'];
+  createdAt: Scalars['DateTimeISO']['output'];
+  customerId?: Maybe<Scalars['ID']['output']>;
+  deliveryTime?: Maybe<Scalars['Float']['output']>;
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  foodQuality?: Maybe<Scalars['Float']['output']>;
+  itemFeedbacks?: Maybe<Array<ItemFeedback>>;
+  lastName: Scalars['String']['output'];
+  meta?: Maybe<Scalars['JSONObject']['output']>;
+  orderId: Scalars['ID']['output'];
+  orderRefId: Scalars['String']['output'];
+  overallRating: Scalars['Float']['output'];
+  overallRemarks?: Maybe<Scalars['String']['output']>;
+  packagingQuality?: Maybe<Scalars['Float']['output']>;
+  phone: Scalars['String']['output'];
+  restaurantId: Scalars['ID']['output'];
+  submittedAt: Scalars['DateTimeISO']['output'];
+  updatedAt: Scalars['DateTimeISO']['output'];
+  valueForMoney?: Maybe<Scalars['Float']['output']>;
+  wouldRecommend: Scalars['Boolean']['output'];
+};
+
+export type RestaurantOrderingFeedBackInput = {
+  deliveryTime?: InputMaybe<Scalars['Float']['input']>;
+  foodQuality?: InputMaybe<Scalars['Float']['input']>;
+  images?: InputMaybe<Array<Scalars['String']['input']>>;
+  improvementSuggestions?: InputMaybe<Scalars['String']['input']>;
+  itemFeedbacks?: InputMaybe<Array<ItemFeedbackInput>>;
+  meta: Scalars['JSON']['input'];
+  orderId: Scalars['ID']['input'];
+  overallRating: Scalars['Float']['input'];
+  overallRemarks?: InputMaybe<Scalars['String']['input']>;
+  packagingQuality?: InputMaybe<Scalars['Float']['input']>;
+  valueForMoney?: InputMaybe<Scalars['Float']['input']>;
+  wouldRecommend?: Scalars['Boolean']['input'];
 };
 
 export type RestaurantReceiptInfo = {
@@ -2296,7 +2413,7 @@ export type FetchCustomerOrdersQueryVariables = Exact<{
 }>;
 
 
-export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemId: { __typename?: 'Item', name: string, desc?: string | null }, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgId: { __typename?: 'ModifierGroup', _id: string, pricingType: PriceTypeEnum, price?: number | null }, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
+export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemName: string, itemRemarks?: string | null, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgName: string, pricingType: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
 
 export type FetchOrderByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2374,6 +2491,20 @@ export type HandleOrderCreationFailureMutationVariables = Exact<{
 
 export type HandleOrderCreationFailureMutation = { __typename?: 'Mutation', handleOrderCreationFailure: boolean };
 
+export type SubmitChooseOrderingFeedbackMutationVariables = Exact<{
+  input: ChooseOrderingFeedBackInput;
+}>;
+
+
+export type SubmitChooseOrderingFeedbackMutation = { __typename?: 'Mutation', submitChooseOrderingFeedback: { __typename?: 'ChooseOrderingReviewFeedBack', _id: string } };
+
+export type SubmitRestaurantFeedbackMutationVariables = Exact<{
+  input: RestaurantOrderingFeedBackInput;
+}>;
+
+
+export type SubmitRestaurantFeedbackMutation = { __typename?: 'Mutation', submitRestaurantFeedback: { __typename?: 'RestaurantOrderingFeedBack', _id: string } };
+
 export type GetCmsPromoRouteDetailsQueryVariables = Exact<{
   slug: Scalars['String']['input'];
 }>;
@@ -2394,7 +2525,7 @@ export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: {
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
+export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null } | null, processingConfig?: { __typename?: 'ProcessingConfig', feePercent?: number | null, maxFeeAmount?: number | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
 
 export type GetCustomerCategoriesAndItemsQueryVariables = Exact<{
   ItemOptionSelected?: InputMaybe<Array<ItemOptionsEnum> | ItemOptionsEnum>;
@@ -2409,7 +2540,7 @@ export type GetCustomerItemQueryVariables = Exact<{
 }>;
 
 
-export type GetCustomerItemQuery = { __typename?: 'Query', getCustomerItem?: { __typename?: 'ItemWithModifiersResponse', id: string, name: string, desc?: string | null, price: number, image?: string | null, upSellItems?: Array<{ __typename?: 'upSellReturnItem', itemId: string, name: string, desc?: string | null, price: number, image?: string | null }> | null, options: Array<{ __typename?: 'Options', displayName: string, _id: string, type: ItemOptionsEnum, desc: string, status: boolean }>, availability?: Array<{ __typename?: 'Availability', _id: string, day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, modifierGroups: Array<{ __typename?: 'ModifierGroupResponse', id: string, name: string, optional: boolean, multiSelect: boolean, desc?: string | null, price?: number | null, minSelections: number, maxSelections: number, pricingType: PriceTypeEnum, allowMultiSelctSingleModsInGroup: boolean, maxSelctSingleModsInGroup: number, isMaxSelctSingleModsInGroupUnlimited: boolean, modifiers: Array<{ __typename?: 'ModifierInfoResponse', id: string, name: string, desc?: string | null, preSelect: boolean, price: number, isItem: boolean }> }> } | null };
+export type GetCustomerItemQuery = { __typename?: 'Query', getCustomerItem?: { __typename?: 'ItemWithModifiersResponse', id: string, name: string, desc?: string | null, price: number, image?: string | null, upSellItems?: Array<{ __typename?: 'upSellReturnItem', itemId: string, name: string, desc?: string | null, price: number, image?: string | null }> | null, options: Array<{ __typename?: 'Options', displayName: string, _id: string, type: ItemOptionsEnum, desc: string, status: boolean }>, availability?: Array<{ __typename?: 'Availability', _id: string, day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, modifierGroups: Array<{ __typename?: 'ModifierGroupResponse', id: string, name: string, optional: boolean, multiSelect: boolean, desc?: string | null, price?: number | null, minSelections: number, maxSelections: number, pricingType: PriceTypeEnum, order: number, allowMultiSelctSingleModsInGroup: boolean, maxSelctSingleModsInGroup: number, isMaxSelctSingleModsInGroupUnlimited: boolean, modifiers: Array<{ __typename?: 'ModifierInfoResponse', id: string, name: string, desc?: string | null, preSelect: boolean, price: number, isItem: boolean }> }> } | null };
 
 export type MeCustomerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2913,16 +3044,12 @@ export const FetchCustomerOrdersDocument = gql`
     items {
       qty
       itemPrice
-      itemId {
-        name
-        desc
-      }
+      itemName
+      itemRemarks
       modifierGroups {
-        mgId {
-          _id
-          pricingType
-          price
-        }
+        mgName
+        pricingType
+        price
         selectedModifiers {
           modifierName
           modifierPrice
@@ -3113,6 +3240,20 @@ export const HandleOrderCreationFailureDocument = gql`
   handleOrderCreationFailure(orderId: $orderId, error: $error)
 }
     `;
+export const SubmitChooseOrderingFeedbackDocument = gql`
+    mutation submitChooseOrderingFeedback($input: ChooseOrderingFeedBackInput!) {
+  submitChooseOrderingFeedback(input: $input) {
+    _id
+  }
+}
+    `;
+export const SubmitRestaurantFeedbackDocument = gql`
+    mutation submitRestaurantFeedback($input: RestaurantOrderingFeedBackInput!) {
+  submitRestaurantFeedback(input: $input) {
+    _id
+  }
+}
+    `;
 export const GetCmsPromoRouteDetailsDocument = gql`
     query getCmsPromoRouteDetails($slug: String!) {
   getCmsPromoRouteDetails(slug: $slug) {
@@ -3185,6 +3326,10 @@ export const GetCustomerRestaurantDetailsDocument = gql`
       allowTips
       onlineOrdering
       scheduleOrders
+    }
+    processingConfig {
+      feePercent
+      maxFeeAmount
     }
     fulfillmentConfig {
       prepTime
@@ -3351,6 +3496,7 @@ export const GetCustomerItemDocument = gql`
       minSelections
       maxSelections
       pricingType
+      order
       allowMultiSelctSingleModsInGroup
       maxSelctSingleModsInGroup
       isMaxSelctSingleModsInGroupUnlimited
@@ -3538,6 +3684,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     handleOrderCreationFailure(variables: HandleOrderCreationFailureMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<HandleOrderCreationFailureMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<HandleOrderCreationFailureMutation>(HandleOrderCreationFailureDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'handleOrderCreationFailure', 'mutation', variables);
+    },
+    submitChooseOrderingFeedback(variables: SubmitChooseOrderingFeedbackMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SubmitChooseOrderingFeedbackMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SubmitChooseOrderingFeedbackMutation>(SubmitChooseOrderingFeedbackDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'submitChooseOrderingFeedback', 'mutation', variables);
+    },
+    submitRestaurantFeedback(variables: SubmitRestaurantFeedbackMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SubmitRestaurantFeedbackMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SubmitRestaurantFeedbackMutation>(SubmitRestaurantFeedbackDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'submitRestaurantFeedback', 'mutation', variables);
     },
     getCmsPromoRouteDetails(variables: GetCmsPromoRouteDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCmsPromoRouteDetailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCmsPromoRouteDetailsQuery>(GetCmsPromoRouteDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCmsPromoRouteDetails', 'query', variables);

@@ -14,6 +14,7 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { sdk } from "@/utils/graphqlClient";
 import { CmsPopupContent, CmsPromoPopup } from "@/generated/graphql";
 import { Env } from "@/env";
+import { PostHogProvider } from "./providers";
 
 const Toast = dynamic(() => import("@/components/common/toast/toast"), {
   ssr: false,
@@ -150,32 +151,35 @@ export default function RootLayout({
             right: 20,
           }}
         />
-        <Suspense fallback={<Loading />}>
-          {
-            <>
+        <PostHogProvider>
+          <Suspense fallback={<Loading />}>
+            {
+              <>
               <NextTopLoader color="#fff" showSpinner={false} />
-              {promoData && (
-                <Modal
-                  isOpen={showPopup}
-                  onClose={() => setShowPopup(false)}
-                  title={promoData.content.title}
-                  description={promoData.content.description}
-                  button={{
-                    text: promoData.content.button.title,
-                    url: promoData.content.button.link,
-                  }}
-                  image={{
-                    desktop: promoData.content.image.desktop,
-                    mobile: promoData.content.image.mobile,
-                  }}
-                  isVerticallyAligned={promoData.content.isVerticallyAligned}
-                />
-              )}
-              {children}
-              <AnalyticsLoader />
-            </>
-          }
-        </Suspense>
+          {/* Promo Popup Component */}
+          {promoData && (
+            <Modal
+              isOpen={showPopup}
+              onClose={() => setShowPopup(false)}
+              title={promoData.content.title}
+              description={promoData.content.description}
+              button={{
+                text: promoData.content.button.title,
+                url: promoData.content.button.link,
+              }}
+              image={{
+                desktop: promoData.content.image.desktop,
+                mobile: promoData.content.image.mobile,
+              }}
+              isVerticallyAligned={promoData.content.isVerticallyAligned}
+            />
+          )}
+          {children}
+          <AnalyticsLoader />
+        </>
+      }
+    </Suspense>
+        </PostHogProvider>
       </body>
 
       {toastData && <Toast message={toastData.message} type={toastData.type} />}
