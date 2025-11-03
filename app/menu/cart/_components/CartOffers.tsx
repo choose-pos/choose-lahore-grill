@@ -161,9 +161,11 @@ const CartOffers = ({
     setLoyaltyError(undefined);
     setApplyLoyaltyLoading(true);
     try {
-      const res = await sdk.validateLoyaltyRedemptionOnCart({
-        input: { loyaltyPointsRedeemed: points, redeemType: type },
-      });
+      const res = await fetchWithAuth(() =>
+        sdk.validateLoyaltyRedemptionOnCart({
+          input: { loyaltyPointsRedeemed: points, redeemType: type },
+        })
+      );
 
       if (res.validateLoyaltyRedemptionOnCart) {
         // Trigger refetch of cart data

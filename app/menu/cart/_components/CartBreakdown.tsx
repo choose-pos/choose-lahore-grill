@@ -121,7 +121,9 @@ const CartBreakdown = ({ amounts, loyaltyRule }: ICartBreakdownProps) => {
       {(restaurantData?.restaurantConfigs?.allowTips ?? false) ? (
         <div className="flex justify-between mb-2">
           <span className="text-base md:text-lg font-online-ordering">
-            Tip ({cartDetails?.amounts?.tipPercent ?? 0}%)
+            {[10, 15, 20].includes(cartDetails?.amounts?.tipPercent ?? 0)
+              ? `Tip (${cartDetails?.amounts?.tipPercent ?? 0}%)`
+              : "Tip"}ca
           </span>
           <span className="text-base md:text-lg font-semibold font-online-ordering">
             ${amounts.tipAmt.toFixed(2)}

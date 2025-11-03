@@ -151,16 +151,11 @@ export default function RootLayout({
             right: 20,
           }}
         />
-         <PostHogProvider>
+        <PostHogProvider>
           <Suspense fallback={<Loading />}>
             {
               <>
-                {children}
-                <AnalyticsLoader />
-              </>
-            }
-          </Suspense>
-
+              <NextTopLoader color="#fff" showSpinner={false} />
           {/* Promo Popup Component */}
           {promoData && (
             <Modal
@@ -179,6 +174,11 @@ export default function RootLayout({
               isVerticallyAligned={promoData.content.isVerticallyAligned}
             />
           )}
+          {children}
+          <AnalyticsLoader />
+        </>
+      }
+    </Suspense>
         </PostHogProvider>
       </body>
 

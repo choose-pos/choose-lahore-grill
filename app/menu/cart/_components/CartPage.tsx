@@ -265,17 +265,15 @@ const CartPage = ({
     };
 
     finalAmts.subTotalAmt = cartAmts.subTotalAmount ?? 0;
-    finalAmts.discAmt =
-      freeItemInCart !== null ? 0 : (cartAmts.discountAmount ?? 0);
+     finalAmts.discAmt = cartAmts.discountAmount ?? 0;
     finalAmts.netAmt = parseFloat(
       (finalAmts.subTotalAmt - finalAmts.discAmt).toFixed(2)
     );
     finalAmts.taxAmt = parseFloat(
       ((taxPercent / 100) * finalAmts.netAmt).toFixed(2)
     );
-    finalAmts.tipAmt = parseFloat(
-      (((cartAmts.tipPercent ?? 0) / 100) * finalAmts.subTotalAmt).toFixed(2)
-    );
+     const tipP = (cartAmts.tipPercent ?? 0) / 100;
+    finalAmts.tipAmt = parseFloat((tipP * finalAmts.subTotalAmt).toFixed(2));
 
     // Calculate processing fee with restaurant-specific or global config (same logic as backend)
     let feePercent = 0;
