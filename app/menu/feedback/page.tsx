@@ -90,6 +90,7 @@ const OrderFeedbackComponent = () => {
   const [overallRating, setOverallRating] = useState<number>(0);
   const [hoveredOverallRating, setHoveredOverallRating] = useState<number>(0);
   const [overallRemarks, setOverallRemarks] = useState<string>("");
+  const [selectedOrderItems, setSelectedOrderItems] = useState<number>(0);
 
   const [foodQuality, setFoodQuality] = useState<number>(0);
   const [hoveredFoodQuality, setHoveredFoodQuality] = useState<number>(0);
@@ -177,6 +178,7 @@ const OrderFeedbackComponent = () => {
             return prev;
           });
         });
+        setSelectedOrderItems(initialItemFeedbacks.length);
       } catch (error) {
         console.error("Error fetching order:", error);
         setError("Failed to fetch order details. Please try again later.");
@@ -368,7 +370,7 @@ const OrderFeedbackComponent = () => {
             <div className="text-sm space-y-1">
               <p className="text-gray-600">Order ID: {selectedOrder.orderId}</p>
               <p className="text-gray-600">
-                Items: {selectedOrder.items.length} item(s)
+                Items: {selectedOrderItems} item(s)
               </p>
             </div>
           </div>
