@@ -123,7 +123,7 @@ const CartBreakdown = ({ amounts, loyaltyRule }: ICartBreakdownProps) => {
           <span className="text-base md:text-lg font-online-ordering">
             {[10, 15, 20].includes(cartDetails?.amounts?.tipPercent ?? 0)
               ? `Tip (${cartDetails?.amounts?.tipPercent ?? 0}%)`
-              : "Tip"}ca
+              : "Tip"}
           </span>
           <span className="text-base md:text-lg font-semibold font-online-ordering">
             ${amounts.tipAmt.toFixed(2)}
