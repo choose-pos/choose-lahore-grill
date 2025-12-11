@@ -5,7 +5,8 @@ import { OrderById } from "@/components/account/TabBar";
 import LoadingDots from "@/components/common/LoadingDots";
 import { cookieKeys } from "@/constants";
 import { Env } from "@/env";
-import { getCookie } from "@/utils/UtilFncs";
+import ToastStore from "@/store/toast";
+import { extractErrorMessage, getCookie } from "@/utils/UtilFncs";
 import { getOrCreateUserHash } from "@/utils/analytics";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
@@ -80,6 +81,7 @@ const StarRating = ({
 
 const OrderFeedbackComponent = () => {
   const searchParams = useSearchParams();
+  const { setToastData } = ToastStore();
   const orderId = searchParams.get("orderId");
 
   // State management
@@ -265,8 +267,10 @@ const OrderFeedbackComponent = () => {
         setError("Failed to submit feedback. Please try again.");
       }
     } catch (error) {
-      console.error("Error submitting feedback:", error);
-      setError("Failed to submit feedback. Please try again.");
+      setToastData({
+        message: extractErrorMessage(error),
+        type: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }

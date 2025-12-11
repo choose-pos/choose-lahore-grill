@@ -234,9 +234,12 @@ export type CartModifiersInput = {
 export type Category = {
   __typename?: 'Category';
   _id: Scalars['ID']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   availability?: Maybe<Array<Availability>>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   items: Array<ItemInfo>;
   menu?: Maybe<Array<Menu>>;
   name: Scalars['String']['output'];
@@ -290,15 +293,23 @@ export type ChooseOrderingReviewFeedBack = {
   createdAt: Scalars['DateTimeISO']['output'];
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
+  isResolved: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
   meta?: Maybe<Scalars['JSONObject']['output']>;
   orderId: Scalars['ID']['output'];
   phone: Scalars['String']['output'];
+  posthogProjectId?: Maybe<Scalars['String']['output']>;
+  posthogSessionReplayUrl?: Maybe<Scalars['String']['output']>;
   rating: Scalars['Float']['output'];
   remarks?: Maybe<Scalars['String']['output']>;
   restaurantId: Scalars['ID']['output'];
+  reviewedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  reviewedBy?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<FeedbackStatus>;
   submittedAt: Scalars['DateTimeISO']['output'];
+  techTeamRemarks?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTimeISO']['output'];
+  usTeamRemarks?: Maybe<Scalars['String']['output']>;
 };
 
 export type CmsButton = {
@@ -796,6 +807,15 @@ export enum EstimatedRevenueEnum {
   PreRevenue = 'PreRevenue'
 }
 
+/** Status of feedback review */
+export enum FeedbackStatus {
+  Others = 'OTHERS',
+  RestaurantIssueIdentified = 'RESTAURANT_ISSUE_IDENTIFIED',
+  RestaurantIssueResolved = 'RESTAURANT_ISSUE_RESOLVED',
+  TechnicalIssueIdentified = 'TECHNICAL_ISSUE_IDENTIFIED',
+  TechnicalIssueResolved = 'TECHNICAL_ISSUE_RESOLVED'
+}
+
 /** Restaurant food type enum. */
 export enum FoodType {
   Jain = 'Jain',
@@ -883,11 +903,14 @@ export enum IntegrationPlatformEnum {
 export type Item = {
   __typename?: 'Item';
   _id: Scalars['ID']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   availability?: Maybe<Array<Availability>>;
   category?: Maybe<Array<Category>>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
   image?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   modifierGroup: Array<ModifierGroupInfo>;
   name: Scalars['String']['output'];
   options: Array<Options>;
@@ -1127,8 +1150,11 @@ export type MilestoneConfig = {
 export type Modifier = {
   __typename?: 'Modifier';
   _id: Scalars['ID']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   isItem: Scalars['Boolean']['output'];
   modifierGroup?: Maybe<Array<ModifierGroup>>;
   name: Scalars['String']['output'];
@@ -1145,8 +1171,11 @@ export type ModifierGroup = {
   __typename?: 'ModifierGroup';
   _id: Scalars['ID']['output'];
   allowMultiSelctSingleModsInGroup: Scalars['Boolean']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   isMaxSelctSingleModsInGroupUnlimited: Scalars['Boolean']['output'];
   item?: Maybe<Array<Item>>;
   maxSelctSingleModsInGroup: Scalars['Float']['output'];
