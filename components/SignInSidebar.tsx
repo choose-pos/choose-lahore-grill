@@ -39,20 +39,17 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [dob, setDob] = useState<string>("");
-  const [emailOffers, setEmailOffers] = useState<boolean>(false);
-  const [textOffers, setTextOffers] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showOtpPage, setShowOtpPage] = useState<boolean>(false);
   const [otp, setOtp] = useState<string>("");
   const [signInOtpId, setSignInOtpId] = useState<boolean | null>(null);
   const [signUpOtpId, setSignUpOtpId] = useState<boolean | null>(null);
+  const [accountPreference, setAccountPrefrence] = useState<AccountPreference>({
+    email: true,
+    sms: true,
+  });
   const [resendTimer, setResendTimer] = useState<number>(0);
   const [isResendClicked, setIsResendClicked] = useState<boolean>(false);
-
-  const [accountPreference, setAccountPrefrence] = useState<AccountPreference>({
-    email: false,
-    sms: false,
-  });
   const [programName, setProgramName] = useState<string | null>(null);
   const { setToastData } = ToastStore();
   const { setMeCustomerData } = meCustomerStore();
@@ -151,14 +148,10 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
 
     try {
       if (isSignUpOpen) {
-        let accountPreferences: AccountPreference = {
-          email: false,
-          sms: false,
+        const accountPreferences: AccountPreference = {
+          email: true,
+          sms: true,
         };
-        if (emailOffers)
-          accountPreferences = { ...accountPreferences, email: true };
-        if (textOffers)
-          accountPreferences = { ...accountPreferences, sms: true };
         setAccountPrefrence(accountPreferences);
 
         const input: CustomerSignupInput = {
@@ -202,12 +195,10 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
     setFirstName("");
     setLastName("");
     setDob("");
-    setEmailOffers(false);
-    setTextOffers(false);
     setOtp("");
     setSignInOtpId(null);
     setSignUpOtpId(null);
-    setAccountPrefrence({ email: false, sms: false });
+    setAccountPrefrence({ email: true, sms: true });
     setIsSignUpOpen(false);
     setShowOtpPage(false);
     setIsResendClicked(false);
@@ -444,47 +435,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             <p className="mt-1 text-sm text-red-500">{errors.dob}</p>
           )}
         </div>
-        <div
-          className="cursor-pointer w-max"
-          onClick={() => setEmailOffers(!emailOffers)}
-        >
-          <label
-            htmlFor="emailOffers"
-            className="gap-2 text-sm text-gray-900 cursor-pointer flex items-center"
-          >
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded accent-primary cursor-pointer"
-              checked={emailOffers}
-              onChange={(e) => setEmailOffers(e.target.checked)}
-            />
-            Receive exclusive offers in your inbox
-          </label>
-        </div>
-
-        <div
-          className="cursor-pointer w-max"
-          onClick={() => setTextOffers(!textOffers)}
-        >
-          <label
-            htmlFor="textOffers"
-            className="gap-2 text-sm text-gray-900 cursor-pointer flex items-center"
-          >
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-primary rounded accent-primary focus:ring-primary border-gray-300 cursor-pointer"
-              checked={textOffers}
-              onChange={(e) => setTextOffers(e.target.checked)}
-            />
-            Receive special offers by text
-          </label>
-        </div>
-
-        <br />
         <p className="text-xs text-gray-500">
-          {`By signing up, you agree to receive email and SMS transactional
-          communications from ${restaurantData?.name} and our technology partner
-          Choose and consent to our`}{" "}
+          {`By signing up, you agree to receive promotional and transactional emails and SMS from ${restaurantData?.name} and our technology partner Choose, and consent to our`}{" "}
           <Link
             href={"https://www.choosepos.com/terms-conditions"}
             passHref
@@ -500,6 +452,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           >
             <span className="underline font-semibold">{`Privacy Policy`}</span>
           </Link>
+          {`. You can opt out of promotional communications at any time from your profile.`}
         </p>
         <button
           type="submit"
