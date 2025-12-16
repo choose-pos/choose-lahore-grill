@@ -530,6 +530,7 @@ export type Contact = {
 export enum CouponUsageType {
   DeliveryOrder = 'DeliveryOrder',
   EntireSale = 'EntireSale',
+  FirstSignedOrder = 'FirstSignedOrder',
   SpecificCategory = 'SpecificCategory',
   SpecificItem = 'SpecificItem'
 }
@@ -830,6 +831,12 @@ export type FulfillmentConfig = {
   largeOrderExtraTime?: Maybe<Scalars['Float']['output']>;
   largeOrderTreshold?: Maybe<Scalars['Float']['output']>;
   prepTime?: Maybe<Scalars['Float']['output']>;
+};
+
+export type GuestConversionAutomation = {
+  __typename?: 'GuestConversionAutomation';
+  active: Scalars['Boolean']['output'];
+  promoId?: Maybe<PromoCode>;
 };
 
 export type GuestData = {
@@ -1185,6 +1192,7 @@ export type ModifierGroup = {
   multiSelect: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   optional: Scalars['Boolean']['output'];
+  posId?: Maybe<Scalars['String']['output']>;
   price?: Maybe<Scalars['Float']['output']>;
   pricingType: PriceTypeEnum;
   restaurantId: Restaurant;
@@ -1610,6 +1618,7 @@ export type PopulatedOrder = {
   __typename?: 'PopulatedOrder';
   _id: Scalars['String']['output'];
   appliedDiscount?: Maybe<DiscountData>;
+  canBeReOrdered: Scalars['Boolean']['output'];
   createdAt: Scalars['DateTimeISO']['output'];
   customerInfo: CustomerReceiptInfo;
   items: Array<PopulatedOrderItem>;
@@ -1911,6 +1920,7 @@ export type Restaurant = {
   __typename?: 'Restaurant';
   _id: Scalars['ID']['output'];
   address?: Maybe<AddressInfo>;
+  automation?: Maybe<RestaurantAutomation>;
   availability?: Maybe<Array<Availability>>;
   beverageCategory?: Maybe<Array<BeverageCategory>>;
   brandingLogo?: Maybe<Scalars['String']['output']>;
@@ -1933,7 +1943,7 @@ export type Restaurant = {
   restaurantConfigs?: Maybe<RestaurantConfigs>;
   socialInfo?: Maybe<SocialInfo>;
   status: RestaurantStatus;
-  syncCategoryRules: Array<SyncCategoryRule>;
+  syncRules: Array<SyncRule>;
   taxRates?: Maybe<Array<TaxRateInfo>>;
   timezone?: Maybe<TimezoneData>;
   type?: Maybe<RestaurantType>;
@@ -1941,6 +1951,11 @@ export type Restaurant = {
   updatedBy?: Maybe<User>;
   user: User;
   website?: Maybe<Scalars['String']['output']>;
+};
+
+export type RestaurantAutomation = {
+  __typename?: 'RestaurantAutomation';
+  guestConversion?: Maybe<GuestConversionAutomation>;
 };
 
 /** Restaurant category type enum. */
@@ -2072,10 +2087,12 @@ export enum StatusEnum {
   Inactive = 'inactive'
 }
 
-export type SyncCategoryRule = {
-  __typename?: 'SyncCategoryRule';
-  categoryId: Scalars['String']['output'];
-  categoryName: Scalars['String']['output'];
+export type SyncRule = {
+  __typename?: 'SyncRule';
+  id: Scalars['String']['output'];
+  isCategory: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  posId?: Maybe<Scalars['String']['output']>;
 };
 
 export type TaxRateInfo = {
@@ -2442,7 +2459,7 @@ export type FetchCustomerOrdersQueryVariables = Exact<{
 }>;
 
 
-export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemName: string, itemRemarks?: string | null, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgName: string, pricingType: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
+export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, canBeReOrdered: boolean, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemName: string, itemRemarks?: string | null, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgName: string, pricingType: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
 
 export type FetchOrderByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3086,6 +3103,7 @@ export const FetchCustomerOrdersDocument = gql`
         }
       }
     }
+    canBeReOrdered
   }
 }
     `;

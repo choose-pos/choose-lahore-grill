@@ -739,7 +739,8 @@ export type Order = {
   items: Items[];
   status?: string | null;
   systemRemark?: string;
-    appliedDiscount?: {
+canBeReOrdered?: boolean;
+  appliedDiscount?: {
     discountType: OrderDiscountType;
     discountAmount?: number | null;
     promoData?: {
@@ -1353,7 +1354,7 @@ export const OrdersContent: React.FC = () => {
                   </div>
                 ) : null}
 
-                 {selectedOrder.taxAmount &&
+                {selectedOrder.taxAmount &&
                 (selectedOrder.platformFees !== null ||
                   selectedOrder.platformFees !== undefined) ? (
                   <div className="flex justify-between">
@@ -1419,27 +1420,27 @@ export const OrdersContent: React.FC = () => {
                         PromoDiscountType.Free
                         ? `$${selectedOrder.appliedDiscount?.promoData?.discountValue} off`
                         : selectedOrder.appliedDiscount.promoData
-                            ?.discountValue &&
-                          selectedOrder.appliedDiscount.promoData
-                            .discountType === PromoDiscountType.FreeDelivery
-                        ? "free delivery"
-                        : selectedOrder.appliedDiscount.promoData
-                            ?.discountValue &&
-                          selectedOrder.appliedDiscount.promoData
-                            .discountType === PromoDiscountType.FixedAmount
-                        ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
-                            2
-                          )} off`
-                        : selectedOrder.appliedDiscount.promoData
-                            ?.discountValue &&
-                          selectedOrder.appliedDiscount.promoData
-                            .discountType === PromoDiscountType.Percentage
-                        ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
-                            2
-                          )} off`
-                        : selectedOrder.appliedDiscount.promoData
-                            ?.discountItemName &&
-                          `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
+                              ?.discountValue &&
+                            selectedOrder.appliedDiscount.promoData
+                              .discountType === PromoDiscountType.FreeDelivery
+                          ? "free delivery"
+                          : selectedOrder.appliedDiscount.promoData
+                                ?.discountValue &&
+                              selectedOrder.appliedDiscount.promoData
+                                .discountType === PromoDiscountType.FixedAmount
+                            ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
+                                2
+                              )} off`
+                            : selectedOrder.appliedDiscount.promoData
+                                  ?.discountValue &&
+                                selectedOrder.appliedDiscount.promoData
+                                  .discountType === PromoDiscountType.Percentage
+                              ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
+                                  2
+                                )} off`
+                              : selectedOrder.appliedDiscount.promoData
+                                  ?.discountItemName &&
+                                `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
                     </p>
                   </div>
                 )}
@@ -1629,37 +1630,50 @@ export const OrdersContent: React.FC = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {order.appliedDiscount?.promoData
-                          ?.discountItemName ? (
+                        {order.appliedDiscount?.promoData?.discountItemName ? (
                           <TableRow key={0}>
-                              <TableCell className="py-3 w-1/2">
-                                <span className="text-base font-medium">
-                                  {order.appliedDiscount.promoData.discountItemName} (Promo Item)
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-center py-3 text-base">
-                                1
-                              </TableCell>
-                              <TableCell className="text-right py-3 text-base">
-                                ${(order.appliedDiscount.discountAmount ?? 0).toFixed(2)}
-                              </TableCell>
-                            </TableRow>
+                            <TableCell className="py-3 w-1/2">
+                              <span className="text-base font-medium">
+                                {
+                                  order.appliedDiscount.promoData
+                                    .discountItemName
+                                }{" "}
+                                (Promo Item)
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center py-3 text-base">
+                              1
+                            </TableCell>
+                            <TableCell className="text-right py-3 text-base">
+                              $
+                              {(
+                                order.appliedDiscount.discountAmount ?? 0
+                              ).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
                         ) : null}
-                        {order.appliedDiscount?.loyaltyData
-                          ?.redeemItem?.itemName ? (
+                        {order.appliedDiscount?.loyaltyData?.redeemItem
+                          ?.itemName ? (
                           <TableRow key={1}>
-                              <TableCell className="py-3 w-1/2">
-                                <span className="text-base font-medium">
-                                  {order.appliedDiscount.loyaltyData.redeemItem?.itemName} (Loyalty Redemption)
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-center py-3 text-base">
-                                1
-                              </TableCell>
-                              <TableCell className="text-right py-3 text-base">
-                                ${(order.appliedDiscount.discountAmount ?? 0).toFixed(2)}
-                              </TableCell>
-                            </TableRow>
+                            <TableCell className="py-3 w-1/2">
+                              <span className="text-base font-medium">
+                                {
+                                  order.appliedDiscount.loyaltyData.redeemItem
+                                    ?.itemName
+                                }{" "}
+                                (Loyalty Redemption)
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center py-3 text-base">
+                              1
+                            </TableCell>
+                            <TableCell className="text-right py-3 text-base">
+                              $
+                              {(
+                                order.appliedDiscount.discountAmount ?? 0
+                              ).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
                         ) : null}
                         {order.items.map((item, itemIndex) => {
                           const finalPrice = item.qty * item.itemPrice;
@@ -1693,7 +1707,7 @@ export const OrdersContent: React.FC = () => {
 
                 {/* Action Button */}
                 <div className="flex gap-2 justify-end mt-auto">
-                  {(order?.totalAmount ?? 0) > 0 ? (
+                  {order.canBeReOrdered && (order?.totalAmount ?? 0) > 0 ? (
                     <button
                       className="px-6 py-2 bg-primary text-white rounded-full text-base transition-colors"
                       onClick={() => reOrder(order._id)}
