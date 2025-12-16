@@ -234,9 +234,12 @@ export type CartModifiersInput = {
 export type Category = {
   __typename?: 'Category';
   _id: Scalars['ID']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   availability?: Maybe<Array<Availability>>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   items: Array<ItemInfo>;
   menu?: Maybe<Array<Menu>>;
   name: Scalars['String']['output'];
@@ -290,15 +293,23 @@ export type ChooseOrderingReviewFeedBack = {
   createdAt: Scalars['DateTimeISO']['output'];
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
+  isResolved: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
   meta?: Maybe<Scalars['JSONObject']['output']>;
   orderId: Scalars['ID']['output'];
   phone: Scalars['String']['output'];
+  posthogProjectId?: Maybe<Scalars['String']['output']>;
+  posthogSessionReplayUrl?: Maybe<Scalars['String']['output']>;
   rating: Scalars['Float']['output'];
   remarks?: Maybe<Scalars['String']['output']>;
   restaurantId: Scalars['ID']['output'];
+  reviewedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  reviewedBy?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<FeedbackStatus>;
   submittedAt: Scalars['DateTimeISO']['output'];
+  techTeamRemarks?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTimeISO']['output'];
+  usTeamRemarks?: Maybe<Scalars['String']['output']>;
 };
 
 export type CmsButton = {
@@ -519,6 +530,7 @@ export type Contact = {
 export enum CouponUsageType {
   DeliveryOrder = 'DeliveryOrder',
   EntireSale = 'EntireSale',
+  FirstSignedOrder = 'FirstSignedOrder',
   SpecificCategory = 'SpecificCategory',
   SpecificItem = 'SpecificItem'
 }
@@ -796,6 +808,15 @@ export enum EstimatedRevenueEnum {
   PreRevenue = 'PreRevenue'
 }
 
+/** Status of feedback review */
+export enum FeedbackStatus {
+  Others = 'OTHERS',
+  RestaurantIssueIdentified = 'RESTAURANT_ISSUE_IDENTIFIED',
+  RestaurantIssueResolved = 'RESTAURANT_ISSUE_RESOLVED',
+  TechnicalIssueIdentified = 'TECHNICAL_ISSUE_IDENTIFIED',
+  TechnicalIssueResolved = 'TECHNICAL_ISSUE_RESOLVED'
+}
+
 /** Restaurant food type enum. */
 export enum FoodType {
   Jain = 'Jain',
@@ -810,6 +831,12 @@ export type FulfillmentConfig = {
   largeOrderExtraTime?: Maybe<Scalars['Float']['output']>;
   largeOrderTreshold?: Maybe<Scalars['Float']['output']>;
   prepTime?: Maybe<Scalars['Float']['output']>;
+};
+
+export type GuestConversionAutomation = {
+  __typename?: 'GuestConversionAutomation';
+  active: Scalars['Boolean']['output'];
+  promoId?: Maybe<PromoCode>;
 };
 
 export type GuestData = {
@@ -883,11 +910,14 @@ export enum IntegrationPlatformEnum {
 export type Item = {
   __typename?: 'Item';
   _id: Scalars['ID']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   availability?: Maybe<Array<Availability>>;
   category?: Maybe<Array<Category>>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
   image?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   modifierGroup: Array<ModifierGroupInfo>;
   name: Scalars['String']['output'];
   options: Array<Options>;
@@ -1127,8 +1157,11 @@ export type MilestoneConfig = {
 export type Modifier = {
   __typename?: 'Modifier';
   _id: Scalars['ID']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   isItem: Scalars['Boolean']['output'];
   modifierGroup?: Maybe<Array<ModifierGroup>>;
   name: Scalars['String']['output'];
@@ -1145,8 +1178,11 @@ export type ModifierGroup = {
   __typename?: 'ModifierGroup';
   _id: Scalars['ID']['output'];
   allowMultiSelctSingleModsInGroup: Scalars['Boolean']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTimeISO']['output'];
   desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
   isMaxSelctSingleModsInGroupUnlimited: Scalars['Boolean']['output'];
   item?: Maybe<Array<Item>>;
   maxSelctSingleModsInGroup: Scalars['Float']['output'];
@@ -1156,6 +1192,7 @@ export type ModifierGroup = {
   multiSelect: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   optional: Scalars['Boolean']['output'];
+  posId?: Maybe<Scalars['String']['output']>;
   price?: Maybe<Scalars['Float']['output']>;
   pricingType: PriceTypeEnum;
   restaurantId: Restaurant;
@@ -1581,6 +1618,7 @@ export type PopulatedOrder = {
   __typename?: 'PopulatedOrder';
   _id: Scalars['String']['output'];
   appliedDiscount?: Maybe<DiscountData>;
+  canBeReOrdered: Scalars['Boolean']['output'];
   createdAt: Scalars['DateTimeISO']['output'];
   customerInfo: CustomerReceiptInfo;
   items: Array<PopulatedOrderItem>;
@@ -1882,6 +1920,7 @@ export type Restaurant = {
   __typename?: 'Restaurant';
   _id: Scalars['ID']['output'];
   address?: Maybe<AddressInfo>;
+  automation?: Maybe<RestaurantAutomation>;
   availability?: Maybe<Array<Availability>>;
   beverageCategory?: Maybe<Array<BeverageCategory>>;
   brandingLogo?: Maybe<Scalars['String']['output']>;
@@ -1904,7 +1943,7 @@ export type Restaurant = {
   restaurantConfigs?: Maybe<RestaurantConfigs>;
   socialInfo?: Maybe<SocialInfo>;
   status: RestaurantStatus;
-  syncCategoryRules: Array<SyncCategoryRule>;
+  syncRules: Array<SyncRule>;
   taxRates?: Maybe<Array<TaxRateInfo>>;
   timezone?: Maybe<TimezoneData>;
   type?: Maybe<RestaurantType>;
@@ -1912,6 +1951,11 @@ export type Restaurant = {
   updatedBy?: Maybe<User>;
   user: User;
   website?: Maybe<Scalars['String']['output']>;
+};
+
+export type RestaurantAutomation = {
+  __typename?: 'RestaurantAutomation';
+  guestConversion?: Maybe<GuestConversionAutomation>;
 };
 
 /** Restaurant category type enum. */
@@ -2043,10 +2087,12 @@ export enum StatusEnum {
   Inactive = 'inactive'
 }
 
-export type SyncCategoryRule = {
-  __typename?: 'SyncCategoryRule';
-  categoryId: Scalars['String']['output'];
-  categoryName: Scalars['String']['output'];
+export type SyncRule = {
+  __typename?: 'SyncRule';
+  id: Scalars['String']['output'];
+  isCategory: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  posId?: Maybe<Scalars['String']['output']>;
 };
 
 export type TaxRateInfo = {
@@ -2413,7 +2459,7 @@ export type FetchCustomerOrdersQueryVariables = Exact<{
 }>;
 
 
-export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemName: string, itemRemarks?: string | null, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgName: string, pricingType: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
+export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, canBeReOrdered: boolean, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemName: string, itemRemarks?: string | null, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgName: string, pricingType: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
 
 export type FetchOrderByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3057,6 +3103,7 @@ export const FetchCustomerOrdersDocument = gql`
         }
       }
     }
+    canBeReOrdered
   }
 }
     `;

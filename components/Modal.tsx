@@ -132,7 +132,7 @@ const Modal: React.FC<{
   //   };
   // }, [showMenu]);
 
-    useEffect(() => {
+  useEffect(() => {
     // Assuming there's only one restaurant, auto-select it when modal opens
     if (!showCalendar) {
       setShowCalendar(true);
@@ -603,7 +603,7 @@ const Modal: React.FC<{
                   disabled={!isDelivery}
                   onClick={() => setTempOrderType(OrderType.Delivery)}
                 >
-                  {isDelivery ? "Delivery" : "Delivery Unavailable"}
+                  {isDelivery ? "Delivery by Uber" : "Delivery Unavailable"}
                 </button>
               </div>
             </div>
@@ -681,6 +681,14 @@ const Modal: React.FC<{
                 </div>
               ) : (
                 <div>
+                  <div className="p-3 pl-0 sm:pl-0 sm:p-4 rounded-r-lg mb-4">
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      <span className="font-semibold">Note: </span>
+                      Delivery fees are charged by Uber. The restaurant earns
+                      nothing from delivery services. Please reach out to Uber
+                      support for any issues.
+                    </p>
+                  </div>
                   <h3 className="sm:text-2xl text-xl  font-bold mb-4  text-gray-800 font-online-ordering">
                     Delivery Address
                   </h3>
@@ -847,8 +855,8 @@ const Modal: React.FC<{
               <div className="grid grid-cols-1 gap-2 sm:gap-3 mb-6 max-h-[33vh]  pr-2 ">
                 {timesList.length === 0 && restaurantClose ? (
                   <div className="w-full justify-center flex items-center">
-                     <p className="text-lg md:text-xl mt-10 text-center">
-                      Restaurant is closed for today! 
+                    <p className="text-lg md:text-xl mt-10 text-center">
+                      Restaurant is closed for today!
                       <br />
                       We&apos;ll back tommorow...
                     </p>

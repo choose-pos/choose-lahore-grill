@@ -1,6 +1,7 @@
 import { Env } from "@/env";
 import { AccountPreference } from "@/generated/graphql";
 import CustomerDataStore from "@/store/customerData";
+import RestaurantStore from "@/store/restaurant";
 import ToastStore from "@/store/toast";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
@@ -31,12 +32,11 @@ const CustomerVerification = ({
   });
   const [showOtp, setShowOtp] = useState(false);
   const [error, setError] = useState("");
-  const [emailConsent, setEmailConsent] = useState<boolean>(false);
-  const [textOffersConsent, setTextOffersConsent] = useState<boolean>(false);
   const [timer, setTimer] = useState(0);
 
   const { setToastData } = ToastStore();
   const { setCustomerData, customerData } = CustomerDataStore();
+  const { restaurantData } = RestaurantStore();
 
   const [existingCustomer, setExistingCustomer] = useState<{
     firstName: string;
@@ -82,8 +82,8 @@ const CustomerVerification = ({
               lastName: formData.lastName,
               otp: formData.otp,
               accountPreferences: {
-                email: emailConsent,
-                sms: textOffersConsent,
+                email: true,
+                sms: true,
               },
             },
           })
@@ -104,8 +104,8 @@ const CustomerVerification = ({
             lastName: formData.lastName,
             otp: formData.otp,
             accountPreferences: {
-              email: emailConsent,
-              sms: textOffersConsent,
+              email: true,
+              sms: true,
             },
           });
           setToastData({
@@ -133,7 +133,6 @@ const CustomerVerification = ({
       verifyOtp();
     }
   }, [
-    emailConsent,
     formData.email,
     formData.firstName,
     formData.lastName,
@@ -142,7 +141,6 @@ const CustomerVerification = ({
     setCustomerData,
     setIsOtpVerified,
     setToastData,
-    textOffersConsent,
   ]);
 
   const validateForm = () => {
@@ -170,14 +168,10 @@ const CustomerVerification = ({
     if (!validateForm()) return;
 
     try {
-      let accountPreferences: AccountPreference = {
-        email: false,
-        sms: false,
+      const accountPreferences: AccountPreference = {
+        email: true,
+        sms: true,
       };
-      if (emailConsent)
-        accountPreferences = { ...accountPreferences, email: true };
-      if (textOffersConsent)
-        accountPreferences = { ...accountPreferences, sms: true };
       const response = await fetchWithAuth(() =>
         sdk.sendOTPGuestOrder({
           verify: {
@@ -313,39 +307,8 @@ const CustomerVerification = ({
             placeholder="alex@example.com"
           />
         </div>
-        <div className="flex items-center">
-          <input
-            id="emailOffers"
-            type="checkbox"
-            className="h-4 w-4 accent-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
-            checked={emailConsent}
-            onChange={(e) => setEmailConsent(e.target.checked)}
-          />
-          <label
-            htmlFor="emailOffers"
-            className="ml-2 block text-sm text-gray-900 cursor-pointer"
-          >
-            Receive exclusive offers in your inbox
-          </label>
-        </div>
-        <div className="flex items-center">
-          <input
-            id="textOffers"
-            type="checkbox"
-            className="h-4 w-4 accent-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
-            checked={textOffersConsent}
-            onChange={(e) => setTextOffersConsent(e.target.checked)}
-          />
-          <label
-            htmlFor="textOffers"
-            className="ml-2 block text-sm text-gray-900 cursor-pointer"
-          >
-            Receive special offers by text
-          </label>
-        </div>
-
         <p className="text-xs text-gray-500">
-          {`By continuing, you agree to receive updates via email and SMS, and accept our`}{" "}
+          {`By verifying your OTP, you agree to receive promotional and transactional emails and SMS from ${restaurantData?.name} and our technology partner Choose, and accept our`}{" "}
           <Link
             href={"https://www.choosepos.com/terms-conditions"}
             passHref
@@ -361,6 +324,7 @@ const CustomerVerification = ({
           >
             <span className="underline font-semibold">{`Privacy Policy`}</span>
           </Link>
+          {`. You can opt out of promotional communications at any time from your profile.`}
         </p>
 
         {showOtp ? (
