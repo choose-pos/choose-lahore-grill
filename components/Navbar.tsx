@@ -40,7 +40,6 @@ const staggerItem = {
 };
 
 const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isOffersOpen, setIsOffersOpen] = useState(false);
   const [isMobileOffersOpen, setIsMobileOffersOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
   >([]);
   const { restaurantData } = RestaurantStore();
   const { cartCountInfo } = useCartStore();
-  const { setCartOpen, setSignInOpen } = useSidebarStore();
+  const { setCartOpen, setSignInOpen, isMenuOpen, setIsMenuOpen } = useSidebarStore();
   const { setToastData } = ToastStore();
   const { meCustomerData, setMeCustomerData } = meCustomerStore();
   const { NavData } = NavDataStore();

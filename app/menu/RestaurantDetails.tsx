@@ -88,7 +88,7 @@ RestaurantDetailsProps) {
   } = useCartStore();
   const searchParams = useSearchParams();
   // const { cartCountInfo } = useCartStore();
-  const { setCartOpen } = useSidebarStore();
+  const { setCartOpen, isMenuOpen, setIsMenuOpen } = useSidebarStore();
   const { setToastData } = ToastStore();
   const [showButton, setShowButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -813,7 +813,7 @@ RestaurantDetailsProps) {
         )}
       </div>
 
-      {loading ? null : (
+       {loading || isMenuOpen ? null : (
         <div
           className={`${
             cartCountInfo > 0 ? "bottom-[4.5rem]" : "bottom-[1.5rem]"
