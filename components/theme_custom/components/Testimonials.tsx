@@ -71,13 +71,27 @@ const Testimonials: React.FC<IReviewSectionProps> = ({ id, reviews }) => {
   return (
     <div
       id={id}
-      className="relative w-full flex flex-col items-center justify-center px-4 sm:px-6 md:px-12 lg:px-16 xl:px-24 py-12 text-center overflow-hidden bg-bg2"
+      className="relative w-full flex flex-col items-center justify-center px-4 sm:px-6 md:px-12 lg:px-16 xl:px-24 py-12 text-center overflow-hidden bg-primaryColor"
     >
       <Image
         src={texture}
         alt="Texture Frame"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none mix-blend-multiply z-50 rounded-lg"
       />
+
+        <h2 
+          className="font-secondary text-3xl sm:text-4xl md:text-5xl text-center capitalize mb-6 sm:mb-8"
+          style={{
+            color: isContrastOkay(
+              Env.NEXT_PUBLIC_PRIMARY_COLOR,
+              Env.NEXT_PUBLIC_BACKGROUND_COLOR
+            )
+              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+              : Env.NEXT_PUBLIC_TEXT_COLOR,
+          }}
+        >
+          Reviews
+        </h2>
 
       <Carousel
         setApi={setApi}
@@ -91,6 +105,7 @@ const Testimonials: React.FC<IReviewSectionProps> = ({ id, reviews }) => {
         className="w-full overflow-hidden max-w-8xl mx-auto"
       >
         <CarouselContent className="transition-transform duration-300 ease-out">
+          
           {reviews.map((review, index) => (
             <CarouselItem
               key={index}
@@ -101,24 +116,24 @@ const Testimonials: React.FC<IReviewSectionProps> = ({ id, reviews }) => {
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true }}
-                className="p-1"
+                // className="p-1"
               >
                 <Card className="border-none bg-transparent shadow-none">
                   <CardContent
-                    className="flex flex-col items-center p-0 sm:p-6 text-black"
-                    // style={{
-                    //   color: isContrastOkay(
-                    //     Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                    //     Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                    //   )
-                    //     ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                    //     : Env.NEXT_PUBLIC_TEXT_COLOR,
-                    // }}
+                    className="flex flex-col items-center p-0 sm:p-4"
+                    style={{
+                      color: isContrastOkay(
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                      )
+                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        : Env.NEXT_PUBLIC_TEXT_COLOR,
+                    }}
                   >
-                    <h2 className="font-secondary text-3xl sm:text-4xl md:text-5xl text-center capitalize">
+                    {/* <h2 className="font-secondary text-3xl sm:text-4xl md:text-5xl text-center capitalize">
                       {"Reviews"}
-                    </h2>
-                    <p className="font-primary text-base sm:text-xl leading-relaxed pt-4 sm:pt-6 md:pt-8 lg:pt-10 font-normal text-opacity-80">
+                    </h2> */}
+                    <p className="font-primary text-base sm:text-xl leading-relaxed  font-normal text-opacity-80">
                       {`"${review.content}"`}
                     </p>
                     {review.name ? (
@@ -138,9 +153,14 @@ const Testimonials: React.FC<IReviewSectionProps> = ({ id, reviews }) => {
             <button
               key={index}
               onClick={() => handleDotClick(index)}
-              className={`w-2.5 h-2.5 rounded-full border-2 transition-all duration-200`}
+              className={`w-4 h-4 rounded-full border-2 transition-all duration-200`}
               style={{
-                borderColor: "#000",
+                borderColor: isContrastOkay(
+                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                )
+                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  : Env.NEXT_PUBLIC_TEXT_COLOR,
                 backgroundColor:
                   current === index
                     ? isContrastOkay(
