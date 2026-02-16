@@ -798,6 +798,41 @@ export type Dropoff = {
   notes?: Maybe<Scalars['String']['output']>;
 };
 
+export type EdgeBoxInventory = {
+  __typename?: 'EdgeBoxInventory';
+  _id: Scalars['ID']['output'];
+  assignedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  assignedRestaurant?: Maybe<Restaurant>;
+  awsIotCertId?: Maybe<Scalars['String']['output']>;
+  balenaDeviceId?: Maybe<Scalars['String']['output']>;
+  balenaFleet?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTimeISO']['output'];
+  deviceRam?: Maybe<Scalars['Float']['output']>;
+  deviceStorageSize?: Maybe<Scalars['Float']['output']>;
+  edgeBoxId: Scalars['String']['output'];
+  edgeDeviceModel?: Maybe<EdgeDeviceModel>;
+  edgeDeviceStorageType?: Maybe<EdgeDeviceStorageType>;
+  macAddress?: Maybe<Scalars['String']['output']>;
+  shortCode: Scalars['String']['output'];
+  updatedAt: Scalars['DateTimeISO']['output'];
+};
+
+export type EdgeDeviceInfo = {
+  __typename?: 'EdgeDeviceInfo';
+  edgeDeviceId: EdgeBoxInventory;
+  shortCode: Scalars['String']['output'];
+};
+
+export enum EdgeDeviceModel {
+  Rpi4 = 'RPI4',
+  Rpi5 = 'RPI5'
+}
+
+export enum EdgeDeviceStorageType {
+  Sd = 'SD',
+  Ssd = 'SSD'
+}
+
 /** Enum used for storing static values of Estimated Revenue */
 export enum EstimatedRevenueEnum {
   Above1500K = 'Above1500K',
@@ -1205,6 +1240,7 @@ export type ModifierGroupInfo = {
   __typename?: 'ModifierGroupInfo';
   _id: ModifierGroup;
   id: Scalars['String']['output'];
+  masterStatus: StatusEnum;
   name: Scalars['String']['output'];
   order: Scalars['Float']['output'];
   pricingType: PriceTypeEnum;
@@ -1234,6 +1270,7 @@ export type ModifierInfo = {
   desc?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isItem: Scalars['Boolean']['output'];
+  masterStatus: StatusEnum;
   name: Scalars['String']['output'];
   order: Scalars['Float']['output'];
   preSelect: Scalars['Boolean']['output'];
@@ -1929,6 +1966,7 @@ export type Restaurant = {
   cuisine?: Maybe<Array<CuisineData>>;
   deliveryConfig?: Maybe<DeliveryConfig>;
   dineInCapacity?: Maybe<Scalars['Float']['output']>;
+  edgeDevice?: Maybe<EdgeDeviceInfo>;
   email: Scalars['String']['output'];
   foodType?: Maybe<Array<FoodType>>;
   fulfillmentConfig?: Maybe<FulfillmentConfig>;
@@ -1973,6 +2011,7 @@ export type RestaurantConfigs = {
   onlineOrdering?: Maybe<Scalars['Boolean']['output']>;
   pickup?: Maybe<Scalars['Boolean']['output']>;
   scheduleOrders?: Maybe<Scalars['Boolean']['output']>;
+  showItemFilters?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type RestaurantInfo = {
@@ -2261,6 +2300,7 @@ export type Visibility = {
 /** WalkthroughStates type enum  */
 export enum WalkthroughStates {
   Campaign = 'Campaign',
+  GuestConversions = 'GuestConversions',
   Loyalty = 'Loyalty',
   Main = 'Main',
   Menu = 'Menu',
@@ -2571,7 +2611,7 @@ export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: {
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null } | null, processingConfig?: { __typename?: 'ProcessingConfig', feePercent?: number | null, maxFeeAmount?: number | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
+export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null, showItemFilters?: boolean | null } | null, processingConfig?: { __typename?: 'ProcessingConfig', feePercent?: number | null, maxFeeAmount?: number | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
 
 export type GetCustomerCategoriesAndItemsQueryVariables = Exact<{
   ItemOptionSelected?: InputMaybe<Array<ItemOptionsEnum> | ItemOptionsEnum>;
@@ -3373,6 +3413,7 @@ export const GetCustomerRestaurantDetailsDocument = gql`
       allowTips
       onlineOrdering
       scheduleOrders
+      showItemFilters
     }
     processingConfig {
       feePercent

@@ -637,11 +637,13 @@ RestaurantDetailsProps) {
                 // value={searchQuery}
                 onChange={handleSearch}
               />
-              <FilterDropdown
-                selectedCategories={selectedCategories}
-                handleCheckboxChange={handleCheckboxChange}
-                onClearAll={handleClearAllFilters}
-              />
+             {restaurant.restaurantConfigs.showItemFilters !== false && (
+                <FilterDropdown
+                  selectedCategories={selectedCategories}
+                  handleCheckboxChange={handleCheckboxChange}
+                  onClearAll={handleClearAllFilters}
+                />
+              )}
               {shouldShow && !isMobile && cartCountInfo > 0 ? (
                 <Link href={`/menu/cart`} passHref>
                   <button

@@ -113,6 +113,7 @@ const PaymentStatusPage = () => {
             onlineOrdering: Restaurant.restaurantConfigs?.onlineOrdering,
             pickup: Restaurant.restaurantConfigs?.pickup,
             scheduleOrders: Restaurant.restaurantConfigs?.scheduleOrders,
+            showItemFilters: Restaurant.restaurantConfigs?.showItemFilters,
           },
           deliveryConfig: {
             provideDelivery: Restaurant.deliveryConfig?.provideDelivery,
