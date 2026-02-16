@@ -244,12 +244,14 @@ RestaurantDetailsProps) {
   }, [showFilter, toggleFilter]);
 
   useEffect(() => {
-    if (categoryType) {
-      const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
+    if (categoryType && categoryType.length > 0) {
       params.set("filters", categoryType.join(","));
-      const newUrl = `${window.location.pathname}?${params.toString()}`;
-      window.history.replaceState({}, "", newUrl);
+    } else {
+      params.delete("filters");
     }
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
   }, [categoryType]);
 
   useEffect(() => {
@@ -260,6 +262,14 @@ RestaurantDetailsProps) {
       setCategoryType(filters);
     }
   }, []);
+
+  useEffect(() => {
+    if (restaurant.restaurantConfigs.showItemFilters === false) {
+      if (selectedCategories && selectedCategories.length > 0) {
+        handleClearAllFilters();
+      }
+    }
+  }, [restaurant.restaurantConfigs.showItemFilters, selectedCategories]);
 
   const searchHandler = (searchValue: string) => {
     setSearchQuery(searchValue.trim());
