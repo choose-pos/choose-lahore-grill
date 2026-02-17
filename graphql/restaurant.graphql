@@ -58,6 +58,7 @@ query GetCustomerRestaurantDetails {
     socialInfo {
       facebook
       instagram
+      googleMapsLink
     }
     availability {
       day

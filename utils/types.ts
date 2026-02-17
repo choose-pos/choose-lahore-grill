@@ -30,6 +30,7 @@ interface SocialInfo {
   facebook?: string;
   instagram?: string;
   twitter?: string;
+  googleMapsLink?: string;
 }
 
 export interface Availability {

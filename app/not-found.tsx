@@ -98,6 +98,7 @@ export default async function NotFound() {
         socialInfo={{
           facebook: socialInfo?.facebook,
           instagram: socialInfo?.instagram,
+          googleMapsLink: socialInfo?.googleMapsLink,
         }}
         restaurantName={name}
       />

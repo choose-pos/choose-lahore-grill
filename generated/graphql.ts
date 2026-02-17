@@ -2098,6 +2098,7 @@ export type SocialInfo = {
   __typename?: 'SocialInfo';
   _id: Scalars['ID']['output'];
   facebook?: Maybe<Scalars['String']['output']>;
+  googleMapsLink?: Maybe<Scalars['String']['output']>;
   instagram?: Maybe<Scalars['String']['output']>;
 };
 
@@ -2416,7 +2417,7 @@ export type GetCmsDetailsQuery = { __typename?: 'Query', getCmsDetails?: { __typ
 export type GetCmsRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCmsRestaurantDetailsQuery = { __typename?: 'Query', getCmsRestaurantDetails?: { __typename?: 'Restaurant', _id: string, name: string, brandingLogo?: string | null, email: string, phone: string, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', displayName: string } | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null } | null } | null };
+export type GetCmsRestaurantDetailsQuery = { __typename?: 'Query', getCmsRestaurantDetails?: { __typename?: 'Restaurant', _id: string, name: string, brandingLogo?: string | null, email: string, phone: string, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', displayName: string } | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null, googleMapsLink?: string | null } | null } | null };
 
 export type CmsContactUsMutationVariables = Exact<{
   input: CmsContactInput;
@@ -2611,7 +2612,7 @@ export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: {
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null, showItemFilters?: boolean | null } | null, processingConfig?: { __typename?: 'ProcessingConfig', feePercent?: number | null, maxFeeAmount?: number | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
+export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null, showItemFilters?: boolean | null } | null, processingConfig?: { __typename?: 'ProcessingConfig', feePercent?: number | null, maxFeeAmount?: number | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null, googleMapsLink?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
 
 export type GetCustomerCategoriesAndItemsQueryVariables = Exact<{
   ItemOptionSelected?: InputMaybe<Array<ItemOptionsEnum> | ItemOptionsEnum>;
@@ -2943,6 +2944,7 @@ export const GetCmsRestaurantDetailsDocument = gql`
     socialInfo {
       facebook
       instagram
+      googleMapsLink
     }
   }
 }
@@ -3464,6 +3466,7 @@ export const GetCustomerRestaurantDetailsDocument = gql`
     socialInfo {
       facebook
       instagram
+      googleMapsLink
     }
     availability {
       day

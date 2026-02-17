@@ -144,6 +144,8 @@ const PaymentStatusPage = () => {
             ? {
                 facebook: Restaurant.socialInfo.facebook ?? undefined,
                 instagram: Restaurant.socialInfo.instagram ?? undefined,
+                googleMapsLink: Restaurant.socialInfo.googleMapsLink ?? undefined,
+
               }
             : undefined,
           availability: Restaurant.availability || undefined,
