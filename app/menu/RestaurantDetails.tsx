@@ -36,6 +36,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import { FiSearch, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { HiMenu } from "react-icons/hi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
 import RecentOrders from "@/components/partners/RecentOrders";
@@ -95,6 +96,7 @@ RestaurantDetailsProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const { setSignInOpen, setIsSignUpOpen } = useSidebarStore();
 
+  const [isSticky, setIsSticky] = useState(false);
   // const IntialCategory = categories;
 
   const isDelivery = restaurant.deliveryConfig.provideDelivery;
@@ -603,6 +605,23 @@ RestaurantDetailsProps) {
     }
   }, [filteredCategories]);
 
+  // Detect when the category bar becomes sticky
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mobileCategoryBarRef.current) {
+        const rect = mobileCategoryBarRef.current.getBoundingClientRect();
+        setIsSticky(rect.top <= 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial state
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   // No online ordering check
   if (!isOnlineOrdering) {
     return <NoOnlineOrder />;
@@ -637,17 +656,30 @@ RestaurantDetailsProps) {
           className="w-full bg-white font-online-ordering sticky top-0 border-t z-10 mb-4 py-2 border-b border-b-gray-100 shadow-md"
         >
           <div className="bg-white w-full mobile-category-bar max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
-            <div className="relative flex items-center mb-2 md:mb-5 pt-2 w-full">
-              <FiSearch className="absolute left-4 text-gray-400" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search menu items..."
-                className="w-full pl-10 pr-4 py-2 rounded-[40px] border border-gray-300 focus:outline-none"
-                // value={searchQuery}
-                onChange={handleSearch}
-              />
-             {restaurant.restaurantConfigs.showItemFilters !== false && (
+            <div className="relative flex items-center mb-2 md:mb-5 pt-2 w-full gap-1">
+              {isSticky && (
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="lg:hidden py-2 pr-2 rounded-md text-gray-600 hover:bg-gray-100 flex-shrink-0"
+                  aria-label="Open menu"
+                >
+                  <HiMenu size={24} />
+                </button>
+              )}
+              
+              <div className="relative flex items-center flex-1">
+                <FiSearch className="absolute left-4 text-gray-400" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search menu items..."
+                  className="w-full pl-10 pr-4 py-2 rounded-[40px] border border-gray-300 focus:outline-none"
+                  // value={searchQuery}
+                  onChange={handleSearch}
+                />
+              </div>
+              
+              {restaurant.restaurantConfigs.showItemFilters !== false && (
                 <FilterDropdown
                   selectedCategories={selectedCategories}
                   handleCheckboxChange={handleCheckboxChange}
