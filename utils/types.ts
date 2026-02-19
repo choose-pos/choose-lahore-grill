@@ -30,6 +30,7 @@ interface SocialInfo {
   facebook?: string;
   instagram?: string;
   twitter?: string;
+  googleMapsLink?: string;
 }
 
 export interface Availability {
@@ -53,6 +54,7 @@ export interface CustomerRestaurant {
     allowTips?: boolean | null;
     onlineOrdering?: boolean | null;
     scheduleOrders?: boolean | null;
+    showItemFilters?: boolean | null;
   };
      processingConfig?: {
     feePercent?: number | null;

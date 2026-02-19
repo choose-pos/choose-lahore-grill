@@ -7,6 +7,7 @@ query GetCustomerRestaurantDetails {
       allowTips
       onlineOrdering
       scheduleOrders
+      showItemFilters
     }
     processingConfig {
       feePercent
@@ -57,6 +58,7 @@ query GetCustomerRestaurantDetails {
     socialInfo {
       facebook
       instagram
+      googleMapsLink
     }
     availability {
       day

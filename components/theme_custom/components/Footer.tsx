@@ -8,6 +8,7 @@ interface IFooterProps {
   socialInfo: {
     instagram?: string | null;
     facebook?: string | null;
+    googleMapsLink?: string | null;
   };
   hours: string[];
   contact: {
@@ -52,10 +53,13 @@ const Footer: React.FC<IFooterProps> = ({
               className="h-full w-full object-contain object-left"
             />
           </div>
-          <Link
+           <Link
             passHref
             target="_blank"
-            href={`https://maps.google.com/?q=${coords[0]},${coords[1]}`}
+            href={
+                socialInfo.googleMapsLink ||
+                `https://maps.google.com/?q=${coords[0]},${coords[1]}`
+              }
           >
             <p className="mb-4">{address}</p>
           </Link>

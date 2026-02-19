@@ -35,6 +35,7 @@ async function getRestaurantDetails() {
         onlineOrdering: Restaurant.restaurantConfigs?.onlineOrdering,
         pickup: Restaurant.restaurantConfigs?.pickup,
         scheduleOrders: Restaurant.restaurantConfigs?.scheduleOrders,
+        showItemFilters: Restaurant.restaurantConfigs?.showItemFilters,
       },
       fulfillmentConfig: {
         deliveryTime: Restaurant.fulfillmentConfig?.deliveryTime,
@@ -88,6 +89,8 @@ async function getRestaurantDetails() {
         ? {
             facebook: Restaurant.socialInfo.facebook ?? undefined,
             instagram: Restaurant.socialInfo.instagram ?? undefined,
+            googleMapsLink: Restaurant.socialInfo.googleMapsLink ?? undefined,
+
           }
         : undefined,
       availability: Restaurant.availability || undefined,

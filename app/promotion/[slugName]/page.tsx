@@ -283,6 +283,7 @@ export default async function PromoPage({ params }: PromoPageProps) {
                 socialInfo={{
                   facebook: socialInfo?.facebook,
                   instagram: socialInfo?.instagram,
+                  googleMapsLink: socialInfo?.googleMapsLink,
                 }}
                 restaurantName={name}
               />

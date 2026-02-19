@@ -59,6 +59,7 @@ export default function PartyClient({
         socialInfo={{
           facebook: socialInfo?.facebook,
           instagram: socialInfo?.instagram,
+          googleMapsLink: socialInfo?.googleMapsLink,
         }}
         restaurantName={name}
         brandingLogo={brandingLogo ?? ""}

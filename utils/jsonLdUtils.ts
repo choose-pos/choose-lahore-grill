@@ -36,6 +36,7 @@ interface Availability {
 interface SocialInfo {
   facebook?: string | null;
   instagram?: string | null;
+  googleMapsLink?: string | null;
 }
 
 interface Restaurant {

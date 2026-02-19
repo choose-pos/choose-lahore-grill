@@ -90,6 +90,21 @@ export default {
       maxWidth: {
         "8xl": "100rem",
       },
+       animation: {
+        "bounce-flash": "bounce-flash 1.2s infinite",
+      },
+      keyframes: {
+        "bounce-flash": {
+          "0%, 100%": {
+            transform: "translateY(0)",
+            opacity: "0.4",
+          },
+          "50%": {
+            transform: "translateY(-25%)",
+            opacity: "1",
+          },
+        },
+      },
       screens: {
         xsm: "485px",
         "custom-lg": "980px",
