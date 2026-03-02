@@ -30,6 +30,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "us-west-2.graphassets.com",
       },
+      {
+        protocol: "https",
+        hostname: "cloverstatic.com",
+      },
     ],
   },
 };
