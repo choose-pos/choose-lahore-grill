@@ -477,7 +477,8 @@ const CustomerVerification = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-800">
-                      Sign up and earn loyalty points with every order.
+                      Sign up and earn {loyaltyRule?.signUpValue}{" "}
+                      {loyaltyRule?.name ?? "loyalty points"} with every order.
                     </p>
                   </div>
                 </div>

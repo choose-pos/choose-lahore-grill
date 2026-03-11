@@ -229,6 +229,10 @@ const PromoCodes: React.FC = () => {
         return `$${code.discountValue} off`;
       case PromoDiscountType.Item:
         return `Free item with purchase`;
+      case PromoDiscountType.Free:
+        return `Free entire cart`;
+      case PromoDiscountType.FreeDelivery:
+        return `Free delivery`;
     }
   };
 
