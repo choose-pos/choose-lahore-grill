@@ -41,7 +41,7 @@ const Footer: React.FC<IFooterProps> = ({
   ];
 
   return (
-    <footer className="pt-12 pb-6 px-4 font-primary bg-bg1 text-textColor">
+    <footer className="pt-12 pb-24 md:pb-6 px-4 font-primary bg-primaryColor text-textColor">
       <div className="container mx-auto grid md:grid-cols-4 gap-8 md:gap-12">
         {/* Column 1: Logo, Address, Social Links */}
         <div className="flex flex-col items-start md:pl-10 !w-full">

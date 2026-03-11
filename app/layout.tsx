@@ -2,7 +2,7 @@
 
 import ToastStore from "@/store/toast";
 import dynamic from "next/dynamic";
-import { Bebas_Neue, Karla, Rubik } from "next/font/google";
+import { Bebas_Neue, Karla, Rubik, Roboto } from "next/font/google";
 import { Suspense, useEffect, useState } from "react";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -33,8 +33,8 @@ const Modal = dynamic(
   }
 );
 
-const karla_online_ordering = Karla({
-  weight: ["400", "500", "600", "700"],
+const roboto_online_ordering = Roboto({
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-online-ordering",
   display: "swap",
@@ -138,7 +138,7 @@ export default function RootLayout({
         <link rel="icon" href={process.env.NEXT_PUBLIC_FAVICON_URL} />
       </head>
       <body
-        className={`${karla_online_ordering.variable}`}
+        className={`${roboto_online_ordering.variable}`}
         style={{
           scrollBehavior: "smooth",
         }}

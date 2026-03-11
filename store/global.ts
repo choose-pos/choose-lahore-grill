@@ -1,8 +1,14 @@
+import { LoyaltyRedeemType } from "@/generated/graphql";
 import { create } from "zustand";
+
+type ClickState =
+  | { type: "view" | "add"; id: string }
+  | { type: "loyalty"; points: number; redeemType: LoyaltyRedeemType };
 
 type ModalStore = {
   showMenu: boolean;
   setShowMenu: (value: boolean) => void;
+
   isAsap: boolean;
   setIsAsap: (value: boolean) => void;
 
@@ -12,11 +18,9 @@ type ModalStore = {
   timesList: string[];
   setTimesList: (data: string[]) => void;
 
-  clickState: {
-    type: "view" | "add";
-    id: string;
-  } | null;
-  setClickState: (data: { type: "view" | "add"; id: string } | null) => void;
+  clickState: ClickState | null;
+  setClickState: (data: ClickState | null) => void;
+
   loadingItem: string | null;
   setLoadingItem: (data: string | null) => void;
 };
@@ -24,10 +28,13 @@ type ModalStore = {
 export const useModalStore = create<ModalStore>()((set) => ({
   showMenu: true,
   setShowMenu: (value) => set({ showMenu: value }),
+
   clickState: null,
   setClickState: (value) => set({ clickState: value }),
+
   loadingItem: null,
   setLoadingItem: (value) => set({ loadingItem: value }),
+
   isAsap: false,
   setIsAsap: (value) => set({ isAsap: value }),
 

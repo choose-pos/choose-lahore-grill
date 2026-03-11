@@ -23,7 +23,7 @@ const CartHeader = ({ text, route }: { text: string; route: string }) => {
         <p className="ml-2 text-base sm:text-lg font-online-ordering">{text}</p>
       </div>
 
-      <h3 className="text-2xl md:text-3xl font-semibold font-online-ordering">
+      <h3 className="text-2xl md:text-3xl font-medium font-online-ordering">
         {restaurantData?.name}
       </h3>
     </div>

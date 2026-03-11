@@ -8,7 +8,7 @@ const CartRemarks = () => {
     <div className="w-full mt-4 lg:mt-6 px-6">
       <label
         htmlFor="special-request"
-        className="mb-2 block font-semibold font-online-ordering text-xl"
+        className="mb-2 block font-medium font-online-ordering text-xl"
       >
         Special Request
       </label>
@@ -18,7 +18,7 @@ const CartRemarks = () => {
         onChange={(e) => setSpecialRemarks(e.target.value)}
         maxLength={150}
         placeholder="Enter any special request for restaurant..."
-        className="w-full p-2 border rounded-[20px] font-online-ordering focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
+        className="w-full p-2 border border-black/30 rounded-md font-online-ordering focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
       />
       <p className="text-sm mt-1 text-right font-online-ordering">
         {specialRemarks.length}/150 characters

@@ -72,14 +72,14 @@ export const StickyTabbar: React.FC<TabProps> = ({ onTabChange }) => {
 
   return (
     <div className="  sticky md:top-24 top-20 left-0 z-10 w-full md:w-auto">
-      <div className="hidden md:block top-32 left-0 bg-white shadow-lg rounded-[40px] z-10 mb-4 w-[320px]">
+      <div className="hidden md:block top-32 left-0 bg-white shadow-lg rounded-md z-10 mb-4 w-[320px]">
         <div className="flex flex-col justify-between items-start py-4 px-4">
           <div className="flex flex-col items-start space-y-2 w-full mt-4">
             {tabs.map((tab, index) => (
               <div key={index} className="w-full">
                 <button
                   onClick={() => handleTabClick(tab)}
-                  className={`px-4 py-2 rounded-[40px] w-full text-start text-xl  ${
+                  className={`px-4 py-2 rounded-md w-full text-start text-xl  ${
                     activeTab === tab
                       ? "bg-primaryColor text-white"
                       : "text-gray-500 hover:bg-bgGray"
@@ -105,13 +105,13 @@ export const StickyTabbar: React.FC<TabProps> = ({ onTabChange }) => {
         </div>
       </div>
 
-      <div className="md:hidden font-online-ordering  z-20 bg-white border-b-[1px] border-gray-100  rounded-full mb-3 mx-auto">
+      <div className="md:hidden font-online-ordering  z-20 bg-white border-b-[1px] border-gray-100  rounded-md mb-3 mx-auto">
         <div className="flex overflow-x-auto  items-center justify-between">
           {tabs.map((tab, index) => (
             <button
               key={index}
               onClick={() => handleTabClick(tab)}
-              className={`flex-shrink-0 px-7 py-2 rounded-full text-start ${
+              className={`flex-shrink-0 px-7 py-2 rounded-md text-start ${
                 activeTab === tab
                   ? "bg-primaryColor text-white"
                   : "text-gray-500 hover:bg-bgGray"
@@ -304,7 +304,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
             </div>
           </CardContent>
         </Card> */}
-        <Card className="bg-white shadow-lg transition-all duration-300 h-auto sm:h-[180px] rounded-[20px]">
+        <Card className="bg-white shadow-lg transition-all duration-300 h-auto sm:h-[180px] rounded-md">
           <CardContent className="py-5 px-5 relative h-full flex flex-col justify-between">
             <div className="flex items-start gap-3">
               {reward.image && (
@@ -320,7 +320,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
                 </div>
               )}
               <div className="flex flex-col items-start space-y-2">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 line-clamp-2">
+                <h3 className="text-lg sm:text-xl font-medium text-gray-800 line-clamp-2">
                   {title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600">
@@ -328,14 +328,14 @@ export const RewardsContent: React.FC<RewardsProps> = ({
                 </p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mt-2 gap-2">
-              <div className="flex items-center space-x-2 bg-bgGray rounded-full px-3 py-1">
+            <div className="flex  justify-between items-start sm:items-center w-full mt-2 gap-2">
+              <div className="flex items-center space-x-2 bg-bgGray rounded-md px-3 py-1">
                 <Image
                   src={Icon}
                   className="w-4 h-4 sm:w-5 sm:h-5 object-cover"
                   alt="icon"
                 />
-                <span className="text-base sm:text-lg font-semibold">
+                <span className="text-base sm:text-lg font-medium">
                   {points}
                 </span>
               </div>
@@ -407,23 +407,23 @@ export const RewardsContent: React.FC<RewardsProps> = ({
   ].sort((a, b) => a.points - b.points);
 
   return (
-    <div className="py-4 sm:py-6 px-4 sm:px-6 lg:px-12 xl:px-20">
+    <div className="py-4 sm:py-6 lg:px-12 xl:px-20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-lg p-4 sm:p-6 mb-6 sm:mb-10 shadow-md border-[1px] border-gray-100">
         <div className="w-full sm:w-auto mb-4 sm:mb-0">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 font-online-ordering">
+          <h2 className="text-2xl sm:text-3xl font-medium text-gray-800 mb-2 font-online-ordering">
             Your {name === "Points" ? "Reward Points" : name}
           </h2>
           <div className="flex items-center">
             <p className="text-base sm:text-lg text-gray-600">{desc}</p>
           </div>
         </div>
-        <div className="flex items-center rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-inner bg-bgGray w-full sm:w-auto justify-center">
+        <div className="flex items-center rounded-md px-4 sm:px-6 py-2 sm:py-3 shadow-inner bg-bgGray w-full sm:w-auto justify-center">
           <Image
             src={Icon}
             className="w-6 h-6 sm:w-8 sm:h-8 mr-2 object-cover"
             alt="icon"
           />
-          <span className="text-2xl sm:text-3xl font-bold">{balance}</span>
+          <span className="text-2xl sm:text-3xl font-medium">{balance}</span>
         </div>
       </div>
 
@@ -443,7 +443,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
           </>
         ) : (
           <div className="w-full flex justify-start items-center col-span-2">
-            <p className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 font-online-ordering">
+            <p className="text-lg sm:text-xl font-medium text-gray-900 mb-4 font-online-ordering">
               No available rewards at the moment! please check back later.
             </p>
           </div>
@@ -568,8 +568,8 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-12 xl:px-20">
-      <h2 className="text-3xl md:text-3xl font-bold mb-3 md:mb-4 font-online-ordering">
+    <div className="px-0 sm:px-6 lg:px-12 xl:px-20">
+      <h2 className="text-3xl md:text-3xl font-medium mb-3 md:mb-4 font-online-ordering">
         Details
       </h2>
       <p className="mb-4 text-sm text-gray-600">
@@ -594,7 +594,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             value={profile.email || ""}
             onChange={handleInputChange}
             required
-            className="mt-1 block w-full rounded-full border border-gray-300 shadow-sm py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm"
           />
         </div>
         <div>
@@ -610,7 +610,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             value={profile.firstName || ""}
             onChange={handleInputChange}
             required
-            className="mt-1 block w-full rounded-full border border-gray-300 shadow-sm py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm"
           />
         </div>
         <div>
@@ -626,7 +626,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             value={profile.lastName || ""}
             onChange={handleInputChange}
             required
-            className="mt-1 block w-full rounded-full border border-gray-300 shadow-sm py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm"
           />
         </div>
         <div>
@@ -656,7 +656,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             name="phone"
             value={profile.phone}
             readOnly
-            className="mt-1 block w-full rounded-full border border-gray-300 bg-gray-100 shadow-sm focus:ring-opacity-50 py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 shadow-sm focus:ring-opacity-50 py-2 px-3 text-sm"
           />
         </div>
         <div className="flex items-center space-x-2">
@@ -691,7 +691,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             passHref
             className="inline-block"
           >
-            <span className="underline font-semibold">{`Platform Terms`}</span>
+            <span className="underline font-medium">{`Platform Terms`}</span>
           </Link>{" "}
           and{" "}
           <Link
@@ -699,14 +699,14 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             passHref
             className="inline-block"
           >
-            <span className="underline font-semibold">{`Privacy Policy`}</span>
+            <span className="underline font-medium">{`Privacy Policy`}</span>
           </Link>
         </p>
         <br />
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-1.5 md:py-2 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          className="w-full py-1.5 md:py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-offset-2"
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -1163,7 +1163,7 @@ export const OrdersContent: React.FC = () => {
           ) : selectedOrder ? (
             <div className="font-online-ordering text-sm">
               <div className="text-center mb-4">
-                <h3 className="text-xl md:text-2xl font-bold">
+                <h3 className="text-xl md:text-2xl font-medium">
                   {selectedOrder.restaurantInfo.name}
                 </h3>
                 <p className="text-sm text-gray-700">
@@ -1239,7 +1239,7 @@ export const OrdersContent: React.FC = () => {
                 )} */}
 
               <div className="border-t border-b py-2 mb-4">
-                <div className="grid grid-cols-12 font-bold">
+                <div className="grid grid-cols-12 font-medium">
                   <span className="col-span-9">Item</span>
                   {/* <span className="col-span-3 text-center">Qty</span> */}
                   <span className="col-span-3 text-right">Total</span>
@@ -1395,7 +1395,7 @@ export const OrdersContent: React.FC = () => {
                   </div>
                 ) : null}
 
-                <div className="flex justify-between font-bold text-lg">
+                <div className="flex justify-between font-medium text-lg">
                   <span>Total</span>
                   <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
                 </div>
@@ -1512,7 +1512,7 @@ export const OrdersContent: React.FC = () => {
 
               {selectedOrder.specialRemark && (
                 <div className="mt-4 bg-yellow-50 p-4 rounded-md">
-                  <h4 className="font-bold mb-2">Restaurant Remarks</h4>
+                  <h4 className="font-medium mb-2">Restaurant Remarks</h4>
                   <p>{selectedOrder.specialRemark}</p>
                 </div>
               )}
@@ -1530,7 +1530,7 @@ export const OrdersContent: React.FC = () => {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-12 xl:px-20">
+    <div className="lg:px-12 xl:px-20">
       <div className="w-full">
         <div className="space-y-4 sm:space-y-6 w-full">
           {currentOrders.map((order, index) => (
@@ -1560,35 +1560,35 @@ export const OrdersContent: React.FC = () => {
               <div className="w-full lg:w-1/4 grid grid-cols-2  sm:grid-cols-2 lg:grid-cols-1 gap-4 pr-4">
                 <div className="space-y-2">
                   <div className="text-base text-gray-600">Date:</div>
-                  <span className="text-lg lg:text-xl font-semibold">
+                  <span className="text-base lg:text-lg font-medium">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </span>
                 </div>
 
                 <div className="space-y-2">
                   <div className="text-base text-gray-600">Order Id:</div>
-                  <span className="text-lg lg:text-xl font-semibold">
+                  <span className="text-base lg:text-lg font-medium">
                     {order.orderId}
                   </span>
                 </div>
 
                 <div className="space-y-2">
                   <div className="text-base text-gray-600">Order Type:</div>
-                  <span className="text-lg lg:text-xl font-semibold">
+                  <span className="text-base lg:text-lg font-medium">
                     {order.orderType}
                   </span>
                 </div>
 
                 <div className="space-y-2">
                   <div className="text-base text-gray-600">Total Amount:</div>
-                  <span className="text-lg lg:text-xl font-semibold">
+                  <span className="text-base lg:text-lg font-medium">
                     ${order.totalAmount?.toFixed(2)}
                   </span>
                 </div>
               </div>
 
               {/* Right Column - Items & Action */}
-              <div className="flex-1 flex flex-col pl-0 lg:pl-8 border-l border-gray-200">
+              <div className="flex-1 flex flex-col pl-0 lg:pl-8 lg:border-l border-gray-200">
                 {/* Failure Reason Display */}
                 {/* {order.status === OrderStatus.Failed &&
                   order.systemRemark !== "" && (
@@ -1709,7 +1709,7 @@ export const OrdersContent: React.FC = () => {
                 <div className="flex gap-2 justify-end mt-auto">
                   {order.canBeReOrdered && (order?.totalAmount ?? 0) > 0 ? (
                     <button
-                      className="px-6 py-2 bg-primary text-white rounded-full text-base transition-colors"
+                      className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
                       onClick={() => reOrder(order._id)}
                       style={{
                         color: isContrastOkay(
@@ -1725,7 +1725,7 @@ export const OrdersContent: React.FC = () => {
                   ) : null}
 
                   <button
-                    className="px-6 py-2 bg-primary text-white rounded-full text-base transition-colors"
+                    className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
                     onClick={() => openModal(order._id)}
                     style={{
                       color: isContrastOkay(

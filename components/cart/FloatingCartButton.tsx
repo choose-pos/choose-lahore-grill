@@ -82,44 +82,50 @@ const FloatingCartButton = ({ count }: { count: number }) => {
   // Show button logic: always show on mobile, use scroll position on desktop
   const shouldShow = isMobile || showButton;
 
-  return ( 
-    <div className="sticky bottom-0 pb-6 pointer-events-none z-40 flex justify-center">
-
-      <Link href={`/menu/cart`} className="pointer-events-auto w-[90%]">
-      <button
-          className={`bg-primary font-online-ordering text-white px-4 py-3 rounded-full flex items-center justify-center text-base shadow-lg w-full
-        ${
-          isMobile
-            ? "" // Full width with margins on mobile
-            : shouldShow
-            ? "hidden"
-            : "hidden" // Hide on desktop based on scroll position
-        }`}
-        style={{
-          color: isContrastOkay(
-            Env.NEXT_PUBLIC_PRIMARY_COLOR,
-            Env.NEXT_PUBLIC_BACKGROUND_COLOR
-          )
-            ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-            : Env.NEXT_PUBLIC_TEXT_COLOR,
-        }}
+  return (
+    <>
+      <Link
+        href={`/menu/cart`}
+        className={`pointer-events-auto flex-1 md:w-[90%] md:flex-none md:hidden ${!shouldShow ? "hidden" : "block"}`}
       >
-         {count > 0
-          ? `${
-              isMobile
-                ? cartDetails?.amounts?.subTotalAmount &&
-                  cartDetails?.amounts?.subTotalAmount > 0
-                  ? `VIEW CART - $${(
-                      cartDetails?.amounts?.subTotalAmount ?? 0
-                    ).toFixed(2)}`
-                  : "Proceed to checkout"
-                : `VIEW CART (${count})`
-            }`
-          : "VIEW CART"}
-
-      </button>
-    </Link>
-  </div>
+        <button
+          className={`bg-primary font-online-ordering text-white px-4 py-3 rounded-md flex items-center justify-center text-base shadow-lg w-full`}
+          style={{
+            color: isContrastOkay(
+              Env.NEXT_PUBLIC_PRIMARY_COLOR,
+              Env.NEXT_PUBLIC_BACKGROUND_COLOR
+            )
+              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+              : Env.NEXT_PUBLIC_TEXT_COLOR,
+          }}
+        >
+          {count > 0 ? (
+            <div className="flex justify-between items-center w-full px-1">
+              <div className="flex flex-col items-start justify-center">
+                {cartDetails?.amounts?.subTotalAmount &&
+                cartDetails.amounts.subTotalAmount > 0 ? (
+                  <span className="font-bold text-base md:text-lg leading-tight mb-0.5">
+                    ${cartDetails.amounts.subTotalAmount.toFixed(2)}
+                  </span>
+                ) : (
+                  <span className="font-bold text-sm md:text-base leading-tight mb-0.5">
+                    Proceed to checkout
+                  </span>
+                )}
+                <span className="font-semibold text-xs md:text-sm leading-tight tracking-wide">
+                  CART
+                </span>
+              </div>
+              <div className="px-3 py-1.5 md:px-4 md:py-2 rounded-md font-bold text-sm md:text-base border border-current">
+                {count} ITEM{count > 1 ? "S" : ""}
+              </div>
+            </div>
+          ) : (
+            <span className="font-semibold py-2">VIEW CART</span>
+          )}
+        </button>
+      </Link>
+    </>
   );
 };
 

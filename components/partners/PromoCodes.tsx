@@ -73,7 +73,7 @@ const PromoModal: React.FC<{
               </code>
               <button
                 onClick={(e) => handleCopy(e, promoData.code || "")}
-                className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-2 flex items-center gap-2 hover:bg-gray-200 rounded-lg transition-colors"
                 aria-label={
                   copiedCode === promoData.code ? "Copied!" : "Copy code"
                 }
@@ -244,7 +244,7 @@ const PromoCodes: React.FC = () => {
 
   return (
     <div className="w-full py-4 max-w-8xl mx-auto">
-      <h2 className="text-xl sm:text-3xl font-bold mb-4 font-online-ordering">
+      <h2 className="text-xl sm:text-3xl font-medium mb-4 font-online-ordering">
         Offers and Rewards
       </h2>
       <div className="w-full max-w-full overflow-hidden">
@@ -258,13 +258,13 @@ const PromoCodes: React.FC = () => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <div className="flex cursor-pointer gap-4 sm:gap-6 pb-4 w-max">
+          <div className="flex gap-4 sm:gap-6 pb-4 w-max cursor-pointer">
             {promoCodeData.map((code, index) => (
               <div
                 key={index}
                 onClick={() => openModal(code)}
                 data-promo-card
-                className="bg-white border  transition-all duration-300  md:h-32 shrink-0 rounded-[20px]"
+                className="bg-white border  transition-all duration-300 w-64 md:w-72 shrink-0 rounded-md"
               >
                 <div className="p-3 md:p-4 h-full flex flex-col justify-center">
                   <div className="flex items-center justify-between">
@@ -275,7 +275,7 @@ const PromoCodes: React.FC = () => {
                       {code.description && (
                         <div className="relative group">
                           <div className="flex flex-wrap items-center gap-1">
-                            <p className="text-xs sm:text-sm text-gray-600 font-online-ordering  truncate">
+                            <p className="text-xs sm:text-sm text-gray-600 font-online-ordering truncate">
                               {code.description && code.description.length > 30
                                 ? `${code.description.substring(0, 30)}...`
                                 : code.description}
@@ -314,7 +314,7 @@ const PromoCodes: React.FC = () => {
                       <Image
                         src={discountImg2}
                         alt="discount Img"
-                        className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
+                        className="w-10 h-10 sm:w-14 sm:h-14 flex-shrink-0"
                       />
                     </div>
                   </div>

@@ -375,7 +375,7 @@ const CartPage = ({
         {/* Left Side */}
         <div className="col-span-1 lg:col-span-6 w-full lg:h-fit lg:sticky lg:top-0">
           <CartHeader text={"Back to Menu"} route="/menu" />
-          <p className="mb-2 block font-semibold font-online-ordering text-xl px-6">
+          <p className="mb-2 block font-medium font-online-ordering text-xl px-6">
             Cart items ({cartCountInfo})
           </p>
           <CartItems
@@ -423,7 +423,7 @@ const CartPage = ({
               // }}
               disabled={actionLoading || isCartLoading}
               onClick={handleProceedToCheckout}
-              className="w-full bg-primary py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+              className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -455,7 +455,7 @@ const CartPage = ({
           // }}
           disabled={actionLoading || isCartLoading}
           onClick={handleProceedToCheckout}
-          className="w-full bg-primary py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+          className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,

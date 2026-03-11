@@ -91,68 +91,63 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
   return (
     <>
       <div className="w-full px-6">
-        <p className="font-online-ordering font-semibold text-xl">
+        <p className="font-online-ordering font-medium text-xl">
           {cartDetails?.delivery ? "Delivery Tip" : "Tip"}
         </p>
-        <div className="font-online-ordering grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-4 mt-4 w-full">
+        <div className="font-online-ordering grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 w-full">
           {[10, 15, 20].map((tip) => (
             <button
               key={tip}
-              onClick={() => handleTipSelection(tip)}
-              className={`text-center justify-center flex items-center space-x-1 px-2 sm:px-4 py-2 rounded-full border-2 text-sm sm:text-base whitespace-nowrap overflow-hidden ${
-                selectedTip === tip ? "border-black" : "bg-bgGray"
+              onClick={() => handleTipSelection(selectedTip === tip ? 0 : tip)}
+              className={`flex flex-col items-center justify-center  rounded-md border-2 transition-all duration-200 ${
+                selectedTip === tip
+                  ? "border-primary bg-gray-50"
+                  : "border-gray-200 bg-white hover:bg-gray-50"
               }`}
             >
-              <span>{tip}%</span>
-              <span>
-                ($
+              <span
+                className={` sm:text-lg ${selectedTip === tip ? "text-black" : "text-gray-800"}`}
+              >
+                {tip}%
+              </span>
+              <span
+                className={`text-xs sm:text-sm ${selectedTip === tip ? "text-black font-medium" : "text-gray-500"}`}
+              >
+                $
                 {(
                   (cartDetails?.amounts.subTotalAmount ?? 0) *
                   (tip / 100)
                 ).toFixed(2)}
-                )
               </span>
-              {selectedTip === tip && (
-                <IoCloseCircleOutline
-                  size={18}
-                  className="ml-1 hover:opacity-80 font-bold text-black"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTipSelection(0);
-                  }}
-                />
-              )}
             </button>
           ))}
           <button
             onClick={() => {
-              setShowCustomTipModal(true);
+              if (
+                ![10, 15, 20].includes(selectedTip ?? 0) &&
+                (selectedTip ?? 0) > 0
+              ) {
+                // If it's already a custom amount and clicked, we clear it (toggle off)
+                handleTipSelection(0);
+              } else {
+                setShowCustomTipModal(true);
+              }
             }}
-            className={`text-center justify-center flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full border-2 text-sm sm:text-base whitespace-nowrap overflow-hidden ${
+            className={`flex flex-col items-center justify-center py-3 sm:py-4 rounded-md border-2 transition-all duration-200 ${
               ![10, 15, 20].includes(selectedTip ?? 0)
-                ? "border-black text-black "
-                : "bg-bgGray"
+                ? "border-primary bg-gray-50"
+                : "border-gray-200 bg-white hover:bg-gray-50"
             }`}
           >
             {![10, 15, 20].includes(selectedTip ?? 0) ? (
-              <span>Custom</span>
+              <>
+                <span className=" text-base  text-black">Custom</span>
+                <span className="text-xs sm:text-sm text-black font-medium">
+                  ${(tipAmt ?? 0).toFixed(2)}
+                </span>
+              </>
             ) : (
-              <span>Custom Tip</span>
-            )}
-            {![10, 15, 20].includes(selectedTip ?? 0) && (
-              <span className="flex items-center space-x-2">
-                <span>(${(tipAmt ?? 0).toFixed(2)})</span>
-                {(tipAmt ?? 0) > 0 ? (
-                  <IoCloseCircleOutline
-                    size={18}
-                    className="hover:opacity-80 text-black"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      handleTipSelection(0);
-                    }}
-                  />
-                ) : null}
-              </span>
+              <span className=" sm:text-lg text-gray-800 my-auto">Other</span>
             )}
           </button>
         </div>
@@ -230,24 +225,24 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
                     setTipPercentInput(parseFloat(tipP.toFixed(2)));
                     setTipAmtInput(Number(input));
                   }}
-                  className="mt-1 block p-2 w-full rounded-md text-xs sm:text-sm border-gray-700 ring-2"
+                  className="mt-1 block p-2 w-full rounded-md text-xs sm:text-sm border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-200"
                 />
               </div>
             </div>
-            <div className="mt-4 sm:mt-6 flex justify-start md:justify-end space-x-2">
+            <div className="mt-4 sm:mt-6 flex justify-end md:justify-end space-x-2">
               <button
                 onClick={() => {
                   setTipAmtInput(tipAmt ?? 0);
                   setTipPercentInput(tipPercent ?? 0);
                   setShowCustomTipModal(false);
                 }}
-                className="py-1 px-3 sm:py-2 sm:px-4 bg-gray-300 rounded-full text-xs sm:text-base font-online-ordering"
+                className="py-1 px-3 sm:py-2 sm:px-4 bg-gray-200 rounded-md text-xs sm:text-base font-online-ordering"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmCustomTip}
-                className="py-1 px-3 sm:py-2 sm:px-4 bg-primary text-white rounded-full text-xs sm:text-base font-online-ordering"
+                className="py-1 px-3 sm:py-2 sm:px-4 bg-primary text-white rounded-md text-xs sm:text-base font-online-ordering"
                 style={{
                   color: isContrastOkay(
                     Env.NEXT_PUBLIC_PRIMARY_COLOR,

@@ -23,7 +23,7 @@ import {
   extractErrorMessage,
   extractFreeDiscountItemDetails,
 } from "@/utils/UtilFncs";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -527,58 +527,84 @@ const ItemModal = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center z-40 p-4"
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      onClick={closeModal}
+      className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-[2px] flex justify-center items-end sm:items-center z-50"
     >
-      <motion.div
-        variants={fadeIn("up", "tween", 0, 0.3)}
-        initial="hidden"
-        animate="show"
-        exit="hidden"
-        className="relative bg-bgGray rounded-[30px] shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[90vh] md:max-h-[90vh]"
-      >
-        {(loading || !categoryItem) && !error ? (
-          <div className="animate-pulse p-4">
-            <div className="h-40 bg-gray-300 rounded mb-4"></div>
-            <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-full"></div>
-          </div>
-        ) : (
-          <>
-            <div className="absolute top-[3px] right-[3px] z-50">
+      <AnimatePresence mode="wait">
+          <motion.div
+            key="modal-content"
+            initial={{ y: "100vh", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100vh", opacity: 0 }}
+            transition={{ type: "tween", stiffness: 300, damping: 30, mass: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-white rounded-t-md sm:rounded-md overflow-hidden shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] md:max-h-[90vh]"
+          >
+            {!loading && categoryItem && (
+            <div className="absolute top-[3px] right-[3px] z-[50]">
               <button
                 onClick={closeModal}
-                className=" text-white bg-black bg-opacity-50 rounded-full p-2.5 hover:bg-opacity-70 transition-all duration-300 !z-50 mt-1 mr-2"
+                className="text-white bg-black bg-opacity-50 rounded-full p-2.5 hover:bg-opacity-70 transition-all duration-300 !z-50 mt-1 mr-2"
               >
                 <IoMdClose size={20} />
               </button>
             </div>
-            <div className="overflow-y-scroll scrollbar-hide">
-              {!categoryItem ? null : (
-                <RenderContent
-                  categoryItem={categoryItem}
-                  clearModifierSelection={clearModifierSelection}
-                  handleModifierChange={handleModifierChange}
-                  handleModifierQuantityChange={handleModifierQuantityChange}
-                  getModifierQuantity={getModifierQuantity}
-                  quantity={quantity}
-                  handleQuantityChange={handleQuantityChange}
-                  validationErrors={validationErrors}
-                  validationErrorRef={validationErrorRef}
-                  specialRequest={specialRequest}
-                  setSpecialRequest={setSpecialRequest}
-                  totalPrice={totalPrice}
-                  handleAddToCart={handleAddToCart}
-                  isAvailable={isAvailable}
-                  isMobile={isMobile}
-                  selectedModifiers={selectedModifiers}
-                  addToCartLoading={addToCartLoading}
-                />
-              )}
-            </div>
-          </>
-        )}
-      </motion.div>
+          )}
+          <div className="overflow-y-scroll scrollbar-hide flex-1">
+            {(loading || !categoryItem) && !error ? (
+              <div className="animate-pulse">
+                {/* Image shimmer */}
+                <div className="h-[300px] bg-gray-200 w-full rounded-t-md" />
+                {/* Title + price shimmer */}
+                <div className="px-6 sm:px-8 py-4 border-b border-gray-200">
+                  <div className="h-7 bg-gray-200 rounded-md w-2/3 mb-3" />
+                  <div className="h-5 bg-gray-200 rounded-md w-1/4" />
+                </div>
+                {/* Description shimmer */}
+                <div className="px-6 sm:px-8 py-4">
+                  <div className="h-4 bg-gray-200 rounded-md w-1/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded-md w-full mb-1" />
+                  <div className="h-4 bg-gray-200 rounded-md w-3/4" />
+                </div>
+                {/* Modifier group shimmer */}
+                <div className="px-6 sm:px-8 py-4 border-t border-gray-100">
+                  <div className="h-5 bg-gray-200 rounded-md w-1/3 mb-4" />
+                  <div className="space-y-3">
+                    <div className="h-10 bg-gray-200 rounded-md w-full" />
+                    <div className="h-10 bg-gray-200 rounded-md w-full" />
+                    <div className="h-10 bg-gray-200 rounded-md w-full" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                {!categoryItem ? null : (
+                  <RenderContent
+                    categoryItem={categoryItem}
+                    clearModifierSelection={clearModifierSelection}
+                    handleModifierChange={handleModifierChange}
+                    handleModifierQuantityChange={handleModifierQuantityChange}
+                    getModifierQuantity={getModifierQuantity}
+                    quantity={quantity}
+                    handleQuantityChange={handleQuantityChange}
+                    validationErrors={validationErrors}
+                    validationErrorRef={validationErrorRef}
+                    specialRequest={specialRequest}
+                    setSpecialRequest={setSpecialRequest}
+                    totalPrice={totalPrice}
+                    handleAddToCart={handleAddToCart}
+                    isAvailable={isAvailable}
+                    isMobile={isMobile}
+                    selectedModifiers={selectedModifiers}
+                    addToCartLoading={addToCartLoading}
+                  />
+                )}
+              </>
+            )}
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
 };

@@ -171,17 +171,13 @@ const CartItems = ({
   };
 
   const handleEditItem = async (itemId: string, id: string) => {
+    const itemToEdit = cartData.find((item) => item._id === id);
+    if (itemToEdit) {
+      setEditingItem(itemToEdit);
+      setIsEditing(true);
+    }
     try {
-      const customerItemDetails = await sdk.getCustomerItem({ id: itemId });
-
-      if (customerItemDetails?.getCustomerItem) {
-        const itemToEdit = cartData.find((item) => item._id === id);
-
-        if (itemToEdit) {
-          setEditingItem(itemToEdit);
-          setIsEditing(true);
-        }
-      }
+      await sdk.getCustomerItem({ id: itemId });
     } catch (error) {
       setToastData({ message: extractErrorMessage(error), type: "error" });
       console.error("Failed to fetch item details", error);
@@ -192,8 +188,7 @@ const CartItems = ({
     <div className="pr-2">
       <div className="w-full flex flex-col overflow-y-scroll h-auto px-6 max-h-[40vh] ios-scroll-fix ">
         {freeItemInCart ? (
-          <div className="mb-6 rounded-[20px] bg-white border p-4">
-            <div className="w-full flex justify-between items-start space-x-2">
+          <div className="mb-6 bg-white border-b border-gray-200 pb-6 pt-2">            <div className="w-full flex justify-between items-start space-x-2">
               <div className="flex items-start gap-4">
                 {freeItemImage ? (
                   <div className="w-14 h-14 relative self-start flex-shrink-0">
@@ -233,8 +228,7 @@ const CartItems = ({
         {cartData.map((item) => (
           <div
             key={item._id}
-            className="last:mb-2 mb-6 rounded-[20px] border bg-white p-4"
-          >
+            className="last:mb-2 mb-6 border-b border-gray-200 last:border-b-0 bg-white pb-6 pt-2"          >
             <div className="flex items-center gap-4">
               {/* Content wrapper */}
               {
@@ -311,7 +305,7 @@ const CartItems = ({
                 )}
 
                 {/* Bottom section with price and quantity controls */}
-                <div className="flex justify-between items-center pt-2">
+                <div className="flex justify-between items-center">
                   <div className="flex items-center bg-white p-1 w-fit">
                     <button
                       onClick={() => handleDecreaseQuantity(item._id)}

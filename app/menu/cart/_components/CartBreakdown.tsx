@@ -45,7 +45,7 @@ const CartBreakdown = ({ amounts, loyaltyRule }: ICartBreakdownProps) => {
         <span className="text-base md:text-lg font-online-ordering">
           Subtotal
         </span>
-        <span className="text-base md:text-lg font-semibold font-online-ordering">
+        <span className="text-base md:text-lg font-medium font-online-ordering">
           ${amounts.subTotalAmt.toFixed(2)}
         </span>
       </div>
@@ -121,7 +121,7 @@ const CartBreakdown = ({ amounts, loyaltyRule }: ICartBreakdownProps) => {
       {(restaurantData?.restaurantConfigs?.allowTips ?? false) ? (
         <div className="flex justify-between mb-2">
           <span className="text-base md:text-lg font-online-ordering">
-            {[10, 15, 20].includes(cartDetails?.amounts?.tipPercent ?? 0)
+             {[10, 15, 20].includes(cartDetails?.amounts?.tipPercent ?? 0)
               ? `Tip (${cartDetails?.amounts?.tipPercent ?? 0}%)`
               : "Tip"}
           </span>

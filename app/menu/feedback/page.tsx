@@ -308,7 +308,7 @@ const OrderFeedbackComponent = () => {
   if (submitted) {
     return (
       <div className="min-h-[calc(100vh-161px)]  flex items-center justify-center p-4 font-primary bg-gray-50">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+        <div className="bg-white rounded-md shadow-lg p-8 max-w-md w-full text-center">
           <div className="mb-4">
             <svg
               className="w-16 h-16 mx-auto text-green-500"
@@ -352,7 +352,7 @@ const OrderFeedbackComponent = () => {
   return (
     <div className="bg-gray-50 py-8 px-4 font-primary">
       <div className="max-w-3xl mx-auto">
-        <div className=" bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        <div className=" bg-white rounded-md shadow-lg p-6 md:p-8">
           {/* Header */}
           <div className="flex items-center mb-6">
             <Link href="/menu">
@@ -413,7 +413,7 @@ const OrderFeedbackComponent = () => {
               onChange={(e) => setOverallRemarks(e.target.value)}
               maxLength={500}
               placeholder="Share your thoughts..."
-              className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent resize-none h-32"
+              className="w-full p-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent resize-none h-32"
             />
             <p className="text-sm text-gray-500 mt-2 text-right">
               {overallRemarks.length}/500 characters
@@ -541,7 +541,7 @@ const OrderFeedbackComponent = () => {
                           </span>
                         </div>
                         <StarRating
-                          rating={item.rating}
+                          rating={item.rating ?? 0}
                           hoveredRating={hoveredItemRatings[item.itemName] ?? 0}
                           onRate={(rating) =>
                             updateItemFeedback(item.itemName, "rating", rating)
@@ -592,7 +592,7 @@ const OrderFeedbackComponent = () => {
             <button
               onClick={handleSubmit}
               disabled={overallRating === 0 || isSubmitting}
-              className={`inline-block px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-full transition-all duration-200 ${
+              className={`inline-block px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-md transition-all duration-200 ${
                 overallRating === 0 || isSubmitting
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : isContrastOkay(

@@ -335,7 +335,7 @@ const PaymentStatusPage = () => {
   if (paymentFailed) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 font-online-ordering">
-        <div className="rounded-lg p-8 text-center flex flex-col items-center justify-center relative">
+        <div className="rounded-md p-8 text-center flex flex-col items-center justify-center relative">
           <Link href={"/menu"}>
             <div className="absolute top-4 left-4 flex items-center text-gray-500 hover:text-black cursor-pointer">
               <IoMdArrowBack size={16} />
@@ -454,7 +454,7 @@ const PaymentStatusPage = () => {
     if (feedbackSubmitted) {
       return (
         <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 font-primary bg-gray-50">
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="bg-white rounded-md shadow-lg p-8 max-w-md w-full text-center">
             <div className="mb-4">
               <svg
                 className="w-16 h-16 mx-auto text-green-500"
@@ -492,7 +492,7 @@ const PaymentStatusPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4 font-primary">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+          <div className="bg-white rounded-md shadow-lg p-6 md:p-8">
             {/* Header */}
             <div className="flex items-center mb-6">
               <Link href="/menu">
@@ -510,7 +510,7 @@ const PaymentStatusPage = () => {
             </p>
 
             {/* Order Details */}
-            <div className="bg-gray-50 p-4 rounded-xl mb-8">
+            <div className="bg-gray-50 p-4 rounded-md mb-8">
               <h3 className="font-semibold mb-2 text-gray-900">
                 Order Details
               </h3>
@@ -529,7 +529,7 @@ const PaymentStatusPage = () => {
               <label className="block font-semibold mb-4 text-lg text-gray-900">
                 Overall Rating <span className="text-red-500">*</span>
               </label>
-              <div className="flex flex-col items-center bg-gray-50 rounded-xl py-8">
+              <div className="flex flex-col items-center bg-gray-50 rounded-md py-8">
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -575,7 +575,7 @@ const PaymentStatusPage = () => {
                 onChange={(e) => setFeedbackRemark(e.target.value)}
                 maxLength={500}
                 placeholder="Share your thoughts..."
-                className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent resize-none h-32"
+                className="w-full p-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent resize-none h-32"
               />
               <p className="text-sm text-gray-500 mt-2 text-right">
                 {feedbackRemark.length}/500 characters
@@ -587,7 +587,7 @@ const PaymentStatusPage = () => {
               <button
                 onClick={handleSubmitFeedback}
                 disabled={rating === 0}
-                className={`inline-block px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-full transition-all duration-200 ${
+                className={`inline-block px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-md transition-all duration-200 ${
                   rating === 0
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : isContrastOkay(
@@ -612,7 +612,7 @@ const PaymentStatusPage = () => {
       {/* Feedback Modal - Fixed positioning */}
       {showFeedbackModal && isMobile && !feedbackSubmitted && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-md p-6 w-full max-w-md relative max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
             <button
               onClick={() => {
@@ -689,7 +689,7 @@ const PaymentStatusPage = () => {
                   onChange={(e) => setFeedbackRemark(e.target.value)}
                   maxLength={150}
                   placeholder="Share your experience with us..."
-                  className="w-full p-2 border rounded-[20px] font-primary focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
+                  className="w-full p-2 border rounded-md font-primary focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
                 />
                 <p className="text-sm mt-1 text-right font-primary">
                   {feedbackRemark.length}/150 characters
@@ -700,7 +700,7 @@ const PaymentStatusPage = () => {
               <button
                 onClick={handleSubmitFeedback}
                 disabled={rating === 0}
-                className={`mt-4 w-full px-6 py-2 rounded-full font-primary font-semibold transition-colors ${
+                className={`mt-4 w-full px-6 py-2 rounded-md font-primary font-semibold transition-colors ${
                   rating === 0
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-black text-white hover:bg-gray-800"
@@ -714,7 +714,7 @@ const PaymentStatusPage = () => {
       )}
 
       <div className="flex items-center justify-center z-50 min-h-screen mx-2">
-        <div className="bg-white p-8 my-5 rounded-lg shadow-lg w-full max-w-2xl relative overflow-y-scroll">
+        <div className="bg-white p-8 my-5 rounded-md shadow-lg w-full max-w-2xl relative overflow-y-scroll">
           <Link href={"/menu"}>
             <div className="flex items-center text-gray-500 hover:text-black cursor-pointer mb-6 ">
               <IoMdArrowBack size={16} />
@@ -1116,7 +1116,7 @@ const PaymentStatusPage = () => {
                           onChange={(e) => setFeedbackRemark(e.target.value)}
                           maxLength={150}
                           placeholder="Share your experience with us..."
-                          className="w-full p-2 border rounded-[20px] font-primary focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
+                          className="w-full p-2 border rounded-md font-primary focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
                         />
                         <p className="text-sm mt-1 text-right font-primary">
                           {feedbackRemark.length}/150 characters
@@ -1128,7 +1128,7 @@ const PaymentStatusPage = () => {
                         <button
                           onClick={handleSubmitFeedback}
                           disabled={rating === 0}
-                          className={`inline-block mt-4 px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-full transition-all duration-200 ${
+                          className={`inline-block mt-4 px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-md transition-all duration-200 ${
                             rating === 0
                               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                               : isContrastOkay(

@@ -37,6 +37,7 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
 }) => {
   const [categoryItem, setCategoryItem] =
     useState<ItemWithModifiersResponse | null>(null);
+  const [itemLoading, setItemLoading] = useState(true);
   const [selectedModifiers, setSelectedModifiers] =
     useState<SelectedModifiersState>({});
   const [specialRequest, setSpecialRequest] = useState<string>(item.remarks);
@@ -114,6 +115,8 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
       } catch (error) {
         console.error("Failed to fetch Item Details", error);
         setToastData({ message: extractErrorMessage(error), type: "error" });
+      } finally {
+        setItemLoading(false);
       }
     };
     fetchItemDetails();
@@ -329,48 +332,74 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
     return selection?.quantity || 0;
   };
 
-  if (!categoryItem) return null;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center p-4"
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center  z-50"
+      onClick={onClose}
     >
       <motion.div
         variants={fadeIn("up", "tween", 0, 0.3)}
         initial="hidden"
         animate="show"
         exit="hidden"
-        className="relative bg-bgGray rounded-[30px] shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[90vh] md:max-h-[90vh]"
+        className="relative bg-bgGray rounded-t-md md:rounded-md shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[90vh] md:max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute top-[3px] right-[3px] z-50">
-          <button
-            onClick={onClose}
-            className=" text-white bg-black bg-opacity-50 rounded-full p-2.5 hover:bg-opacity-70 transition-all duration-300 !z-50 mt-1 mr-2"
-          >
-            <IoMdClose size={20} />
-          </button>
-        </div>
+        {categoryItem && (
+          <div className="absolute top-[3px] right-[3px] z-50">
+            <button
+              onClick={onClose}
+              className="text-white bg-black bg-opacity-50 rounded-full p-2.5 hover:bg-opacity-70 transition-all duration-300 !z-50 mt-1 mr-2"
+            >
+              <IoMdClose size={20} />
+            </button>
+          </div>
+        )}
         <div className="overflow-y-scroll scrollbar-hide">
-          <RenderContent
-            categoryItem={categoryItem}
-            clearModifierSelection={clearModifierSelection}
-            handleModifierChange={handleModifierChange}
-            handleModifierQuantityChange={handleModifierQuantityChange}
-            getModifierQuantity={getModifierQuantity}
-            validationErrors={validationErrors}
-            specialRequest={specialRequest}
-            setSpecialRequest={setSpecialRequest}
-            totalPrice={totalPrice}
-            handleAddToCart={handleUpdateCart}
-            isMobile={isMobile}
-            isAvailable={true}
-            selectedModifiers={selectedModifiers}
-            isEdit={true}
-            addToCartLoading={addToCartLoading}
-          />
+          {itemLoading || !categoryItem ? (
+            <div className="animate-pulse">
+              <div className="h-[300px] bg-gray-200 w-full rounded-t-md" />
+              <div className="px-6 sm:px-8 py-4 border-b border-gray-200">
+                <div className="h-7 bg-gray-200 rounded-md w-2/3 mb-3" />
+                <div className="h-5 bg-gray-200 rounded-md w-1/4" />
+              </div>
+              <div className="px-6 sm:px-8 py-4">
+                <div className="h-4 bg-gray-200 rounded-md w-1/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded-md w-full mb-1" />
+                <div className="h-4 bg-gray-200 rounded-md w-3/4" />
+              </div>
+              <div className="px-6 sm:px-8 py-4 border-t border-gray-100">
+                <div className="h-5 bg-gray-200 rounded-md w-1/3 mb-4" />
+                <div className="space-y-3">
+                  <div className="h-10 bg-gray-200 rounded-md w-full" />
+                  <div className="h-10 bg-gray-200 rounded-md w-full" />
+                  <div className="h-10 bg-gray-200 rounded-md w-full" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <RenderContent
+              categoryItem={categoryItem}
+              clearModifierSelection={clearModifierSelection}
+              handleModifierChange={handleModifierChange}
+              handleModifierQuantityChange={handleModifierQuantityChange}
+              getModifierQuantity={getModifierQuantity}
+              validationErrors={validationErrors}
+              specialRequest={specialRequest}
+              setSpecialRequest={setSpecialRequest}
+              totalPrice={totalPrice}
+              handleAddToCart={handleUpdateCart}
+              isMobile={isMobile}
+              isAvailable={true}
+              selectedModifiers={selectedModifiers}
+              isEdit={true}
+              addToCartLoading={addToCartLoading}
+            />
+          )}
         </div>
       </motion.div>
     </motion.div>

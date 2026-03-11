@@ -165,7 +165,7 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
   }, [showMenu, selectedItem]);
 
   return (
-    <div className="relative flex flex-col">
+    <div className="relative flex flex-col min-h-screen">
       {!pathname.includes("checkout") &&
         !pathname.includes("payment-status") &&
         !pathname.includes("cart") &&

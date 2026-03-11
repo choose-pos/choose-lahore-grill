@@ -88,8 +88,14 @@ const CheckoutOrderSummary = () => {
 
       {/* View Items List */}
       {showOrderItems ? (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-11/12 max-w-lg">
+        <div
+          onClick={() => setShowOrderItems(false)}
+          className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white p-4 sm:p-6 rounded-md shadow-lg w-11/12 max-w-lg"
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl sm:text-2xl font-online-ordering">
                 Order Items ({cartCountInfo})
@@ -105,8 +111,7 @@ const CheckoutOrderSummary = () => {
             </div>
             <div className="w-full flex flex-col overflow-y-scroll h-auto max-h-[50vh]">
               {freeItemInCart ? (
-                <div className="mb-6 rounded-[20px] bg-white border p-4">
-                  <div className="w-full flex justify-between items-start space-x-2">
+                <div className="py-4 bg-white border-b border-gray-200">                  <div className="w-full flex justify-between items-start space-x-2">
                     <div className="flex items-start gap-4">
                       {freeItemImage ? (
                         <div className="w-14 h-14 relative self-start flex-shrink-0">
@@ -139,8 +144,7 @@ const CheckoutOrderSummary = () => {
               {cartData.map((item) => (
                 <div
                   key={item._id}
-                  className="last:mb-2 mb-6 rounded-[20px] border bg-white p-4"
-                >
+                  className="py-4 bg-white border-b border-gray-200 last:border-b-0"                >
                   <div className="flex items-center gap-4">
                     {/* Content wrapper */}
                     {item.itemImage ? (
@@ -149,8 +153,7 @@ const CheckoutOrderSummary = () => {
                           src={item.itemImage}
                           alt={item.itemName}
                           fill
-                          className={`object-cover object-center w-full h-full`}
-                        />
+                          className={`object-cover rounded-md object-center w-full h-full`}                        />
                       </div>
                     ) : null}
                     <div className="flex-grow flex flex-col gap-2">

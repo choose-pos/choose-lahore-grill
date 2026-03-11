@@ -323,7 +323,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
 
   const renderSignUpForm = () => (
     <form onSubmit={handleSubmit} className="font-online-ordering">
-      <h2 className="text-2xl font-bold mb-4 font-online-ordering">
+      <h2 className="text-2xl font-medium mb-4 font-online-ordering">
         Sign up and start earning {programName}!
       </h2>
       <hr />
@@ -342,7 +342,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               id="firstName"
               className={`mt-1 block w-full border ${
                 errors.firstName ? "border-red-500" : "border-gray-300"
-              } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
+              } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="Alex"
@@ -364,7 +364,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               id="lastName"
               className={`mt-1 block w-full border ${
                 errors.lastName ? "border-red-500" : "border-gray-300"
-              } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
+              } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="D"
@@ -388,7 +388,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             id="phone"
             className={`mt-1 block w-full border ${
               errors.phone ? "border-red-500" : "border-gray-300"
-            } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
+            } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
             value={phoneNumber}
             onChange={handlePhoneChange}
             placeholder="800-555-0175"
@@ -410,7 +410,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             id="email"
             className={`mt-1 block w-full border ${
               errors.email ? "border-red-500" : "border-gray-300"
-            } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
+            } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="alex@example.com"
@@ -456,7 +456,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         </p>
         <button
           type="submit"
-          className="w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary "
+          className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary "
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -511,7 +511,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
 
   const renderSignInForm = () => (
     <form onSubmit={handleSignInSubmit} className="font-online-ordering">
-      <h2 className="text-2xl font-bold mb-4 font-online-ordering">
+      <h2 className="text-2xl font-medium mb-4 font-online-ordering">
         Sign In to earn {programName}
       </h2>
       <hr />
@@ -530,7 +530,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             id="phone"
             className={`mt-1 block w-full border ${
               errors.phone ? "border-red-500" : "border-gray-300"
-            } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
+            } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
             value={phoneNumber}
             onChange={handlePhoneChange}
             placeholder="Enter 10 digit number"
@@ -541,7 +541,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         </div>
         <button
           type="submit"
-          className="w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary  capitalize font-online-ordering"
+          className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary  capitalize font-online-ordering"
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -580,14 +580,14 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           >
             <IoArrowBack size={24} />
           </button>
-          <h2 className="text-2xl font-bold font-online-ordering">
-            {isShowingSmsVerification ? "Verify SMS OTP" : "Verfify Email OTP"}
+          <h2 className="text-2xl font-medium font-online-ordering">
+            {isShowingSmsVerification ? "Verify SMS OTP" : "Verify Email OTP"}
           </h2>
         </div>
         <hr />
         <div className="space-y-4 mt-5">
           {!isShowingSmsVerification ? (
-            <p className="flex items-start text-xs text-gray-400 SMS">
+            <p className="flex items-start text-xs text-gray-400">
               {`Note: Please check your spam / trash folder if you don't find the verification code in your inbox.`}
             </p>
           ) : null}
@@ -605,7 +605,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               id="otp"
               className={`mt-1 block w-full border ${
                 errors.otp ? "border-red-500" : "border-gray-300"
-              } rounded-full shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
+              } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
               value={otp}
               onChange={handleOtpChange}
               placeholder="Enter 6 digit OTP"
@@ -635,7 +635,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           <div className="flex justify-between">
             <button
               type="submit"
-              className="w-full bg-primary text-white py-2 px-4 rounded-full font-online-ordering capitalize hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              className="w-full bg-primary text-white py-2 px-4 rounded-md font-online-ordering capitalize hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,

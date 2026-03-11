@@ -155,7 +155,7 @@ const RecentOrders = () => {
 
   return (
     <div className="font-online-ordering z-40">
-      <h2 className="text-xl sm:text-3xl font-bold mb-4 font-online-ordering">
+      <h2 className="text-xl sm:text-3xl font-medium mb-4 font-online-ordering">
         Recent Orders
       </h2>
       <div className="my-2">
@@ -172,15 +172,15 @@ const RecentOrders = () => {
           <CarouselContent className="-ml-4">
             {slides.map((slide, slideIndex) => (
               <CarouselItem key={slideIndex} className="pl-4 basis-full">
-                <div className="flex gap-4 h-full">
+                <div className="flex gap-4 tems-stretch">
                   {slide.map((order, index) => (
                     <div
                       key={order._id}
-                      className={`w-full ${
+                      className={`flex flex-col w-full ${
                         itemsPerSlide === 3 ? "md:w-1/3" : ""
                       }`}
                     >
-                      <div className="bg-white border transition-all duration-300 w-full min-h-44 shrink-0 rounded-[20px]">
+                      <div className="bg-white border transition-all duration-300 w-full flex-1 rounded-md">
                         <div className="p-3 md:p-4 h-full flex flex-col">
                           <div className="flex-grow">
                             <div className="flex items-center justify-between mb-2">
@@ -230,8 +230,7 @@ const RecentOrders = () => {
                                 disabled={
                                   loadingOrders[order._id] || modalLoading
                                 }
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-full bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300"
-                              >
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300"                              >
                                 {loadingOrders[order._id] ? (
                                   <div className="text-black flex items-center">
                                     <Loader2 className="w-4 h-4 mr-1 animate-spin" />

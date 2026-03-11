@@ -625,6 +625,7 @@ export type CustomerDetailsInput = {
   lastName: Scalars['String']['input'];
   otp: Scalars['String']['input'];
   phone: Scalars['String']['input'];
+  signUp?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type CustomerLoginVerificationInput = {
@@ -1743,9 +1744,9 @@ export type PromoCmsButton = {
 export type PromoCode = {
   __typename?: 'PromoCode';
   _id: Scalars['ID']['output'];
-  applicableCategory?: Maybe<Category>;
+  applicableCategory?: Maybe<Array<Category>>;
   applicableDays?: Maybe<Array<Day>>;
-  applicableItem?: Maybe<Item>;
+  applicableItem?: Maybe<Array<Item>>;
   code: Scalars['String']['output'];
   couponUsageSalesLimit?: Maybe<Scalars['Float']['output']>;
   couponUsageType: CouponUsageType;
@@ -1770,9 +1771,9 @@ export type PromoCode = {
 
 export type PromoCodeData = {
   __typename?: 'PromoCodeData';
-  applicableCategory?: Maybe<Category>;
+  applicableCategory?: Maybe<Array<Category>>;
   applicableDays?: Maybe<Array<Day>>;
-  applicableItem?: Maybe<Item>;
+  applicableItem?: Maybe<Array<Item>>;
   code: Scalars['String']['output'];
   discountItemId?: Maybe<Scalars['String']['output']>;
   discountItemName?: Maybe<Scalars['String']['output']>;
@@ -2289,6 +2290,7 @@ export type VerifyGuestOrderInput = {
 export type VerifyOtpGuestOrderResponse = {
   __typename?: 'VerifyOTPGuestOrderResponse';
   customer?: Maybe<Customer>;
+  promoCodeMessage?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
 
@@ -2486,7 +2488,7 @@ export type VerifyOtpGuestOrderQueryVariables = Exact<{
 }>;
 
 
-export type VerifyOtpGuestOrderQuery = { __typename?: 'Query', verifyOTPGuestOrder: { __typename?: 'VerifyOTPGuestOrderResponse', success: boolean, customer?: { __typename?: 'Customer', firstName?: string | null, lastName?: string | null, email?: string | null, phone: string } | null } };
+export type VerifyOtpGuestOrderQuery = { __typename?: 'Query', verifyOTPGuestOrder: { __typename?: 'VerifyOTPGuestOrderResponse', success: boolean, promoCodeMessage?: string | null, customer?: { __typename?: 'Customer', firstName?: string | null, lastName?: string | null, email?: string | null, phone: string } | null } };
 
 export type CreateOrderMutationVariables = Exact<{
   createOrder: CreateOrderInput;
@@ -3082,6 +3084,7 @@ export const VerifyOtpGuestOrderDocument = gql`
       email
       phone
     }
+    promoCodeMessage
   }
 }
     `;

@@ -68,7 +68,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
       <div className="flex items-center space-x-2">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 ${
+          className={`flex items-center space-x-2 px-3 py-2 rounded-md border border-gray-300 transition-all duration-200 ${
             selectedCategories && selectedCategories?.length > 0
               ? `w-auto`
               : `w-full`

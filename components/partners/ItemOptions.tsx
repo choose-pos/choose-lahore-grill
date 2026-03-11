@@ -297,8 +297,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
         {upsellItem.map((item) => (
           <div
             key={item.itemId}
-            className="flex items-center sm:gap-4 gap-2 border-[1px] rounded-[10px] border-gray-200 shadow-md"
-          >
+            className="flex items-center sm:gap-4 gap-2 border-b-[1px] last:border-b-0 border-gray-200 py-3"          >
             {item.image && (
               <div className="relative w-[84px] h-full sm:w-24  flex-shrink-0">
                 <Image
@@ -306,7 +305,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                   alt={item.name}
                   fill
                   // className="object-cover rounded-l-[10px]"
-                  className={`object-cover object-center w-full h-full rounded-l-[10px]`}
+                  className={`object-cover object-center w-full h-full rounded-[10px]`}
                 />
               </div>
             )}
@@ -351,7 +350,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                       <button
                         onClick={() => handleAddToCart(item.itemId, item.name)}
                         disabled={loadingItems[item.itemId]}
-                        className="font-medium min-w-[100px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-full"
+                        className="font-medium min-w-[100px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-md"
                       >
                         {loadingItems[item.itemId] ? (
                           <Loader2 size={16} className="animate-spin mx-auto" />
@@ -363,7 +362,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                       <button
                         onClick={() => handleUpdateCart(item.itemId)}
                         disabled={loadingItems[item.itemId]}
-                        className="font-medium min-w-[120px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-full"
+                        className="font-medium min-w-[120px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-md"
                       >
                         {loadingItems[item.itemId] ? (
                           <Loader2 size={16} className="animate-spin mx-auto" />

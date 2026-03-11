@@ -60,20 +60,20 @@ export default async function NotFound() {
       <div className="max-w-md w-full text-center ">
         {/* 404 Number */}
         <div className="mb-8">
-          <h1 className="text-8xl md:text-9xl font-bold font-online-ordering text-primaryColor">
+          <h1 className="text-8xl md:text-9xl font-medium font-online-ordering text-primaryColor">
             404
           </h1>
         </div>
 
         {/* Error Message */}
         <div className="mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 font-online-ordering">
+          <h2 className="text-2xl md:text-3xl font-medium mb-4 font-online-ordering">
             Page Not Found
           </h2>
-          <p className="text-lg mb-2 font-online-ordering opacity-80">
+          <p className="text-lg mb-2 font-online-ordering opacity-95">
             Oops! The page you&apos;re looking for doesn&apos;t exist.
           </p>
-          <p className="text-base font-online-ordering opacity-60">
+          <p className="text-base font-online-ordering opacity-80">
             It might have been moved, deleted, or you entered the wrong URL.
           </p>
         </div>

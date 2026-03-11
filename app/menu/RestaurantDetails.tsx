@@ -40,6 +40,7 @@ import { HiMenu } from "react-icons/hi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
 import RecentOrders from "@/components/partners/RecentOrders";
+import { OrderTypeData } from "@/store/orderType";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
@@ -108,6 +109,9 @@ RestaurantDetailsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+    const { setTempOrderType, tempOrderType, setPendingOrderType } =
+    OrderTypeData();
 
   const toggleFilter = () => {
     setShowFilter(!showFilter);
@@ -627,10 +631,12 @@ RestaurantDetailsProps) {
     return <NoOnlineOrder />;
   }
 
-  return (
-    <div className="w-full min-h-screen">
-      <main className="h-auto bg-white py-4 z-40">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
+   return (
+    <div
+      className={`w-full flex flex-col flex-1 ${loading ? "h-screen overflow-hidden" : ""}`}
+    >
+      <main className="h-auto bg-white py-4 z-20 shrink-0">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center max-w-8xl mx-auto px-4 md:px-20 lg:px-28">
           <div>
             <h2 className="md:text-3xl text-2xl mb-1 font-online-ordering">
               <span className=" font-online-ordering ">{restaurant.name}</span>
@@ -639,7 +645,7 @@ RestaurantDetailsProps) {
               <p>{restaurant.address?.addressLine1}</p>
             </div>
           </div>
-          <div className="flex space-x-4 mt-2 md:mt-0">
+          <div className="flex w-full md:w-auto mt-2 md:mt-0">
             <OrderOptions
               isDelivery={isDelivery}
               isPickUp={isPickUp}
@@ -649,15 +655,15 @@ RestaurantDetailsProps) {
         </div>
       </main>
 
-      <div className="flex flex-col bg-white w-full mx-auto relative">
+      <div className="flex flex-col bg-white w-full mx-auto relative flex-1">
         {/* Categories at top, Sticky */}
         <div
           ref={mobileCategoryBarRef}
-          className="w-full bg-white font-online-ordering sticky top-0 border-t z-10 mb-4 py-2 border-b border-b-gray-100 shadow-md"
+          className="w-full bg-white font-online-ordering sticky top-0 border-t z-20 mb-4 py-2 border-b border-b-gray-100 shadow-md"
         >
-          <div className="bg-white w-full mobile-category-bar max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
+          <div className="bg-white w-full mobile-category-bar max-w-8xl mx-auto px-4 md:px-20 lg:px-28">
             <div className="relative flex items-center mb-2 md:mb-5 pt-2 w-full gap-1">
-              {isSticky && (
+              {isSticky && !loading  && (
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="lg:hidden py-2 pr-2 rounded-md text-gray-600 hover:bg-gray-100 flex-shrink-0"
@@ -673,7 +679,7 @@ RestaurantDetailsProps) {
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search menu items..."
-                  className="w-full pl-10 pr-4 py-2 rounded-[40px] border border-gray-300 focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none"
                   // value={searchQuery}
                   onChange={handleSearch}
                 />
@@ -689,7 +695,7 @@ RestaurantDetailsProps) {
               {shouldShow && !isMobile && cartCountInfo > 0 ? (
                 <Link href={`/menu/cart`} passHref>
                   <button
-                    className={`bg-white font-online-ordering border border-primaryColor ml-2 px-6 py-2  rounded-full flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
+                    className={`bg-white font-online-ordering border border-primaryColor px-6 py-2 rounded-md flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
                     style={{
                       color: isContrastOkay(
                         "#ffffff",
@@ -740,7 +746,11 @@ RestaurantDetailsProps) {
                       <button
                         key={category._id}
                         data-category-id={category._id}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300 transition-all duration-200 whitespace-nowrap`}
+                        className={`flex-shrink-0 px-4 py-2 rounded-md text-start transition-all duration-200 whitespace-nowrap ${
+                          activeCategory === category._id
+                            ? ""
+                            : "hover:bg-gray-300"
+                        }`}
                         style={{
                           backgroundColor:
                             activeCategory === category._id
@@ -750,11 +760,22 @@ RestaurantDetailsProps) {
                             activeCategory === category._id
                               ? isContrastOkay(
                                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                                 )
                                 ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                                 : Env.NEXT_PUBLIC_TEXT_COLOR
                               : "black",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (activeCategory !== category._id) {
+                            e.currentTarget.style.backgroundColor = "#d1d5db"; // gray-300
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (activeCategory !== category._id) {
+                            e.currentTarget.style.backgroundColor =
+                              "transparent";
+                          }
                         }}
                         onClick={(e) =>
                           scrollToCategory(category._id, category.name, e)
@@ -788,7 +809,7 @@ RestaurantDetailsProps) {
         ) : (
           <div className="flex items-start w-full font-online-ordering">
             {/* Main Content */}
-            <div className="w-full max-w-8xl mx-auto xl:overflow-y-auto overflow-scroll px-6 md:px-20 lg:px-28">
+            <div className="w-full max-w-8xl mx-auto xl:overflow-y-auto px-6 md:px-20 lg:px-28">
               {!searchQuery && <RecentOrders />}
               {!searchQuery && <PromoCodes />}
               {!searchQuery && (
@@ -803,7 +824,7 @@ RestaurantDetailsProps) {
                     {!searchQuery && !categoryType ? (
                       // No search query and no filters - show store message
                       <>
-                        <h1 className="md:text-4xl text-2xl font-bold">
+                        <h1 className="md:text-4xl text-2xl font-medium">
                           Restaurant is not taking any orders for today
                         </h1>
 
@@ -812,7 +833,7 @@ RestaurantDetailsProps) {
                         </p>
                         <button
                           onClick={() => setShowMenu(false)}
-                          className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 `}
+                          className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-md border border-gray-300 transition-all duration-200 `}
                           type="button"
                         >
                           <span className="font-medium font-online-ordering">
@@ -823,7 +844,7 @@ RestaurantDetailsProps) {
                     ) : (
                       // Has search query or filters - show no results found
                       <>
-                        <h1 className="md:text-4xl text-2xl font-bold">
+                        <h1 className="md:text-4xl text-2xl font-medium">
                           No result found
                         </h1>
                         <p className="md:text-lg text-base">
@@ -857,18 +878,14 @@ RestaurantDetailsProps) {
         )}
       </div>
 
-       {loading || isMenuOpen ? null : (
-        <div
-          className={`${
-            cartCountInfo > 0 ? "bottom-[4.5rem]" : "bottom-[1.5rem]"
-          } sticky  pb-2 pointer-events-none z-40 flex justify-end`}
-        >
+      {loading || isMenuOpen  ? null : (
+        <div className="sticky bottom-0 pb-6 mt-auto pointer-events-none z-40 flex flex-row items-stretch justify-end px-4 gap-3 md:justify-center w-full md:hidden">
+          {cartCountInfo > 0 && <FloatingCartButton count={cartCountInfo} />}
           <button
             onClick={() => {
               setIsCategoriesPopupOpen(!isCategoriesPopupOpen);
             }}
-            className={`font-online-ordering flex-col text-white px-3 py-3 rounded-full flex items-center text-base mr-6 w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}
-            style={{
+    className={`font-online-ordering flex-col text-white px-3 py-2 rounded-md flex items-center justify-center text-sm w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}            style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
                 Env.NEXT_PUBLIC_BACKGROUND_COLOR
@@ -877,30 +894,32 @@ RestaurantDetailsProps) {
                 : Env.NEXT_PUBLIC_TEXT_COLOR,
             }}
           >
-            <MdMenuBook size={18} />
-            <span className="text-sm">Menu</span>
+            <MdMenuBook size={20} className="mb-0.5" />
+            <span>Menu</span>
           </button>
         </div>
       )}
-      {cartCountInfo > 0 ? <FloatingCartButton count={cartCountInfo} /> : null}
       <AnimatePresence>
         {isMobile && isCategoriesPopupOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center z-40 p-4"
-          >
+            onClick={() => setIsCategoriesPopupOpen(false)}
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center z-40 p-0"          >
             <motion.div
               variants={fadeIn("up", "tween", 0, 0.3)}
               initial="hidden"
               animate="show"
               exit="hidden"
-              className="relative bg-bgGray rounded-[20px] shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[70vh]"
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-bgGray rounded-t-md shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[70vh]"
             >
               <>
-                <div className="flex items-center justify-between font-online-ordering py-2 px-3 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Categories ({filteredCategories?.length || 0})</h2>
+                 <div className="flex items-center justify-between font-online-ordering py-4 px-3 border-b border-gray-200">
+                  <h2 className="text-lg font-medium">
+                    Categories ({filteredCategories?.length || 0})
+                  </h2>
                   <button
                     onClick={() => setIsCategoriesPopupOpen(false)}
                     className="text-gray-500 hover:text-gray-700"
@@ -916,7 +935,7 @@ RestaurantDetailsProps) {
                         <button
                           key={category._id}
                           data-category-id={category._id}
-                          className={`w-full text-left py-1.5 px-3 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
+                          className={`w-full text-left py-1.5 px-4 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
                           style={{
                             color:
                               activeCategory === category._id

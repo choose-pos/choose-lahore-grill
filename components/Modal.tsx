@@ -4,6 +4,7 @@ import {
   AddressInfoInput,
   OrderType,
   StateDataInput,
+  LoyaltyRedeemType,
 } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import { OrderTypeData } from "@/store/orderType";
@@ -21,7 +22,7 @@ import {
   isAsapAvailable,
 } from "@/utils/formattedTime";
 import { getDistance } from "@/utils/getDistance";
-import { sdk } from "@/utils/graphqlClient";
+import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { refreshCartDetails } from "@/utils/refreshCartDetails";
 import { Address, Availability } from "@/utils/types";
 import debounce from "lodash.debounce";
@@ -40,6 +41,9 @@ import { getOrCreateUserHash } from "@/utils/analytics";
 import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
 import { refreshCartCount } from "@/utils/getCartCountData";
 import { DateTime } from "luxon";
+import { useRouter } from "next/navigation";
+import { LuMoveLeft, LuMoveRight } from "react-icons/lu";
+import { FaArrowRightArrowLeft } from "react-icons/fa6";
 
 type PlaceType = {
   label: string;
@@ -56,6 +60,7 @@ const Modal: React.FC<{
   restaurantName: string;
   availability: Availability[];
 }> = ({ address, restaurantName }) => {
+  const router = useRouter();
   const {
     setShowMenu,
     daysList,
@@ -100,6 +105,11 @@ const Modal: React.FC<{
   const isDelivery = restaurantData?.deliveryConfig.provideDelivery;
   const isPickUp = restaurantData?.restaurantConfigs.pickup;
   const isScheduling = restaurantData?.restaurantConfigs.scheduleOrders;
+  const [isDateScrollable, setIsDateScrollable] = useState(false);
+  const dateScrollerRef = useRef<HTMLDivElement>(null);
+  const [scrollDateDirection, setScrollDateDirection] = useState<
+    "right" | "left"
+  >("right");
 
   useEffect(() => {
     if (cartDetails?.delivery && cartDetails.delivery.place) {
@@ -121,6 +131,51 @@ const Modal: React.FC<{
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  const checkScrollable = () => {
+    if (dateScrollerRef.current) {
+      const { scrollWidth, clientWidth } = dateScrollerRef.current;
+      setIsDateScrollable(scrollWidth > clientWidth);
+      handleDateScroll();
+    }
+  };
+
+  useEffect(() => {
+    checkScrollable();
+    window.addEventListener("resize", checkScrollable);
+    return () => window.removeEventListener("resize", checkScrollable);
+  }, [daysList, isScheduling, showSchedule]);
+
+  const scrollDates = () => {
+    if (dateScrollerRef.current) {
+      const scrollAmount = 150;
+      if (scrollDateDirection === "right") {
+        dateScrollerRef.current.scrollBy({
+          left: scrollAmount,
+          behavior: "smooth",
+        });
+      } else {
+        dateScrollerRef.current.scrollBy({
+          left: -scrollAmount,
+          behavior: "smooth",
+        });
+      }
+    }
+  };
+
+  const handleDateScroll = () => {
+    if (dateScrollerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = dateScrollerRef.current;
+      const atEnd = scrollLeft + clientWidth >= scrollWidth - 10;
+      const atStart = scrollLeft <= 10;
+
+      if (atEnd) {
+        setScrollDateDirection("left");
+      } else if (atStart) {
+        setScrollDateDirection("right");
+      }
+    }
+  };
+
   // useEffect(() => {
   //   if (!showMenu) {
   //     document.body.style.overflow = "hidden";
@@ -139,6 +194,15 @@ const Modal: React.FC<{
     }
   }, [showCalendar]);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
   // useEffect(()=> {
   //   const updateCartSession = async () => {
 
@@ -175,7 +239,7 @@ const Modal: React.FC<{
     try {
       const res = await sdk.AddToCart({
         items: {
-          itemId: clickState?.id ?? "",
+          itemId: itemId ?? "",
           qty: 1,
           categoryId: selectedCategoryId,
         },
@@ -280,6 +344,32 @@ const Modal: React.FC<{
           setDistance(distance);
         }
       }
+    }
+  };
+
+  const handleLoyaltyRedeem = async (
+    points: number,
+    redeemType: LoyaltyRedeemType,
+  ) => {
+    try {
+      const res = await fetchWithAuth(() =>
+        sdk.validateLoyaltyRedemptionOnCart({
+          input: { loyaltyPointsRedeemed: points, redeemType },
+        }),
+      );
+
+      if (res.validateLoyaltyRedemptionOnCart) {
+        const updatedCart = await refreshCartDetails();
+        if (updatedCart?.CartDetails) {
+          setCartDetails(updatedCart.CartDetails);
+        }
+        router.push(`/menu/cart`);
+      }
+    } catch (error) {
+      setToastData({
+        type: "error",
+        message: extractErrorMessage(error),
+      });
     }
   };
 
@@ -409,6 +499,8 @@ const Modal: React.FC<{
       if (clickState) {
         if (clickState.type === "add") {
           handleAddToCart(clickState.id);
+        } else if (clickState.type === "loyalty") {
+          handleLoyaltyRedeem(clickState.points, clickState.redeemType);
         } else {
           setSelectedItem(clickState.id);
         }
@@ -421,13 +513,14 @@ const Modal: React.FC<{
       if (clickState) {
         if (clickState.type === "add") {
           handleAddToCart(clickState.id);
+        } else if (clickState.type === "loyalty") {
+          handleLoyaltyRedeem(clickState.points, clickState.redeemType);
         } else {
           setSelectedItem(clickState.id);
         }
         setClickState(null);
       }
     }
-
     try {
       const res = await refreshCartDetails();
       if (res?.CartDetails) {
@@ -555,51 +648,58 @@ const Modal: React.FC<{
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-center justify-center !z-50 bg-black bg-opacity-50 bottom-0 font-online-ordering"
+      className="fixed inset-0 flex items-end sm:items-center justify-center !z-50 bg-black bg-opacity-50 bottom-0 font-online-ordering"
     >
       <motion.div
         variants={fadeIn("up", "tween", 0, 0.3)}
         initial="hidden"
         animate="show"
         exit="hidden"
-        className="bg-white sm:rounded-[30px] w-full h-full sm:h-auto sm:w-11/12 sm:max-w-xl relative"
+        className="bg-white rounded-md w-full h-[75vh] overflow-y-auto sm:overflow-visible sm:h-auto sm:w-11/12 sm:max-w-xl relative"
       >
         {areAllValuesFilled() && (
           <button
             onClick={() => {
               setShowMenu(true);
             }}
-            className="absolute top-4 right-4 z-50 p-2 rounded-full hover:bg-gray-100"
+            className="absolute top-0 right-0 z-50 p-2  rounded-full hover:bg-gray-100"
           >
             <IoClose size={24} />
           </button>
         )}
         {!showSchedule ? (
           <>
-            <div className="pt-12 px-6">
-              <div className="flex relative">
+            <div className="pt-12 px-6 pb-3">
+              <div className="flex relative bg-gray-100 rounded-md p-1 items-center shadow-inner">
                 <div
-                  className="absolute top-0 h-full bg-gray-100 transition-all duration-300 ease-in-out rounded-t-lg shadow-md"
+                  className="absolute top-1 bottom-1 bg-white transition-transform duration-300 ease-in-out rounded-md shadow-sm"
                   style={{
-                    width: "50%",
+                    width: "calc(50% - 4px)",
                     transform: `translateX(${
-                      tempOrderType === OrderType.Pickup ? "0%" : "100%"
+                      tempOrderType === OrderType.Pickup
+                        ? "4px"
+                        : "calc(100% + 4px)"
                     })`,
+                    left: 0,
                   }}
                 />
                 <button
-                  className={`flex-1 py-3 text-center focus:outline-none relative z-10 font-online-ordering ${
-                    tempOrderType === OrderType.Pickup ? "" : "text-gray-500"
-                  } ${!isPickUp ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`flex-1 py-2 text-center focus:outline-none relative z-10 font-online-ordering text-[15px] md:text-base transition-colors duration-300 ${
+                    tempOrderType === OrderType.Pickup
+                      ? "text-gray-900 font-medium"
+                      : "text-gray-500"
+                  } ${!isPickUp ? "opacity-40 cursor-not-allowed" : ""}`}
                   onClick={() => isPickUp && setTempOrderType(OrderType.Pickup)}
                   disabled={!isPickUp}
                 >
                   {isPickUp ? "Pickup" : "Pickup Unavailable"}
                 </button>
                 <button
-                  className={`flex-1 py-3 text-center focus:outline-none relative z-10 font-online-ordering ${
-                    tempOrderType === OrderType.Delivery ? "" : "text-gray-500"
-                  } ${!isDelivery ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`flex-1 py-2 text-center focus:outline-none relative z-10 font-online-ordering text-[15px] md:text-base transition-colors duration-300 ${
+                    tempOrderType === OrderType.Delivery
+                      ? "text-gray-900 font-medium"
+                      : "text-gray-500"
+                  } ${!isDelivery ? "opacity-40 cursor-not-allowed" : ""}`}
                   disabled={!isDelivery}
                   onClick={() => setTempOrderType(OrderType.Delivery)}
                 >
@@ -610,7 +710,8 @@ const Modal: React.FC<{
             <div className="pb-12 px-6 pt-6 border-t">
               {tempOrderType === OrderType.Pickup ? (
                 <div>
-                  <h3 className="sm:text-2xl text-xl font-bold mb-2 sm:mb-4 text-gray-800 font-online-ordering">
+                  <h3 className="sm:text-2xl text-xl font-medium mb-2 sm:mb-4 text-gray-800 font-online-ordering">
+                    {" "}
                     Pickup Details
                   </h3>
                   {/* <AsyncSelect
@@ -621,9 +722,10 @@ const Modal: React.FC<{
                     className="mb-4"
                     isClearable={true}
                   /> */}
-                  <div className="rounded-lg sm:p-4 sm:mt-4 mt-6 flex justify-between items-center">
+                  <div className="rounded-lg sm:mt-4 mt-6 flex justify-between items-center">
+                    {" "}
                     <div>
-                      <p className="font-bold font-online-ordering">
+                      <p className="font-medium font-online-ordering">
                         {restaurantName}
                       </p>
                       <p>{address.addressLine1}</p>
@@ -650,10 +752,10 @@ const Modal: React.FC<{
                       onClick={async () => {
                         await handleScheduleOrder(true);
                       }}
-                      className="flex justify-between items-center border border-gray-300 rounded-lg p-4 cursor-pointer mt-4"
+                      className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
                     >
                       <div>
-                        <h4 className="text-base font-bold">ASAP Order</h4>
+                        <h4 className="text-base font-medium">ASAP Order</h4>
                         <p className="text-sm text-gray-600">
                           Pickup available in{" "}
                           {restaurantData?.fulfillmentConfig?.prepTime} mins
@@ -665,10 +767,10 @@ const Modal: React.FC<{
                   {showCalendar && (
                     <div
                       onClick={() => setShowSchedule(!showSchedule)}
-                      className="flex justify-between items-center border border-gray-300 rounded-lg p-4 cursor-pointer mt-4"
+                      className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
                     >
                       <div>
-                        <h4 className="text-base font-bold">
+                        <h4 className="text-base font-medium">
                           Schedule Your Order
                         </h4>
                         <p className="text-sm text-gray-600">
@@ -689,7 +791,7 @@ const Modal: React.FC<{
                       support for any issues.
                     </p>
                   </div>
-                  <h3 className="sm:text-2xl text-xl  font-bold mb-4  text-gray-800 font-online-ordering">
+                  <h3 className="sm:text-2xl text-xl  font-medium mb-4  text-gray-800 font-online-ordering">
                     Delivery Address
                   </h3>
                   <div className="space-y-4">
@@ -711,7 +813,7 @@ const Modal: React.FC<{
                             ({
                               ...prev,
                               addressLine2: e.target.value,
-                            }) as AddressInfoInput
+                            }) as AddressInfoInput,
                         )
                       }
                     />
@@ -720,10 +822,10 @@ const Modal: React.FC<{
                         onClick={async () => {
                           await handleScheduleOrder(true);
                         }}
-                        className="flex justify-between items-center border border-gray-300 rounded-lg p-4 cursor-pointer mt-4"
+                        className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
                       >
                         <div>
-                          <h4 className="text-base font-bold">ASAP Order</h4>
+                          <h4 className="text-base font-medium">ASAP Order</h4>
                           <p className="text-sm text-gray-600">
                             Delivery in{" "}
                             {(restaurantData?.fulfillmentConfig?.prepTime ??
@@ -740,10 +842,10 @@ const Modal: React.FC<{
                   {tempUserAddress?.addressLine1 && (
                     <div
                       onClick={() => setShowSchedule(!showSchedule)}
-                      className="flex justify-between items-center border border-gray-300 rounded-lg p-4 cursor-pointer mt-4"
+                      className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
                     >
                       <div>
-                        <h4 className="text-base font-bold">
+                        <h4 className="text-base font-medium">
                           Schedule Your Order
                         </h4>
                         <p className="text-sm text-gray-600">
@@ -770,92 +872,102 @@ const Modal: React.FC<{
               <span className="text-base sm:text-lg font-medium">Back</span>
             </button>
 
-            <h3 className="text-lg md:text-xl font-bold  font-online-ordering text-gray-800">
+            <h3 className="text-lg md:text-xl font-medium  font-online-ordering text-gray-800">
               Schedule Your Order
             </h3>
-            <p className="text-sm md:text-sm mb-4 sm:mb-6 text-gray-600">
-              Select a date and time for your order.
-            </p>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm md:text-sm text-gray-600">
+                Select a date and time for your order.
+              </p>
+            </div>
 
-            <div className="flex-grow overflow-y-auto">
-              <div
-                className={`grid gap-2 sm:gap-4 mb-2 transition-all duration-300 pr-2 ${
-                  isScheduling ? "grid-cols-2" : "grid-cols-1"
-                } `}
-              >
-                {isScheduling
-                  ? daysList
-                      .slice(0, showAllDates ? daysList.length : 2)
-                      .map((day) => (
+            <div className="flex-grow flex flex-col overflow-hidden">
+              <div className="flex justify-end">
+                {isDateScrollable && (
+                  <motion.button
+                    onClick={scrollDates}
+                    className="h-8 w-8 bg-white rounded-md flex items-center justify-center text-gray-700 hover:text-primary transition-colors flex-shrink-0"
+                    animate={{
+                      rotate: scrollDateDirection === "left" ? 180 : 0,
+                    }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  >
+                    <LuMoveRight size={18} />
+                  </motion.button>
+                )}
+              </div>
+              <div className="relative flex w-full mb-4">
+                <div
+                  ref={dateScrollerRef}
+                  onScroll={handleDateScroll}
+                  className="flex w-full gap-2 sm:gap-4 transition-all duration-300 pr-2 overflow-x-auto pb-2 scrollbar-hide flex-shrink-0 [&::-webkit-scrollbar]:hidden"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                >
+                  {isScheduling
+                    ? daysList.map((day) => (
                         <button
                           key={day.label}
-                          className={`p-2 rounded-full text-sm md:text-base font-medium transition-all duration-200 ${
-                            tempDeliveryDay === day.label
-                              ? "bg-primary shadow-md"
-                              : "bg-gray-100 hover:bg-gray-200"
-                          }`}
+                          className={`flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 border 
+                            ${
+                              tempDeliveryDay === day.label
+                                ? "bg-primary border-primary shadow-md"
+                                : "bg-white border-gray-200 hover:bg-gray-50"
+                            }`}
                           style={{
                             color:
                               tempDeliveryDay === day.label
                                 ? isContrastOkay(
                                     Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                                    Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                    Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                                   )
                                   ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                                   : "#ffffff"
-                                : isContrastOkay(
-                                      "#f3f4f6",
-                                      Env.NEXT_PUBLIC_PRIMARY_COLOR
-                                    )
-                                  ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                                  : "#7d7a7a",
+                                : "#374151",
                           }}
                           onClick={() => setTempDeliveryDay(day.label)}
                         >
-                          <FiCalendar className="inline-block mr-2 mb-1" />
-                          {day.label}
+                          <span className="block">
+                            {day.label.split(" ")[0]}
+                          </span>
+                          {day.label.split(" ").slice(1).length > 0 && (
+                            <span className="block text-sm font-normal mt-1">
+                              {day.label.split(" ").slice(1).join(" ")}
+                            </span>
+                          )}
                         </button>
                       ))
-                  : daysList.slice(0, 1).map((day) => (
-                      <button
-                        key={day.label}
-                        className="p-2 rounded-full text-sm md:text-base font-medium transition-all duration-200 bg-primary text-white shadow-md"
-                        onClick={() => setTempDeliveryDay(day.label)}
-                        style={{
-                          color: isContrastOkay(
-                            Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                            Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                          )
-                            ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            : "#ffffff",
-                        }}
-                      >
-                        <FiCalendar className="inline-block mr-2 mb-1" />
-                        {day.label}
-                      </button>
-                    ))}
+                    : daysList.slice(0, 1).map((day) => (
+                        <button
+                          key={day.label}
+                          className="flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 bg-primary border border-primary text-white shadow-md"
+                          onClick={() => setTempDeliveryDay(day.label)}
+                          style={{
+                            color: isContrastOkay(
+                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                              Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                            )
+                              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                              : "#000000",
+                          }}
+                        >
+                          <span className="block">
+                            {day.label.split(" ")[0]}
+                          </span>
+                          {day.label.split(" ").slice(1).length > 0 && (
+                            <span className="block text-sm font-normal mt-1">
+                              {day.label.split(" ").slice(1).join(" ")}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                </div>
               </div>
 
-              {isScheduling && daysList.length > 2 && (
-                <div className="flex justify-end pr-2 mb-4">
-                  <button
-                    className="font-semibold transition-colors duration-200 flex items-center gap-2 text-gray-800 hover:text-gray-900"
-                    onClick={() => setShowAllDates(!showAllDates)}
-                  >
-                    {showAllDates ? "Show less days" : "Show more days"}
-                    {showAllDates ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 gap-2 sm:gap-3 mb-6 max-h-[33vh]  pr-2 ">
+              <div className="flex flex-col mb-6 flex-grow overflow-y-auto pr-2">
+                {" "}
                 {timesList.length === 0 && restaurantClose ? (
                   <div className="w-full justify-center flex items-center">
-                    <p className="text-lg md:text-xl mt-10 text-center">
+                    <p className="teext-lg md:text-xl mt-10 text-center">
                       Restaurant is closed for today!
                       <br />
                       We&apos;ll back tommorow...
@@ -865,36 +977,56 @@ const Modal: React.FC<{
                   timesList.map((time) => (
                     <label
                       key={time}
-                      className="flex items-center space-x-3 cursor-pointer"
+                      className="flex items-center space-x-4 cursor-pointer py-4 border-b border-gray-200 last:border-b-0 transition-all duration-200 bg-white hover:bg-gray-50"
                     >
-                      <input
-                        ref={timeOptionsRef}
-                        type="radio"
-                        name="time"
-                        value={time}
-                        checked={tempDeliveryTime === time}
-                        onChange={() => {
-                          const restaurantTimeZone =
-                            restaurantData?.timezone?.timezoneName?.split(
-                              " "
-                            )[0] ?? "";
-                          convertToUtcForTimeSlots(
-                            tempDeliveryDay,
-                            time,
-                            restaurantTimeZone ?? ""
-                          );
-                          setTempDeliveryTime(time);
-                        }}
-                        className="form-radio text-primary w-4 h-4 accent-primary focus:ring-primary "
-                      />
-                      <span
-                        className={`p-2 rounded-full text-sm md:text-base font-normal flex-grow transition-all duration-200 bg-gray-100 text-gray-800 hover:bg-gray-200 ${
-                          tempDeliveryTime === time
-                            ? "border-primary  border"
-                            : "border border-transparent"
-                        }`}
-                      >
-                        <FiClock className="inline-block mr-2 mb-1" />
+                      <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0 cursor-pointer">
+                        <input
+                          ref={timeOptionsRef}
+                          type="radio"
+                          name="time"
+                          value={time}
+                          checked={tempDeliveryTime === time}
+                          onChange={() => {
+                            const restaurantTimeZone =
+                              restaurantData?.timezone?.timezoneName?.split(
+                                " ",
+                              )[0] ?? "";
+                            convertToUtcForTimeSlots(
+                              tempDeliveryDay,
+                              time,
+                              restaurantTimeZone ?? "",
+                            );
+                            setTempDeliveryTime(time);
+                          }}
+                          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div
+                          className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors duration-200 pointer-events-none ${
+                            tempDeliveryTime === time
+                              ? "border-primary"
+                              : "border-gray-300 peer-hover:border-gray-400"
+                          }`}
+                          style={{
+                            borderWidth: "1.5px",
+                            borderColor:
+                              tempDeliveryTime === time
+                                ? Env.NEXT_PUBLIC_PRIMARY_COLOR
+                                : undefined,
+                          }}
+                        >
+                          <div
+                            className={`w-2.5 h-2.5 rounded-full transition-transform duration-200 ${
+                              tempDeliveryTime === time
+                                ? "scale-100"
+                                : "scale-0"
+                            }`}
+                            style={{
+                              backgroundColor: Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-800 flex-grow text-left">
                         {time}
                       </span>
                     </label>
@@ -904,7 +1036,7 @@ const Modal: React.FC<{
             </div>
 
             <button
-              className={`w-full p-2 rounded-full text-lg mt-2 font-bold transition-all duration-200 ${
+              className={`w-full p-2 rounded-md text-md mt-2 font-medium transition-all duration-200 ${
                 tempDeliveryDay && tempDeliveryTime
                   ? "bg-primary hover:bg-primary-dark shadow-lg"
                   : "bg-gray-300 cursor-not-allowed"
@@ -914,17 +1046,17 @@ const Modal: React.FC<{
                   tempDeliveryDay && tempDeliveryTime
                     ? isContrastOkay(
                         Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                        Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                       )
                       ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                       : "#ffffff"
-                    : "#d1d5db",
+                    : "#000000",
               }}
               disabled={!tempDeliveryDay || !tempDeliveryTime}
               onClick={() => handleScheduleOrder()}
             >
-              <FiCheck className="inline-block mr-2 mb-1" />
-              Schedule Order
+              View Menu
+              <LuMoveRight className="inline-block ml-2 " />
             </button>
           </div>
         )}

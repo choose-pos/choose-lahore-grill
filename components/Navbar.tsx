@@ -20,6 +20,9 @@ import { FiChevronDown } from "react-icons/fi";
 import { ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import Button from "./common/Button";
+import FloatingCartButton from "@/components/cart/FloatingCartButton";
+
 interface NavbarProps {
   myaccount: boolean;
 }
@@ -133,7 +136,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
     <header
       className={`${
         pathname === "/menu" ? "" : "sticky top-0"
-      } bg-white z-20 shadow-sm border-b border-b-black/20   font-online-ordering`}
+      } bg-white z-50 shadow-sm border-b border-b-black/20   font-online-ordering`}
     >
       <div className="max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
         <div className="flex justify-between items-center h-16 md:h-24">
@@ -160,7 +163,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
           <nav className="hidden lg:flex items-center space-x-2">
             {navItems?.map((item) => (
               <Link key={item.href} href={item.href} passHref>
-                <p className="  px-4 py-2 rounded-md text-2xl md:text-lg font-medium ">
+                <p className="px-4 py-2 rounded-md text-2xl md:text-lg font-normal text-black hover:text-gray-600">
                   {item.label}
                 </p>
               </Link>
@@ -171,7 +174,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 onClick={toggleOffers}
               >
                 <div
-                  className="flex items-center space-x-1 cursor-pointer hover:text-primaryColor transition-colors duration-200"
+                  className="flex items-center gap-1 px-4 py-2 text-lg text-black hover:text-gray-600 font-normal"
                   onClick={toggleOffersDropdown}
                 >
                   <span>Promotions</span>
@@ -235,7 +238,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 {cartCountInfo > 0 ? (
                   <Link href={`/menu/cart`}>
                     <button
-                      className="bg-primary text-white px-6 py-2 rounded-full flex items-center space-x-2"
+                      className="bg-primary text-white px-6 py-2 rounded-md flex items-center space-x-2"
                       style={{
                         color: isContrastOkay(
                           Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -286,7 +289,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 ) : (
                   <button
                     onClick={() => setSignInOpen(true)}
-                    className="text-gray-600 font-medium"
+                    className="text-gray-600 font-normal"
                   >
                     Sign In
                   </button>
@@ -294,7 +297,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 {cartCountInfo > 0 ? (
                   <Link href={`/menu/cart`} passHref>
                     <div
-                      className="bg-primary text-white px-6 py-2 rounded-full flex items-center space-x-2"
+                      className="bg-primary text-white px-6 py-2 rounded-md flex items-center space-x-2"
                       style={{
                         color: isContrastOkay(
                           Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -374,7 +377,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
           <div className="flex flex-col h-full">
             <div className="px-4 border-b border-gray-200">
               <div className="flex items-center justify-between h-16 py-2">
-                <div className="flex items-center pl-2">
+                <div className="flex items-center ">
                   <div className="w-24 md:h-[85px] h-[70px] relative">
                     {restaurantData?.brandingLogo ? (
                       <Link href={"/"}>
@@ -457,8 +460,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               )}
             </nav>
 
-            <div className="px-4 py-6 font-online-ordering">
-              {myaccount ? (
+            <div className="px-4 sm:px-8 py-6 font-online-ordering mt-auto flex flex-col gap-6">              {myaccount ? (
                 <>
                   <button
                     onClick={() => {
@@ -470,47 +472,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                     <MdAccountCircle size={28} />
                     <span>Log Out</span>
                   </button>
-                  {cartCountInfo > 0 ? (
-                    <Link href={`/menu/cart`} passHref>
-                      <button
-                        className="w-full bg-primary text-white px-4 py-3 rounded-full flex items-center justify-center space-x-2"
-                        style={{
-                          color: isContrastOkay(
-                            Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                            Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                          )
-                            ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            : Env.NEXT_PUBLIC_TEXT_COLOR,
-                        }}
-                      >
-                        <FaCartShopping
-                          size={18}
-                          style={{
-                            color: isContrastOkay(
-                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                              Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            )
-                              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                              : Env.NEXT_PUBLIC_TEXT_COLOR,
-                          }}
-                        />
-                        <span
-                          style={{
-                            color: isContrastOkay(
-                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                              Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            )
-                              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                              : Env.NEXT_PUBLIC_TEXT_COLOR,
-                          }}
-                        >
-                          {cartCountInfo > 0
-                            ? `${cartCountInfo} items`
-                            : "VIEW CART (0)"}
-                        </span>
-                      </button>
-                    </Link>
-                  ) : null}
+                  
                 </>
               ) : (
                 <div className="space-y-4">
@@ -530,56 +492,26 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                         setSignInOpen(true);
                         closeMenu();
                       }}
-                      className="w-full font-online-ordering text-xl font-medium py-3"
+                      className="w-full font-online-ordering text-xl font-medium py-3 text-black"
                     >
                       Sign In
                     </button>
                   )}
-                  {cartCountInfo > 0 ? (
-                    <Link href={`/menu/cart`} passHref>
-                      <button
-                        className="w-full bg-primary text-white px-4 py-3 rounded-full flex items-center justify-center space-x-2"
-                        style={{
-                          color: isContrastOkay(
-                            Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                            Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                          )
-                            ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            : Env.NEXT_PUBLIC_TEXT_COLOR,
-                        }}
-                      >
-                        <FaCartShopping
-                          size={18}
-                          style={{
-                            color: isContrastOkay(
-                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                              Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            )
-                              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                              : Env.NEXT_PUBLIC_TEXT_COLOR,
-                          }}
-                        />
-                        <span
-                          style={{
-                            color: isContrastOkay(
-                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                              Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                            )
-                              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                              : Env.NEXT_PUBLIC_TEXT_COLOR,
-                          }}
-                        >
-                          {cartCountInfo > 0
-                            ? `${cartCountInfo} items`
-                            : "VIEW CART (0)"}
-                        </span>
-                      </button>
-                    </Link>
-                  ) : null}
+                    </div>
+              )}
+
+              {cartCountInfo > 0 && (
+                <div onClick={closeMenu} className="w-full flex md:pb-0">
+                  <FloatingCartButton count={cartCountInfo} />
                 </div>
               )}
             </div>
           </div>
+        </div>
+      )}
+      {!pathname.startsWith("/menu") && (
+        <div className="fixed bottom-0 left-0 right-0 z-[60] lg:hidden bg-white px-4 py-3">
+          <Button text="Order Now" url="/menu" fullWidth={true} />
         </div>
       )}
     </header>

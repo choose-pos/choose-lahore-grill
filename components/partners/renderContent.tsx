@@ -93,7 +93,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
     <>
       <div className="relative">
         {categoryItem.image && (
-          <div className="h-[300px] max-h-[300px] w-full relative rounded-t-[30px] md:rounded-[30px]">
+          <div className="h-[300px] max-h-[300px] w-full relative rounded-t-md sm:rounded-md overflow-hidden">
             <Image
               src={categoryItem.image || "/placeholder.svg"}
               alt={categoryItem.name}
@@ -112,14 +112,26 @@ const RenderContent: React.FC<RenderContentProps> = ({
                 option.type !== ItemOptionsEnum.UpSellItem &&
                 option.type !== ItemOptionsEnum.IsVegan
             )
-            .map((option) => (
-              <span
-                key={option._id}
-                className="font-online-ordering inline-block px-2 py-1 mr-1.5 mb-1 md:mb-0 text-xs sm:text-sm rounded-full bg-bgGray border border-textGray"
-              >
-                {option.displayName}
-              </span>
-            ))}
+            .map((option) => {
+              if (option.type === ItemOptionsEnum.PopularItem) {
+                return (
+                  <span
+                    key={option._id}
+                    className="inline-block mb-1 mr-1.5 px-2 py-0.5 text-xs font-normal rounded-md bg-green-600 text-white w-fit"
+                  >
+                    Best Seller
+                  </span>
+                );
+              }
+              return (
+                <span
+                  key={option._id}
+                  className="font-online-ordering inline-block px-2 py-1 mr-1.5 mb-1 md:mb-0 text-xs sm:text-sm rounded-full bg-bgGray border border-textGray"
+                >
+                  {option.displayName}
+                </span>
+              );
+            })}
         </div>
       </div>
 
@@ -135,7 +147,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
           <div className="flex flex-col md:flex-row md:items-center items-start justify-between">
             <div>
               <div className="flex items-center space-x-2 mb-2">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-online-ordering">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-medium font-online-ordering">
                   {categoryItem?.name}
                 </h2>
                 <div className="flex items-center space-x-1 w-16">
@@ -167,7 +179,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
               </div>
             </div>
             <div>
-              <p className="text-base sm:text-3xl font-semibold mb-1.5 font-online-ordering">
+              <p className="text-base sm:text-3xl font-normal mb-1.5 font-online-ordering">
                 ${categoryItem.price.toFixed(2)}
               </p>
             </div>
@@ -179,16 +191,16 @@ const RenderContent: React.FC<RenderContentProps> = ({
             <div className="relative">
               <label
                 htmlFor="item-desc"
-                className="text-base sm:text-lg font-semibold md:mb-1.5 block font-online-ordering"
+                className="text-base sm:text-lg font-medium md:mb-1.5 block font-online-ordering"
               >
                 Description
               </label>
-              <p className="text-base md:text-lg sm:text-xl md:leading-relaxed font-online-ordering inline">
+              <p className="text-base md:text-base sm:text-lg md:leading-relaxed font-online-ordering inline">
                 {displayedText}
                 {needsReadMore && (
                   <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="inline-flex items-center text-primary ml-1 text-sm font-medium hover:underline align-middle"
+                    className="inline-flex items-center text-black ml-1 text-sm font-medium hover:underline align-middle"
                   >
                     {isExpanded ? (
                       <ChevronUp size={16} />
@@ -205,7 +217,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
           <div key={groupIndex} className="mb-3 sm:mb-4 rounded-lg">
             <div className="flex items-center justify-between px-6 sm:px-8 py-2">
               <div className="space-y-0.5">
-                <h3 className="text-xl sm:text-2xl font-semibold font-online-ordering">
+                <h3 className="text-xl sm:text-2xl font-medium font-online-ordering">
                   {group.name}
                 </h3>
                 <p className="text-xs sm:text-sm font-online-ordering">
@@ -220,7 +232,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
                 <span
-                  className={`text-xs sm:text-sm px-1.5 sm:px-2 py-0.5 rounded-full font-online-ordering ${
+                  className={`text-xs sm:text-sm px-1.5 sm:px-2 py-0.5 rounded-md font-online-ordering ${
                     !group.optional
                       ? selectedModifiers[group.id]?.length >=
                         (group.minSelections || 1)
@@ -352,7 +364,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
                       )}
                     </div>
                     {modifierIndex < group.modifiers.length - 1 && (
-                      <hr className="border-[1px] border-t border-textGray my-1" />
+                      <hr className="border border-t border-gray-100 my-1" />
                     )}
                   </React.Fragment>
                 );
@@ -379,7 +391,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
         <div className="mb-4 sm:mb-6 px-6 sm:px-8">
           <label
             htmlFor="special-request"
-            className="text-base sm:text-lg font-semibold mb-1.5 block font-online-ordering"
+            className="text-base sm:text-lg font-medium mb-1.5 block font-online-ordering"
           >
             Special Requests
           </label>
@@ -389,7 +401,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
             onChange={(e) => setSpecialRequest(e.target.value)}
             maxLength={150}
             placeholder="Enter any special requests here..."
-            className="w-full font-online-ordering p-2 sm:p-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-black border-gray-400 resize-none h-20 sm:h-24"
+            className="w-full font-online-ordering p-2 sm:p-3 text-sm sm:text-base border rounded-md focus:outline-none border-gray-400 resize-none h-20 sm:h-24"
           />
           <p className="text-sm mt-1 text-right font-online-ordering">
             {specialRequest.length}/150 characters
@@ -399,11 +411,12 @@ const RenderContent: React.FC<RenderContentProps> = ({
         {categoryItem.upSellItems && categoryItem.upSellItems?.length > 0 && (
           <ItemOptions upsellItem={categoryItem.upSellItems} />
         )}
+        <div className="h-4 sm:h-6"></div>
       </div>
 
       {isAvailable ? (
         <div
-          className={`flex  p-4 bg-bgGray border-t sticky bottom-0 font-online-ordering ${
+          className={`flex  p-4 bg-white border-t sticky bottom-0 font-online-ordering ${
             isEdit ? "justify-end items-center" : "justify-between items-center"
           }`}
         >
@@ -411,16 +424,16 @@ const RenderContent: React.FC<RenderContentProps> = ({
             <div className="flex items-center sm:gap-2 gap-1">
               <button
                 onClick={() => handleQuantityChange(-1)}
-                className="sm:p-1 p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                className="sm:p-2 ml-3 p-[2px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
               >
                 <FiMinus className="" size={isMobile ? 16 : 18} />
               </button>
-              <span className="mx-1 min-w-[20px] text-base lg:text-lg text-center">
+              <span className="mx-2 min-w-[20px] text-base lg:text-lg text-center">
                 {quantity}
               </span>
               <button
                 onClick={() => handleQuantityChange(1)}
-                className="sm:p-1 p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                className="sm:p-2 p-[2px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
               >
                 <FiPlus className="" size={isMobile ? 16 : 18} />
               </button>
@@ -428,7 +441,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
           )}
           <button
             onClick={handleAddToCart}
-            className="bg-primary py-3 px-6 rounded-full transition duration-300 font-semibold sm:text-base shadow-md hover:shadow-lg text-sm font-online-ordering disabled:opacity-45"
+            className="bg-primary py-4 px-8 rounded-md transition duration-300 font-normal sm:text-base shadow-md hover:shadow-lg text-sm font-online-ordering disabled:opacity-45"
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,

@@ -78,6 +78,8 @@ const CheckoutPage = ({
   } | null>(null);
   const [placeOrderError, setPlaceOrderError] = useState<string>();
   const [placeOrderLoading, setPlaceOrderLoading] = useState(false);
+  const [showStickyTotal, setShowStickyTotal] = useState(false);
+  const totalRef = useRef<HTMLDivElement>(null);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   // UseEffects
@@ -246,6 +248,15 @@ const CheckoutPage = ({
     setAmounts(finalAmts);
   }, [restaurantData, cartDetails, deliveryFee, processingConfig,freeItemInCart]);
 
+    useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyTotal(entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    if (totalRef.current) observer.observe(totalRef.current);
+    return () => observer.disconnect();
+  }, [amounts]);
+
   return (
     <div className="w-full h-full min-h-screen bg-white flex flex-col justify-between items-center mb-1">
       <div className="flex-1 w-full h-full relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-6">
@@ -261,6 +272,7 @@ const CheckoutPage = ({
                   setPlaceOrderError={setPlaceOrderError}
                   amounts={amounts}
                   loyaltyRule={loyaltyRule}
+                  refreshData={() => setStateChange((prev) => !prev)}
                 />
               </div>
               <hr className="mx-6 my-4 lg:my-6" />
@@ -324,7 +336,9 @@ const CheckoutPage = ({
             {placeOrderError}
           </p>
 
-          <CartBreakdown amounts={amounts} loyaltyRule={loyaltyRule} />
+          <div ref={totalRef}>
+            <CartBreakdown amounts={amounts} loyaltyRule={loyaltyRule} />
+          </div>
           <div className="mb-12 lg:hidden" />
           <div className="px-6 w-full my-2 hidden lg:block">
             <button
@@ -339,7 +353,7 @@ const CheckoutPage = ({
               disabled={
                 placeOrderLoading || (!meCustomerData && !isOtpVerified)
               }
-              className="w-full bg-primary mt-2 py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+              className="w-full bg-primary mt-2 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -357,6 +371,27 @@ const CheckoutPage = ({
 
         {/* Floating Button */}
         <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t">
+          {(() => {
+            const orderTotal =
+              (amounts?.subTotalAmt ?? 0) -
+              (amounts?.discAmt ?? 0) +
+              (amounts?.taxAmt ?? 0) +
+              (amounts?.tipAmt ?? 0) +
+              (amounts?.platformFeeAmt ?? 0) +
+              (amounts?.deliveryFeeAmt ?? 0);
+            return orderTotal > 0 ? (
+              <div
+                className={`flex justify-between items-center text-base font-online-ordering overflow-hidden transition-all duration-300 ease-in-out ${
+                  showStickyTotal
+                    ? "max-h-0 opacity-0 mb-0"
+                    : "max-h-10 opacity-100 mb-2"
+                }`}
+              >
+                <span className="font-medium">Order Total</span>
+                <span className="font-medium">${orderTotal.toFixed(2)}</span>
+              </div>
+            ) : null;
+          })()}
           <button
             onClick={() => {
               if (stripeFormRef.current) {
@@ -364,7 +399,7 @@ const CheckoutPage = ({
               }
             }}
             disabled={placeOrderLoading || (!meCustomerData && !isOtpVerified)}
-            className="w-full bg-primary py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+            className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,

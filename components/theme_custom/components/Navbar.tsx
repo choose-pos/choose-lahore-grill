@@ -10,6 +10,7 @@ import { IoMdClose } from "react-icons/io";
 import ContactNav from "./ContactNav";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import Button from "@/components/common/Button";
 
 interface INavProps {
   logo?: string;
@@ -37,6 +38,7 @@ const Navbar: React.FC<INavProps> = ({
   const [isButtonVisible, setIsButtonVisible] = useState<boolean>(false);
   const observerTargetRef = useRef<HTMLDivElement>(null);
   const { setNavData } = NavDataStore();
+  const [showBottomButton, setShowBottomButton] = useState(false);
 
   const [isAtTop, setIsAtTop] = useState(true);
 
@@ -55,6 +57,26 @@ const Navbar: React.FC<INavProps> = ({
 
     // Cleanup
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      // Show bottom button if we have scrolled past 400px (approx height of mobile hero section)
+      if (window.scrollY > 400) {
+        setShowBottomButton(true);
+      } else {
+        setShowBottomButton(false);
+      }
+    };
+
+    // Initial check
+    handleWindowScroll();
+
+    window.addEventListener("scroll", handleWindowScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleWindowScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -392,6 +414,11 @@ const Navbar: React.FC<INavProps> = ({
         </div>
       </div>
       <div ref={observerTargetRef} style={{ height: "1px" }} />
+       {(showBottomButton || isOpen) && (
+        <div className="fixed bottom-0 left-0 right-0 z-[60] lg:hidden bg-white px-4 py-3">
+          <Button text="Order Now" url="/menu" fullWidth={true} />
+        </div>
+      )}
     </>
   );
 };
