@@ -62,7 +62,7 @@ export default function MyAccountPage({ restaurant }: RestaurantDetailsProps) {
 
   return (
     <div className="bg-bgGray">
-      <AccountDetails customerData={customerData} />;
+      <AccountDetails customerData={customerData} />
     </div>
   );
 }
