@@ -375,7 +375,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
       {isMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-white">
           <div className="flex flex-col h-full">
-            <div className="px-4 border-b border-gray-200">
+            <div className="px-6 border-b border-gray-200">
               <div className="flex items-center justify-between h-16 py-2">
                 <div className="flex items-center ">
                   <div className="w-24 md:h-[85px] h-[70px] relative">
