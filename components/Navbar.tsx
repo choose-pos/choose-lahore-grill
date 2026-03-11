@@ -460,7 +460,8 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               )}
             </nav>
 
-            <div className="px-4 sm:px-8 py-6 font-online-ordering mt-auto flex flex-col gap-6">              {myaccount ? (
+            <div className="px-4 sm:px-8 py-6 font-online-ordering mt-auto flex flex-col gap-6">              
+              {myaccount ? (
                 <>
                   <button
                     onClick={() => {
