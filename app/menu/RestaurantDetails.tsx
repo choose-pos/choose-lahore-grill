@@ -168,6 +168,26 @@ RestaurantDetailsProps) {
     }
   }, [isLoggedIn, searchParams]);
 
+  useEffect(() => {
+    const type = searchParams.get("type");
+    if (!type) return;
+
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.delete("type");
+    const queryString = newSearchParams.toString();
+    const cleanUrl = `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+
+    if (type === "delivery") {
+      setPendingOrderType(OrderType.Delivery);
+      setTempOrderType(OrderType.Delivery);
+    } else if (type === "pickup") {
+      setPendingOrderType(OrderType.Pickup);
+      setTempOrderType(OrderType.Pickup);
+    }
+
+    window.history.replaceState(null, "", cleanUrl);
+  }, [searchParams]);
+
   // Fetching cart count and cart details
   useEffect(() => {
     const fetchCartDets = async () => {
@@ -394,7 +414,7 @@ RestaurantDetailsProps) {
     let categoriesVisited = new Set<string>();
     if (typeof window !== "undefined") {
       categoriesVisited = new Set(
-        JSON.parse(sessionStorage.getItem("categoriesVisited") || "[]")
+        JSON.parse(sessionStorage.getItem("categoriesVisited") || "[]"),
       );
     }
 
@@ -407,13 +427,13 @@ RestaurantDetailsProps) {
     const observerCallback: IntersectionObserverCallback = (entries) => {
       // Find the first intersecting entry with the highest intersection ratio
       const intersectingEntries = entries.filter(
-        (entry) => entry.isIntersecting
+        (entry) => entry.isIntersecting,
       );
 
       if (intersectingEntries.length > 0) {
         // Sort by intersection ratio (highest first)
         intersectingEntries.sort(
-          (a, b) => b.intersectionRatio - a.intersectionRatio
+          (a, b) => b.intersectionRatio - a.intersectionRatio,
         );
         const entry = intersectingEntries[0];
 
@@ -426,7 +446,7 @@ RestaurantDetailsProps) {
             categoriesVisited.add(categoryId);
             sessionStorage.setItem(
               "categoriesVisited",
-              JSON.stringify([...categoriesVisited])
+              JSON.stringify([...categoriesVisited]),
             );
 
             const userHash = getOrCreateUserHash();
@@ -454,9 +474,9 @@ RestaurantDetailsProps) {
               // Re-check if mobileCategoryBarRef is still valid after timeout
               if (mobileCategoryBarRef.current) {
                 const categoryButton = Array.from(
-                  mobileCategoryBarRef.current.querySelectorAll("button")
+                  mobileCategoryBarRef.current.querySelectorAll("button"),
                 ).find(
-                  (btn) => btn.getAttribute("data-category-id") === categoryId
+                  (btn) => btn.getAttribute("data-category-id") === categoryId,
                 );
 
                 if (categoryButton) {
@@ -475,7 +495,7 @@ RestaurantDetailsProps) {
 
     const observer = new IntersectionObserver(
       observerCallback,
-      observerOptions
+      observerOptions,
     );
 
     // Make sure all category refs have proper data attributes
@@ -555,7 +575,7 @@ RestaurantDetailsProps) {
   const scrollToCategory = (
     categoryId: string,
     categoryName: string,
-    e: React.MouseEvent
+    e: React.MouseEvent,
   ) => {
     e.preventDefault();
     const element = categoryRefs.current[categoryId];
@@ -609,7 +629,6 @@ RestaurantDetailsProps) {
     }
   }, [filteredCategories]);
 
-  // Detect when the category bar becomes sticky
   useEffect(() => {
     const handleScroll = () => {
       if (mobileCategoryBarRef.current) {
@@ -618,11 +637,11 @@ RestaurantDetailsProps) {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     handleScroll(); // Check initial state
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -631,17 +650,17 @@ RestaurantDetailsProps) {
     return <NoOnlineOrder />;
   }
 
-   return (
-    <div
-      className={`w-full flex flex-col flex-1 ${loading ? "h-screen overflow-hidden" : ""}`}
-    >
-      <main className="h-auto bg-white py-4 z-20 shrink-0">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center max-w-8xl mx-auto px-4 md:px-20 lg:px-28">
+  return (
+    <div className="w-full flex flex-col flex-1">
+      <main className="h-auto bg-white py-3 z-20 shrink-0">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
           <div>
-            <h2 className="md:text-3xl text-2xl mb-1 font-online-ordering">
-              <span className=" font-online-ordering ">{restaurant.name}</span>
+            <h2 className="md:text-3xl text-2xl mb-1 font-heading-oo">
+              <span className="font-heading-oo font-semibold">
+                {restaurant.name}
+              </span>
             </h2>
-            <div className="text-sm sm:text-base font-online-ordering">
+            <div className="text-sm sm:text-base font-body-oo font-normal">
               <p>{restaurant.address?.addressLine1}</p>
             </div>
           </div>
@@ -659,11 +678,11 @@ RestaurantDetailsProps) {
         {/* Categories at top, Sticky */}
         <div
           ref={mobileCategoryBarRef}
-          className="w-full bg-white font-online-ordering sticky top-0 border-t z-20 mb-4 py-2 border-b border-b-gray-100 shadow-md"
+          className="w-full bg-white font-subheading-oo sticky top-0 border-t z-20 mb-4 py-2 border-b border-b-gray-100 shadow-md"
         >
-          <div className="bg-white w-full mobile-category-bar max-w-8xl mx-auto px-4 md:px-20 lg:px-28">
+          <div className="bg-white w-full mobile-category-bar max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
             <div className="relative flex items-center mb-2 md:mb-5 pt-2 w-full gap-1">
-              {isSticky && !loading  && (
+              {isSticky && !loading && (
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="lg:hidden py-2 pr-2 rounded-md text-gray-600 hover:bg-gray-100 flex-shrink-0"
@@ -672,7 +691,7 @@ RestaurantDetailsProps) {
                   <HiMenu size={24} />
                 </button>
               )}
-              
+
               <div className="relative flex items-center flex-1">
                 <FiSearch className="absolute left-4 text-gray-400" />
                 <input
@@ -684,7 +703,7 @@ RestaurantDetailsProps) {
                   onChange={handleSearch}
                 />
               </div>
-              
+
               {restaurant.restaurantConfigs.showItemFilters !== false && (
                 <FilterDropdown
                   selectedCategories={selectedCategories}
@@ -695,11 +714,11 @@ RestaurantDetailsProps) {
               {shouldShow && !isMobile && cartCountInfo > 0 ? (
                 <Link href={`/menu/cart`} passHref>
                   <button
-                    className={`bg-white font-online-ordering border border-primaryColor px-6 py-2 rounded-md flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
+                    className={`bg-white font-body-oo border border-primaryColor px-6 py-2 rounded-md flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
                     style={{
                       color: isContrastOkay(
                         "#ffffff",
-                        Env.NEXT_PUBLIC_PRIMARY_COLOR
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
                       )
                         ? Env.NEXT_PUBLIC_PRIMARY_COLOR
                         : "#000000",
@@ -746,7 +765,7 @@ RestaurantDetailsProps) {
                       <button
                         key={category._id}
                         data-category-id={category._id}
-                        className={`flex-shrink-0 px-4 py-2 rounded-md text-start transition-all duration-200 whitespace-nowrap ${
+                        className={`flex-shrink-0 px-4 py-2 rounded-md font-body-oo text-start transition-all duration-200 whitespace-nowrap ${
                           activeCategory === category._id
                             ? ""
                             : "hover:bg-gray-300"
@@ -818,7 +837,8 @@ RestaurantDetailsProps) {
                   loyaltyOffers={loyaltyOffers}
                 />
               )}
-              <div className="space-y-10  mb-2 md:mb-0 ">
+
+              <div className="space-y-10  mb-2 md:mb-0 lg:mt-5">
                 {filteredCategories && filteredCategories.length === 0 ? (
                   <div className="py-4 h-[40rem]">
                     {!searchQuery && !categoryType ? (
@@ -833,7 +853,7 @@ RestaurantDetailsProps) {
                         </p>
                         <button
                           onClick={() => setShowMenu(false)}
-                          className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-md border border-gray-300 transition-all duration-200 `}
+                          className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 `}
                           type="button"
                         >
                           <span className="font-medium font-online-ordering">
@@ -878,14 +898,15 @@ RestaurantDetailsProps) {
         )}
       </div>
 
-      {loading || isMenuOpen  ? null : (
+      {loading || isMenuOpen ? null : (
         <div className="sticky bottom-0 pb-6 mt-auto pointer-events-none z-40 flex flex-row items-stretch justify-end px-4 gap-3 md:justify-center w-full md:hidden">
           {cartCountInfo > 0 && <FloatingCartButton count={cartCountInfo} />}
           <button
             onClick={() => {
               setIsCategoriesPopupOpen(!isCategoriesPopupOpen);
             }}
-    className={`font-online-ordering flex-col text-white px-3 py-2 rounded-md flex items-center justify-center text-sm w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}            style={{
+            className={`font-subheading-oo flex-col text-white px-3 py-2 rounded-md flex items-center justify-center text-sm w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}
+            style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
                 Env.NEXT_PUBLIC_BACKGROUND_COLOR
@@ -906,7 +927,8 @@ RestaurantDetailsProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsCategoriesPopupOpen(false)}
-            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center z-40 p-0"          >
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center z-40 p-0"
+          >
             <motion.div
               variants={fadeIn("up", "tween", 0, 0.3)}
               initial="hidden"
@@ -916,8 +938,8 @@ RestaurantDetailsProps) {
               className="relative bg-bgGray rounded-t-md shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[70vh]"
             >
               <>
-                 <div className="flex items-center justify-between font-online-ordering py-4 px-3 border-b border-gray-200">
-                  <h2 className="text-lg font-medium">
+                <div className="flex items-center justify-between font-subheading-oo py-4 px-3 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold">
                     Categories ({filteredCategories?.length || 0})
                   </h2>
                   <button
@@ -935,7 +957,7 @@ RestaurantDetailsProps) {
                         <button
                           key={category._id}
                           data-category-id={category._id}
-                          className={`w-full text-left py-1.5 px-4 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
+                          className={`w-full text-left py-1.5 px-4 text-sm rounded-lg hover:bg-gray-100 font-body-oo font-medium`}
                           style={{
                             color:
                               activeCategory === category._id

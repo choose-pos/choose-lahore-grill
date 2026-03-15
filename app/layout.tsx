@@ -2,7 +2,14 @@
 
 import ToastStore from "@/store/toast";
 import dynamic from "next/dynamic";
-import { Bebas_Neue, Karla, Rubik, Roboto } from "next/font/google";
+import {
+  Bebas_Neue,
+  Karla,
+  Rubik,
+  Roboto,
+  Manrope,
+  Source_Sans_3,
+} from "next/font/google";
 import { Suspense, useEffect, useState } from "react";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -32,6 +39,25 @@ const Modal = dynamic(
     ssr: false,
   }
 );
+
+const manrope_00 = Manrope({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-heading-oo",
+  display: "swap",
+});
+const sub_manrope_online_oo = Manrope({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-subheading-oo",
+  display: "swap",
+});
+const source_sans_3_oo = Source_Sans_3({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-body-oo",
+  display: "swap",
+});
 
 const roboto_online_ordering = Roboto({
   weight: ["400", "500", "700"],
@@ -138,7 +164,7 @@ export default function RootLayout({
         <link rel="icon" href={process.env.NEXT_PUBLIC_FAVICON_URL} />
       </head>
       <body
-        className={`${roboto_online_ordering.variable}`}
+        className={`${roboto_online_ordering.variable} ${manrope_00.variable} ${sub_manrope_online_oo.variable} ${source_sans_3_oo.variable}`}
         style={{
           scrollBehavior: "smooth",
         }}

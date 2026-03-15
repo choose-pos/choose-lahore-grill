@@ -17,20 +17,20 @@ const NoOnlineOrder = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        <h2 className="text-2xl font-bold font-subheading-oo text-gray-800 mb-4">
           Online Ordering Unavailable
         </h2>
 
         <div className="flex items-center justify-center mb-6">
           <MdOutlineStorefront className="text-red-500 text-xl mr-2" />
-          <p className="text-red-500 font-medium">
+          <p className="text-red-500 font-subheading-oo font-medium">
             Not Accepting Online Orders
           </p>
         </div>
 
        
 
-        <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md">
+        <div className="text-sm font-body-oo text-gray-500 bg-gray-50 p-4 rounded-md">
           Please check back later for online ordering availability
         </div>
       </div>

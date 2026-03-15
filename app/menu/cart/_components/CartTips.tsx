@@ -4,10 +4,16 @@ import ToastStore from "@/store/toast";
 import { sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { extractErrorMessage } from "@/utils/UtilFncs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
 
-const CartTips = ({ refreshData }: { refreshData: () => void }) => {
+const CartTips = ({
+  refreshData,
+  disabled = false,
+}: {
+  refreshData: () => void;
+  disabled?: boolean;
+}) => {
   // Stores
   const { setToastData } = ToastStore();
   const { cartDetails } = useCartStore();
@@ -19,6 +25,17 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
   const [tipPercent, setTipPercent] = useState<number>();
   const [tipPercentInput, setTipPercentInput] = useState<number>();
   const [showCustomTipModal, setShowCustomTipModal] = useState(false);
+  const prevDisabledRef = useRef(disabled);
+
+  // Auto-set tip to 0% when disabled (only free loyalty item), or 10% when re-enabled
+  useEffect(() => {
+    if (disabled && (selectedTip ?? 0) !== 0) {
+      handleTipSelection(0);
+    } else if (!disabled && prevDisabledRef.current) {
+      handleTipSelection(10);
+    }
+    prevDisabledRef.current = disabled;
+  }, [disabled]);
 
   // UseEffects
   useEffect(() => {
@@ -82,8 +99,9 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
   };
 
   if (
-    !cartDetails?.amounts.subTotalAmount ||
-    cartDetails?.amounts.subTotalAmount === 0
+    !disabled &&
+    (!cartDetails?.amounts.subTotalAmount ||
+      cartDetails?.amounts.subTotalAmount === 0)
   ) {
     return null;
   }
@@ -91,10 +109,12 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
   return (
     <>
       <div className="w-full px-6">
-        <p className="font-online-ordering font-medium text-xl">
+        <p className="font-subheading-oo font-semibold text-xl">
           {cartDetails?.delivery ? "Delivery Tip" : "Tip"}
         </p>
-        <div className="font-online-ordering grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 w-full">
+        <div
+          className={`font-body-oo grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 w-full${disabled ? " opacity-50 pointer-events-none" : ""}`}
+        >
           {[10, 15, 20].map((tip) => (
             <button
               key={tip}
@@ -162,7 +182,7 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
       {showCustomTipModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-11/12 max-w-md">
-            <h2 className="text-xl sm:text-2xl mb-4 font-online-ordering">
+            <h2 className="text-xl sm:text-2xl mb-4 font-subheading-oo font-semibold">
               Enter Custom Tip
             </h2>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -195,14 +215,14 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
                     setTipPercentInput(Number(input));
                     setTipAmtInput(parseFloat(tipA.toFixed(2)));
                   }}
-                  className="mt-1 block p-2 w-full rounded-md text-xs sm:text-sm border-gray-700 ring-2"
+                  className="mt-1 block p-2 w-full rounded-md text-xs sm:text-sm border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-200"
                 />
               </div> */}
 
               <div className="w-full sm:flex-1">
                 <label
                   htmlFor="customAmount"
-                  className="block text-xs sm:text-sm font-medium text-gray-700 font-online-ordering"
+                  className="block text-xs sm:text-sm font-medium text-gray-700 font-body-oo"
                 >
                   Custom Tip Amount ($)
                 </label>
@@ -236,13 +256,13 @@ const CartTips = ({ refreshData }: { refreshData: () => void }) => {
                   setTipPercentInput(tipPercent ?? 0);
                   setShowCustomTipModal(false);
                 }}
-                className="py-1 px-3 sm:py-2 sm:px-4 bg-gray-200 rounded-md text-xs sm:text-base font-online-ordering"
+                className="py-1 px-3 sm:py-2 sm:px-4 bg-gray-200 rounded-md text-xs sm:text-base font-subheading-oo font-semibold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmCustomTip}
-                className="py-1 px-3 sm:py-2 sm:px-4 bg-primary text-white rounded-md text-xs sm:text-base font-online-ordering"
+                className="py-1 px-3 sm:py-2 sm:px-4 bg-primary text-white rounded-md text-xs sm:text-base font-subheading-oo font-semibold"
                 style={{
                   color: isContrastOkay(
                     Env.NEXT_PUBLIC_PRIMARY_COLOR,

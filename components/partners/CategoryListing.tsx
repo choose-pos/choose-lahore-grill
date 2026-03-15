@@ -117,18 +117,18 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
     };
 
     return (
-      <div className="rounded-lg w-full  lg:py-4">
+      <div className="rounded-md w-full pt-2 pb-2 lg:pt-0 lg:pb-0 lg:py-4">
         <div
           ref={ref}
           data-category-id={category._id}
           data-category-name={category.name}
           className="scroll-mt-96"
         >
-          <h2 className="text-lg md:text-xl lg:text-2xl font-medium mb-0 lg:mb-1 font-online-ordering mt-4 lg:mt-0">
+          <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-1 lg:mb-1 font-subheading-oo">
             {category.name}
           </h2>
-          <div className="mb-1 lg:mb-4 flex items-center">
-            <p className="text-gray-600 text-base italic md:text-lg font-online-ordering">
+          <div className="mb-3 lg:mb-4 flex items-center">
+            <p className="text-gray-600 text-base italic md:text-lg font-body-oo">
               {displayText}
             </p>
             {shouldShowMore && (
@@ -151,9 +151,9 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
               <div
                 id={category.name}
                 className={[
-                  "bg-white font-online-ordering flex flex-row w-full transition-all duration-300 h-full relative  border-gray-200",
+                  "bg-white flex flex-row w-full transition-all duration-300 h-full relative  border-gray-200",
                   // mobile
-                  "items-center min-h-[140px] py-4",
+                  "items-center min-h-[140px] py-5",
                   index !== 0 ? "border-t border-gray-200" : "",
                   category.items.length === 1 ? "border-b border-gray-200" : "",
                   // desktop
@@ -167,15 +167,15 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                 {item?.image ? (
                   <div
                     className="relative order-last flex-shrink-0
-                    w-[7.5rem] aspect-square self-stretch my-1 rounded-2xl overflow-hidden
-                    lg:w-[7rem] lg:h-[7rem] lg:my-auto lg:rounded-xl lg:ml-4"
+                    w-[7.5rem] aspect-square my-auto rounded-md overflow-hidden
+                    lg:w-[7rem] lg:h-[7rem]  lg:ml-4"
                   >
                     <Image
                       src={item.image}
                       alt={item?.name || "Menu item"}
                       fill
                       sizes=""
-                      className="object-cover rounded-2xl lg:rounded-xl"
+                      className="object-cover rounded-md "
                     />
                     {isOutOfStock && (
                       <div className="absolute inset-0 bg-grayscale flex items-center justify-center">
@@ -187,26 +187,22 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                   </div>
                 ) : (
                   <div
-                    className="relative order-last flex-shrink-0 self-stretch my-1
+                    className="relative order-last flex-shrink-0 my-auto
                       w-[7.5rem] aspect-square rounded-2xl overflow-hidden item-image-placeholder border border-gray-100
-                      lg:w-[7rem] lg:h-[7rem] lg:my-auto lg:rounded-xl lg:ml-4 lg:border-gray-200"
+                      lg:w-[7rem] lg:h-[7rem] lg:rounded-xl lg:ml-4 lg:border-gray-200"
                     data-text={Array(200).fill(`${item.name} `).join("")}
                   />
                 )}
 
                 {/* Content */}
-                <div
-                  className={`flex-1 flex flex-col relative min-w-0 pr-3 py-3 self-stretch
-                  ${!item.desc ? "justify-between" : "justify-center gap-y-1"}
-                  lg:justify-start lg:gap-y-0 lg:pr-0 lg:px-0 lg:py-0`}
-                >
+                <div className="flex-1 flex flex-col relative min-w-0 pr-3 self-stretch justify-start gap-y-1 lg:gap-y-0 lg:pr-0 lg:px-0 lg:py-0">
                   {/* Best Seller badge - shown on both mobile and desktop */}
                   {item.options.some(
                     (o) =>
                       o.type === ItemOptionsEnum.PopularItem &&
                       o.status === true,
                   ) && (
-                    <span className="inline-block mb-1 px-2 py-0.5 text-xs font-normal rounded-md bg-green-600 text-white w-fit">
+                    <span className="inline-block mb-1 px-2 py-0.5 text-xs font-normal font-body-oo rounded-md bg-green-600 text-white w-fit">
                       Best Seller
                     </span>
                   )}
@@ -242,7 +238,7 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                         .map((option) => (
                           <span
                             key={option.displayName}
-                            className="font-online-ordering items-center text-center font-semibold inline-block px-2 py-1 mr-1.5 text-[8px] rounded-full bg-gray-50 text-gray-700 border border-gray-200"
+                            className="font-body-oo items-center text-center font-semibold  inline-block px-2 py-1 mr-1.5 text-[8px] rounded-md bg-gray-50 text-gray-700 border border-gray-200"
                           >
                             {option.displayName}
                           </span>
@@ -255,7 +251,7 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                           o.type !== ItemOptionsEnum.IsVegan &&
                           o.type !== ItemOptionsEnum.PopularItem,
                       ).length > 2 && (
-                        <span className="font-online-ordering items-center text-center font-semibold inline-block px-2 py-1 mr-1.5 text-[8px] rounded-full bg-gray-50 text-gray-700 border border-gray-200">
+                        <span className="font-body-oo items-center text-center font-semibold inline-block px-2 py-1 mr-1.5 text-[8px] rounded-md bg-gray-50 text-gray-700 border border-gray-200">
                           ...
                         </span>
                       )}
@@ -293,17 +289,19 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                   </div>
 
                   {/* Name */}
-                  <p className="text-base leading-tight">{item.name}</p>
+                  <p className="text-base font-subheading-oo font-semibold">
+                    {item.name}
+                  </p>
 
                   {/* Description */}
                   {item.desc && (
-                    <p className="line-clamp-2 text-sm text-gray-400 leading-normal">
+                    <p className="line-clamp-2 text-sm text-gray-400 font-body-oo">
                       {item.desc}
                     </p>
                   )}
 
                   {/* Price */}
-                  <p className="text-base leading-tight lg:mt-auto lg:pt-2">
+                  <p className="text-base leading-tight pb-2 mt-auto lg:pt-2 font-subheading-oo font-semibold">
                     ${item.price.toFixed(2)}
                   </p>
 
@@ -352,7 +350,7 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <div className="flex items-center">
-                        <p className="text-sm pl-1">Add</p>
+                        <p className="text-sm pl-1 font-body-oo">Add</p>
                         <Plus size={12} className="ml-1" />
                       </div>
                     )}

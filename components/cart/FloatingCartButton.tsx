@@ -89,7 +89,7 @@ const FloatingCartButton = ({ count }: { count: number }) => {
         className={`pointer-events-auto flex-1 md:w-[90%] md:flex-none md:hidden ${!shouldShow ? "hidden" : "block"}`}
       >
         <button
-          className={`bg-primary font-online-ordering text-white px-4 py-3 rounded-md flex items-center justify-center text-base shadow-lg w-full`}
+          className={`bg-primary font-subheading-oo text-white px-4 py-3 rounded-md flex items-center justify-center text-base shadow-lg w-full`}
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,

@@ -8,6 +8,7 @@ import {
 } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import CustomerDataStore from "@/store/customerData";
+import { useModalStore } from "@/store/global";
 import meCustomerStore from "@/store/meCustomer";
 import RestaurantStore from "@/store/restaurant";
 import ToastStore from "@/store/toast";
@@ -24,15 +25,13 @@ import {
 import { extractErrorMessage, extractFreeDiscountItemDetails } from "@/utils/UtilFncs";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CartBreakdown from "./CartBreakdown";
 import CartHeader from "./CartHeader";
 import CartItems from "./CartItems";
 import CartOffers from "./CartOffers";
-import CartOrderType from "./CartOrderType";
 import CartRemarks from "./CartRemarks";
 import CartTips from "./CartTips";
-import { useModalStore } from "@/store/global";
 
 interface ICartPageProps {
   restaurantInfo: CustomerRestaurant;
@@ -61,20 +60,21 @@ const CartPage = ({
 
   // Stores
   const { restaurantData, setRestaurantData } = RestaurantStore();
+  const { setShowMenu } = useModalStore();
   const {
     cartCountInfo,
+    cartData,
     cartDetails,
     freeItemInCart,
     setCartCountInfo,
     setCartData,
     setCartDetails,
     setFreeItemInCart,
-    setFreeItemImage,
     setSpecialRemarks,
     setTotalAmount,
+    setFreeItemImage,
   } = useCartStore();
   const { setMeCustomerData } = meCustomerStore();
-  const { setShowMenu } = useModalStore();
 
   // States
   const [stateChange, setStateChange] = useState<boolean>(false);
@@ -82,10 +82,25 @@ const CartPage = ({
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [editingItem, setEditingItem] = useState<GroupedCartItem | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isCartLoading, setIsCartLoading] = useState<boolean>(true);
   const { customerData } = CustomerDataStore();
   const { setToastData } = ToastStore();
   const { specialRemarks } = useCartStore();
-  const [isCartLoading, setIsCartLoading] = useState<boolean>(true);
+  const totalRef = useRef<HTMLDivElement>(null);
+  const [isTotalVisible, setIsTotalVisible] = useState(false);
+
+
+  
+  useEffect(() => {
+    const el = totalRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsTotalVisible(entry.isIntersecting),
+      { threshold: 0.5 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [amounts]);
 
   useEffect(() => {
     if (!checkDeliveryAvailable) {
@@ -371,11 +386,11 @@ const CartPage = ({
 
   return (
     <div className="w-full h-full min-h-screen bg-white flex flex-col justify-between items-center">
-      <div className="flex-1 w-full h-full relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-6">
+      <div className="flex-1 w-full h-full relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
         {/* Left Side */}
-        <div className="col-span-1 lg:col-span-6 w-full lg:h-fit lg:sticky lg:top-0">
+        <div className="col-span-1 lg:col-span-6 w-full lg:h-fit lg:sticky lg:top-0 lg:z-10 bg-white">
           <CartHeader text={"Back to Menu"} route="/menu" />
-          <p className="mb-2 block font-medium font-online-ordering text-xl px-6">
+          <p className="mb-5 block  font-subheading-oo font-semibold text-xl px-6">
             Cart items ({cartCountInfo})
           </p>
           <CartItems
@@ -385,7 +400,15 @@ const CartPage = ({
             isEditing={isEditing}
             setIsEditing={setIsEditing}
           />
-          <hr className="mx-6 mt-2 lg:mt-12" />
+          <div className="px-6 mt-2">
+            <button
+              onClick={() => push("/menu")}
+              className="w-full py-2.5 border border-gray-300 rounded-md text-gray-700 font-subheading-oo font-semibold text-sm hover:bg-gray-50 transition-all duration-200"
+            >
+              + Add more items
+            </button>
+          </div>
+          <hr className="mx-6 my-6 lg:my-4 pb-2 border-gray-200" />
           <CartRemarks />
         </div>
 
@@ -393,17 +416,19 @@ const CartPage = ({
         <div className="lg:block hidden col-span-1"></div>
 
         {/* Right Side */}
-        <div className="col-span-1 lg:col-span-5 w-full h-auto border border-b-0">
-          <br />
-
-          <CartOrderType />
-          <hr className="mx-6 my-4 lg:my-6" />
+        <div className="col-span-1 lg:col-span-5 w-full h-auto lg:mt-6">
           {(restaurantData?.restaurantConfigs?.allowTips ?? false) ? (
             <>
-              <CartTips refreshData={() => setStateChange((prev) => !prev)} />
+              <CartTips
+                refreshData={() => setStateChange((prev) => !prev)}
+                disabled={
+                  (cartData.length === 0 && freeItemInCart !== null) ||
+                  (amounts !== null && amounts.netAmt <= 0)
+                }
+              />
               {!cartDetails?.amounts.subTotalAmount ||
               cartDetails?.amounts.subTotalAmount === 0 ? null : (
-                <hr className="mx-6 my-4 lg:my-6" />
+                <hr className="mx-6 my-5 border-gray-200" />
               )}
             </>
           ) : null}
@@ -413,17 +438,25 @@ const CartPage = ({
             amounts={amounts}
             refreshData={() => setStateChange((prev) => !prev)}
           />
-          <hr className="mx-6 my-4 lg:my-6" />
-          <CartBreakdown amounts={amounts} loyaltyRule={loyaltyRule} />
-          <div className="mb-12 lg:hidden" />
-          <div className="px-6 w-full my-2 hidden lg:block">
+          <hr className="mx-6 my-5 border-gray-200" />
+          <CartBreakdown
+            amounts={amounts}
+            loyaltyRule={loyaltyRule}
+            totalRef={totalRef}
+          />
+          {/* <div className="mb-12 lg:hidden" /> */}
+          <div className={`px-6 w-full my-2 ${isTotalVisible ? "block" : "hidden lg:block"}`}
+          >
+            <p className="text-sm text-green-700 font-medium font-subheading-oo mb-3">
+              You saved upto 25% by ordering directly instead of third party app
+            </p>
             <button
               // onClick={() => {
               //   push("/menu/checkout");
               // }}
               disabled={actionLoading || isCartLoading}
               onClick={handleProceedToCheckout}
-              className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+              className="w-full bg-primary py-2 rounded-md hover:bg-opacity-90 transition-all duration-200 font-subheading-oo font-semibold disabled:opacity-50"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -436,44 +469,49 @@ const CartPage = ({
               {isCartLoading
                 ? "Loading cart..."
                 : actionLoading
-                ? "Processing..."
-                : total === 0
-                  ? "Place Order"
-                  : "Continue to Payment"}
+                  ? "Processing..."
+                  : total === 0
+                    ? "Place Order"
+                    : "Continue to Payment"}
             </button>
           </div>
           <br />
         </div>
       </div>
 
-      {/* Floating Button */}
-
-      <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t">
-        <button
-          // onClick={() => {
-          //   push("/menu/checkout");
-          // }}
-          disabled={actionLoading || isCartLoading}
-          onClick={handleProceedToCheckout}
-          className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
-          style={{
-            color: isContrastOkay(
-              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-              Env.NEXT_PUBLIC_BACKGROUND_COLOR
-            )
-              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-              : Env.NEXT_PUBLIC_TEXT_COLOR,
-          }}
-        >
-          {isCartLoading
-            ? "Loading cart..."
-            : actionLoading
-            ? "Processing..."
-            : total === 0
-              ? "Place Order"
-              : "Continue to Payment"}
-        </button>
-      </div>
+      {/* Floating Button - hidden when actual total is in view */}
+      {!isTotalVisible && (
+        <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t z-20">
+          <div className="flex justify-between items-center mb-1 font-subheading-oo font-semibold">
+            <span className="text-base ">Order Total</span>
+            <span className="text-base ">${total.toFixed(2)}</span>
+          </div>
+          <p className="text-xs text-green-700 font-subheading-oo font-semibold mb-3">
+            You saved upto 25% by ordering directly instead of third party app
+          </p>
+          <button
+            disabled={actionLoading || isCartLoading}
+            onClick={handleProceedToCheckout}
+            className="w-full bg-primary py-2 rounded-md hover:bg-opacity-90 transition-all duration-200 font-subheading-oo font-semibold disabled:opacity-50"
+            style={{
+              color: isContrastOkay(
+                Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+              )
+                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                : Env.NEXT_PUBLIC_TEXT_COLOR,
+            }}
+          >
+            {isCartLoading
+              ? "Loading cart..."
+              : actionLoading
+                ? "Processing..."
+                : total === 0
+                  ? "Place Order"
+                  : "Continue to Payment"}
+          </button>
+        </div>
+      )}
 
       {/* Edit Item Modal */}
       <AnimatePresence>

@@ -58,7 +58,7 @@ const CartItems = ({
             const totalQuantity =
               mod.selectedModifiers?.reduce(
                 (qtyAcc, selectedMod) => qtyAcc + selectedMod.qty,
-                0
+                0,
               ) ?? 0;
             // Multiply base price by total quantity
             groupTotal = (mod.price ?? 0) * totalQuantity;
@@ -68,7 +68,7 @@ const CartItems = ({
               mod.selectedModifiers?.reduce(
                 (selectedAcc, selectedMod) =>
                   selectedAcc + selectedMod.mid.price * selectedMod.qty,
-                0
+                0,
               ) ?? 0;
             break;
           case PriceTypeEnum.FreeOfCharge:
@@ -188,7 +188,9 @@ const CartItems = ({
     <div className="pr-2">
       <div className="w-full flex flex-col overflow-y-scroll h-auto px-6 max-h-[40vh] ios-scroll-fix ">
         {freeItemInCart ? (
-          <div className="mb-6 bg-white border-b border-gray-200 pb-6 pt-2">            <div className="w-full flex justify-between items-start space-x-2">
+          <div className="mb-6 bg-white border-b border-gray-200 pb-6 pt-2">
+            {" "}
+            <div className="w-full flex justify-between items-start space-x-2">
               <div className="flex items-start gap-4">
                 {freeItemImage ? (
                   <div className="w-14 h-14 relative self-start flex-shrink-0">
@@ -200,7 +202,8 @@ const CartItems = ({
                     />
                   </div>
                 ) : null}
-                <h3 className="font-semibold font-online-ordering text-base md:text-lg lg:text-xl">
+                <h3 className="font-semibold font-subheading-oo text-base md:text-lg lg:text-xl">
+                  {" "}
                   {freeItemInCart.name}
                 </h3>
               </div>
@@ -214,10 +217,10 @@ const CartItems = ({
                   />
                 </button>
                 <div className="flex justify-center items-center space-x-2">
-                  <p className="lg:text-lg md:text-base text-base font-semibold font-online-ordering text-green-500">
+                  <p className="lg:text-lg md:text-base text-base font-normal font-subheading-oo text-green-500">
                     FREE
                   </p>
-                  <p className="lg:text-lg md:text-base text-base font-semibold font-online-ordering line-through">
+                  <p className="lg:text-lg md:text-base text-base font-normal font-subheading-oo line-through">
                     ${freeItemInCart.price}
                   </p>
                 </div>
@@ -228,17 +231,19 @@ const CartItems = ({
         {cartData.map((item) => (
           <div
             key={item._id}
-            className="last:mb-2 mb-6 border-b border-gray-200 last:border-b-0 bg-white pb-6 pt-2"          >
+            className="mb-4 border-b border-gray-200 last:mb-0 last:border-b-0 bg-white pb-4 pt-2"
+          >
             <div className="flex items-center gap-4">
               {/* Content wrapper */}
               {
                 item.itemImage ? (
-                  <div className="w-14 h-14 relative self-start flex-shrink-0">
+                  <div className="w-16 h-16 relative self-start flex-shrink-0">
+                    {" "}
                     <Image
                       src={item.itemImage}
                       alt={item.itemName}
                       fill
-                      className={`object-cover object-center w-full h-full rounded-lg`}
+                      className={`object-cover object-center w-full h-full rounded-md`}
                     />
                   </div>
                 ) : null
@@ -253,7 +258,8 @@ const CartItems = ({
                 {/* Top section with title and buttons */}
                 <div className="flex justify-between items-start">
                   <div className="flex-grow pr-4">
-                    <h3 className="font-medium font-online-ordering text-base md:text-lg">
+                    <h3 className="font-semibold font-subheading-oo text-base md:text-lg">
+                      {" "}
                       {item.itemName}
                     </h3>
                   </div>
@@ -280,26 +286,22 @@ const CartItems = ({
 
                 {/* Modifier groups */}
                 {item.modifierGroups && item.modifierGroups.length > 0 && (
-                  <div className="font-online-ordering text-sm text-textGrayColor flex flex-wrap">
-                    {item.modifierGroups.map((mg, index) => {
-                      return (
-                        <span key={mg._id} className="inline-block">
-                          {mg.selectedModifiers
-                            ?.map((m) => m.mid.name + " x " + m.qty)
-                            .join(", ")}
-                          {index ===
-                          (item.modifierGroups ?? []).length - 1 ? null : (
-                            <span className="pr-1">,</span>
-                          )}
-                        </span>
-                      );
-                    })}
-                  </div>
+                  <p className="font-body-oo font-normal text-sm text-textGrayColor">
+                    {item.modifierGroups
+                      .flatMap(
+                        (mg) =>
+                          mg.selectedModifiers
+                            ?.filter((m) => m.mid.name)
+                            .map((m) => `${m.mid.name} x ${m.qty}`) ?? [],
+                      )
+                      .join(", ")}
+                  </p>
                 )}
 
                 {/* Remarks */}
                 {item.remarks && (
-                  <p className="lg:mt-1 text-sm font-extralight capitalize font-online-ordering italic">
+                  <p className="lg:mt-1 text-sm font-extralight capitalize font-body-oo italic">
+                    {" "}
                     {item.remarks}
                   </p>
                 )}
@@ -351,6 +353,7 @@ const CartItems = ({
                   </div>
 
                   <p className="lg:text-xl md:text-lg text-base font-semibold font-online-ordering">
+                    {" "}
                     ${calculateItemPrice(item)}
                   </p>
                 </div>

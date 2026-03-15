@@ -96,7 +96,7 @@ const GiftCard = () => {
         <div className="flex mb-8">
           <button
             onClick={() => setActiveTab(0)}
-            className={`flex-1 py-2 px-4 text-center ${
+            className={`flex-1 py-2 px-4 text-center font-subheading-oo ${
               activeTab === 0
                 ? "bg-white text-primary font-semibold"
                 : "bg-gray-200 text-gray-700"
@@ -106,7 +106,7 @@ const GiftCard = () => {
           </button>
           <button
             onClick={() => setActiveTab(1)}
-            className={`flex-1 py-2 px-4 text-center ${
+            className={`flex-1 py-2 px-4 text-center font-subheading-oo ${
               activeTab === 1
                 ? "bg-white text-primary font-semibold"
                 : "bg-gray-200 text-gray-700"
@@ -121,7 +121,7 @@ const GiftCard = () => {
             {/* <h2 className="text-2xl font-bold mb-6">Create New Gift Card</h2> */}
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 font-subheading-oo">
                   Gift Card Amount
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -151,10 +151,12 @@ const GiftCard = () => {
                 </div>
               </div>
               <div>
-                <p className="pb-2 font-semibold text-xl">From</p>
+                <p className="pb-2 font-semibold text-xl font-subheading-oo">
+                  From
+                </p>
                 <label
                   htmlFor="fromName"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 mb-2 font-subheading-oo"
                 >
                   Name
                 </label>
@@ -170,7 +172,7 @@ const GiftCard = () => {
               <div>
                 <label
                   htmlFor="fromEmail"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 mb-2 font-subheading-oo"
                 >
                   Email
                 </label>
@@ -186,7 +188,7 @@ const GiftCard = () => {
               <div>
                 <label
                   htmlFor="note"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 mb-2 font-subheading-oo"
                 >
                   Note
                 </label>
@@ -221,7 +223,7 @@ const GiftCard = () => {
                     ).toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between mt-2 font-bold">
+                <div className="flex justify-between mt-2 font-semibold font-subheading-oo">
                   <span>Total</span>
                   <span>${calculateTotal()}</span>
                 </div>
@@ -239,19 +241,19 @@ const GiftCard = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
                     Code
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
                     Expiry Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
                     Used By
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
                     Actions
                   </th>
                 </tr>
@@ -265,7 +267,7 @@ const GiftCard = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <FaCreditCard className="text-2xl text-blue-500 mr-3" />
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-semibold text-gray-900 font-subheading-oo">
                           {card.code}
                         </span>
                       </div>
@@ -287,7 +289,7 @@ const GiftCard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {card.usedBy ? `${card.usedBy.firstName}` : "Not used"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold font-subheading-oo">
                       {card.isActive && (
                         <button
                           onClick={() => copyToClipboard(card.code)}

@@ -95,7 +95,7 @@ const InitializeSession = () => {
       } catch (err) {
         extractErrorMessage(err);
         setError(
-          "An unexpected error occurred, please close this tab and try again."
+          "An unexpected error occurred, please close this tab and try again.",
         );
       } finally {
         setLoading(false);
@@ -118,7 +118,8 @@ const InitializeSession = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen font-online-ordering">
+      <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">
+        {" "}
         <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
         <button
           style={{

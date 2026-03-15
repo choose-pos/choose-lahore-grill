@@ -154,8 +154,8 @@ const RecentOrders = () => {
   }
 
   return (
-    <div className="font-online-ordering z-40">
-      <h2 className="text-xl sm:text-3xl font-medium mb-4 font-online-ordering">
+    <div className="font-subheading-oo z-40">
+      <h2 className="text-xl sm:text-xl font-semibold mb-4 font-subheading-oo">
         Recent Orders
       </h2>
       <div className="my-2">
@@ -172,7 +172,7 @@ const RecentOrders = () => {
           <CarouselContent className="-ml-4">
             {slides.map((slide, slideIndex) => (
               <CarouselItem key={slideIndex} className="pl-4 basis-full">
-                <div className="flex gap-4 tems-stretch">
+                <div className="flex gap-4 items-stretch">
                   {slide.map((order, index) => (
                     <div
                       key={order._id}
@@ -184,21 +184,21 @@ const RecentOrders = () => {
                         <div className="p-3 md:p-4 h-full flex flex-col">
                           <div className="flex-grow">
                             <div className="flex items-center justify-between mb-2">
-                              <p className="text-sm font-medium text-gray-600 font-online-ordering">
+                              <p className="text-sm font-semibold text-gray-600 font-subheading-oo">
                                 Order #{order.orderId}
                               </p>
-                              <p className="text-sm text-gray-500 font-online-ordering">
+                              <p className="text-sm text-gray-500 font-body-oo font-normal">
                                 {formatDate(order.createdAt)}
                               </p>
                             </div>
 
                             <div className="mb-2">
-                              <p className="text-lg font-bold text-gray-900 font-online-ordering">
+                              <p className="text-lg font-medium text-gray-900 font-subheading-oo">
                                 {(order.totalAmount || 0) === 0
                                   ? "FREE"
                                   : `$${(order.totalAmount || 0).toFixed(2)}`}
                               </p>
-                              <p className="text-xs text-gray-600 capitalize font-online-ordering">
+                              <p className="text-xs text-gray-600 capitalize font-body-oo font-normal">
                                 {order.orderType.toLowerCase()} •{" "}
                                 {order.items.reduce(
                                   (total: any, item: any) => total + item.qty,
@@ -217,7 +217,7 @@ const RecentOrders = () => {
                             </div>
 
                             <div className="mb-3">
-                              <p className="text-sm text-gray-700 line-clamp-2 font-online-ordering">
+                              <p className="text-sm text-gray-700 line-clamp-2 font-body-oo font-normal">
                                 {getItemsPreview(order)}
                               </p>
                             </div>
@@ -230,7 +230,8 @@ const RecentOrders = () => {
                                 disabled={
                                   loadingOrders[order._id] || modalLoading
                                 }
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300"                              >
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-semibold font-subheading-oo  transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300"
+                              >
                                 {loadingOrders[order._id] ? (
                                   <div className="text-black flex items-center">
                                     <Loader2 className="w-4 h-4 mr-1 animate-spin" />

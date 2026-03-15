@@ -135,7 +135,7 @@ const OrderFeedbackComponent = () => {
         const data = await fetchWithAuth(() =>
           sdk.fetchOrderById({
             id: orderId,
-          })
+          }),
         );
 
         if (!data.fetchCustomerOrderById) {
@@ -146,13 +146,15 @@ const OrderFeedbackComponent = () => {
         setSelectedOrder(data.fetchCustomerOrderById);
 
         const itemNames = new Set(
-          data.fetchCustomerOrderById.items.map((item) => item.itemName)
+          data.fetchCustomerOrderById.items.map((item) => item.itemName),
         );
         const initialItemFeedbacks = Array.from(itemNames).map((itemName) => ({
           itemName: itemName,
           rating: 0,
           remarks: "",
         }));
+
+        // Add loyalty redeemed item if exists
         const loyaltyRedeemItem =
           data.fetchCustomerOrderById.appliedDiscount?.loyaltyData?.redeemItem;
         if (loyaltyRedeemItem) {
@@ -208,12 +210,12 @@ const OrderFeedbackComponent = () => {
   const updateItemFeedback = (
     itemName: string,
     field: keyof ItemFeedback,
-    value: any
+    value: any,
   ) => {
     setItemFeedbacks((prev) =>
       prev.map((item) =>
-        item.itemName === itemName ? { ...item, [field]: value } : item
-      )
+        item.itemName === itemName ? { ...item, [field]: value } : item,
+      ),
     );
   };
 
@@ -239,7 +241,7 @@ const OrderFeedbackComponent = () => {
         const filtered = itemFeedbacks.filter(
           (item) =>
             (item.rating ?? 0) > 0 ||
-            (item.remarks && item.remarks.trim() !== "")
+            (item.remarks && item.remarks.trim() !== ""),
         );
 
         return filtered.length > 0
@@ -258,7 +260,7 @@ const OrderFeedbackComponent = () => {
       const response = await fetchWithAuth(() =>
         sdk.submitRestaurantFeedback({
           input: feedbackData,
-        })
+        }),
       );
 
       if (response.submitRestaurantFeedback?._id) {
@@ -267,6 +269,7 @@ const OrderFeedbackComponent = () => {
         setError("Failed to submit feedback. Please try again.");
       }
     } catch (error) {
+      console.error("Error submitting feedback:", error);
       setToastData({
         message: extractErrorMessage(error),
         type: "error",
@@ -279,7 +282,7 @@ const OrderFeedbackComponent = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center font-primary">
+      <div className="w-full min-h-screen flex flex-col items-center justify-center font-body-oo">
         <span className="mb-2 text-gray-600">Loading order details...</span>
         <LoadingDots />
       </div>
@@ -289,7 +292,7 @@ const OrderFeedbackComponent = () => {
   // Error state
   if (error) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center h-64 font-primary">
+      <div className="w-full min-h-screen flex items-center justify-center h-64 font-body-oo">
         <div className="text-center text-red-600">
           <FaExclamationCircle className="mx-auto text-3xl mb-2" />
           <p className="text-sm">{error}</p>
@@ -307,7 +310,7 @@ const OrderFeedbackComponent = () => {
   // Success state
   if (submitted) {
     return (
-      <div className="min-h-[calc(100vh-161px)]  flex items-center justify-center p-4 font-primary bg-gray-50">
+      <div className="min-h-[calc(100vh-161px)]  flex items-center justify-center p-4 font-body-oo bg-gray-50">
         <div className="bg-white rounded-md shadow-lg p-8 max-w-md w-full text-center">
           <div className="mb-4">
             <svg
@@ -324,14 +327,16 @@ const OrderFeedbackComponent = () => {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-secondary font-bold mb-2">Thank You!</h2>
+          <h2 className="text-2xl font-semibold font-subheading-oo mb-2">
+            Thank You!
+          </h2>
           <p className="text-gray-600 mb-6">
             Your feedback has been submitted successfully. We appreciate your
             input!
           </p>
           <Link
             href="/menu"
-            className={`flex gap-1 items-center justify-center text-sm sm:text-base font-medium font-primary `}
+            className={`flex gap-1 items-center justify-center text-sm sm:text-base font-semibold font-subheading-oo `}
           >
             <ArrowLeft className="text-sm w-4 h-4 " />
             Back to Menu
@@ -343,14 +348,14 @@ const OrderFeedbackComponent = () => {
 
   if (!selectedOrder) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center font-primary">
+      <div className="w-full min-h-screen flex items-center justify-center font-body-oo">
         <p className="text-red-500">Order not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 py-8 px-4 font-primary">
+    <div className="bg-gray-50 py-8 px-4 font-body-oo">
       <div className="max-w-3xl mx-auto">
         <div className=" bg-white rounded-md shadow-lg p-6 md:p-8">
           {/* Header */}
@@ -363,14 +368,16 @@ const OrderFeedbackComponent = () => {
             </Link>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-semibold mb-2">
+          <h1 className="text-3xl md:text-4xl font-semibold font-subheading-oo mb-2">
             Share Your Feedback
           </h1>
           <p className="text-gray-600 mb-8">Help us improve your experience</p>
 
           {/* Order Details */}
           <div className="bg-gray-50 p-4 rounded-xl mb-8">
-            <h3 className="font-semibold mb-2 text-gray-900">Order Details</h3>
+            <h3 className="font-semibold font-subheading-oo mb-2 text-gray-900">
+              Order Details
+            </h3>
             <div className="text-sm space-y-1">
               <p className="text-gray-600">Order ID: {selectedOrder.orderId}</p>
               <p className="text-gray-600">
@@ -381,7 +388,7 @@ const OrderFeedbackComponent = () => {
 
           {/* Overall Rating - Required */}
           <div className="mb-8">
-            <label className="block font-semibold mb-4 text-lg text-gray-900">
+            <label className="block font-semibold font-subheading-oo mb-4 text-lg text-gray-900">
               Overall Rating <span className="text-red-500">*</span>
             </label>
             <div className="flex flex-col items-center bg-gray-50 rounded-xl py-8">
@@ -403,7 +410,7 @@ const OrderFeedbackComponent = () => {
           <div className="mb-8">
             <label
               htmlFor="overall-remarks"
-              className="block font-semibold mb-3 text-gray-900"
+              className="block font-semibold font-subheading-oo mb-3 text-gray-900"
             >
               Tell us more about your experience
             </label>
@@ -441,9 +448,9 @@ const OrderFeedbackComponent = () => {
               onClick={() => setIsSpecificAspectsOpen(!isSpecificAspectsOpen)}
               className="w-full flex items-center justify-between text-left group"
             >
-              <h3 className="font-semibold text-lg text-gray-900 group-hover:text-gray-700 transition-colors">
+              <h3 className="font-semibold font-subheading-oo text-lg text-gray-900 group-hover:text-gray-700 transition-colors">
                 Rate Specific Aspects{" "}
-                <span className="text-gray-400 text-sm font-normal">
+                <span className="text-gray-400 text-sm font-normal font-body-oo">
                   (Optional)
                 </span>
               </h3>
@@ -458,7 +465,9 @@ const OrderFeedbackComponent = () => {
               <div className="mt-6 space-y-5">
                 {/* Food Quality */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4">
-                  <label className="text-gray-700">Food Quality</label>
+                  <label className="text-gray-700 font-subheading-oo">
+                    Food Quality
+                  </label>
                   <StarRating
                     rating={foodQuality}
                     hoveredRating={hoveredFoodQuality}
@@ -470,7 +479,9 @@ const OrderFeedbackComponent = () => {
 
                 {/* Delivery Time */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4">
-                  <label className="text-gray-700">Delivery/Pickup Time</label>
+                  <label className="text-gray-700 font-subheading-oo">
+                    Delivery/Pickup Time
+                  </label>
                   <StarRating
                     rating={deliveryTime}
                     hoveredRating={hoveredDeliveryTime}
@@ -482,7 +493,9 @@ const OrderFeedbackComponent = () => {
 
                 {/* Packaging Quality */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4">
-                  <label className="text-gray-700">Packaging Quality</label>
+                  <label className="text-gray-700 font-subheading-oo">
+                    Packaging Quality
+                  </label>
                   <StarRating
                     rating={packagingQuality}
                     hoveredRating={hoveredPackagingQuality}
@@ -494,7 +507,9 @@ const OrderFeedbackComponent = () => {
 
                 {/* Value for Money */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <label className="text-gray-700">Value for Money</label>
+                  <label className="text-gray-700 font-subheading-oo">
+                    Value for Money
+                  </label>
                   <StarRating
                     rating={valueForMoney}
                     hoveredRating={hoveredValueForMoney}
@@ -513,9 +528,9 @@ const OrderFeedbackComponent = () => {
               onClick={() => setIsItemFeedbackOpen(!isItemFeedbackOpen)}
               className="w-full flex items-center justify-between text-left group"
             >
-              <h3 className="font-semibold text-lg text-gray-900 group-hover:text-gray-700 transition-colors">
+              <h3 className="font-semibold font-subheading-oo text-lg text-gray-900 group-hover:text-gray-700 transition-colors">
                 Rate Individual Items{" "}
-                <span className="text-gray-400 text-sm font-normal">
+                <span className="text-gray-400 text-sm font-normal font-body-oo">
                   (Optional)
                 </span>
               </h3>
@@ -536,12 +551,12 @@ const OrderFeedbackComponent = () => {
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                         <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">
+                          <span className="font-semibold font-subheading-oo text-gray-900">
                             {item.itemName}
                           </span>
                         </div>
                         <StarRating
-                          rating={item.rating ?? 0}
+                          rating={item.rating}
                           hoveredRating={hoveredItemRatings[item.itemName] ?? 0}
                           onRate={(rating) =>
                             updateItemFeedback(item.itemName, "rating", rating)
@@ -569,7 +584,7 @@ const OrderFeedbackComponent = () => {
                           updateItemFeedback(
                             item.itemName,
                             "remarks",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         maxLength={200}
@@ -592,12 +607,12 @@ const OrderFeedbackComponent = () => {
             <button
               onClick={handleSubmit}
               disabled={overallRating === 0 || isSubmitting}
-              className={`inline-block px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-md transition-all duration-200 ${
+              className={`inline-block px-8 py-2 text-lg sm:text-xl font-semibold font-subheading-oo rounded-md transition-all duration-200 ${
                 overallRating === 0 || isSubmitting
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : isContrastOkay(
                         Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                        Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                       )
                     ? `bg-primaryColor text-background hover:opacity-90`
                     : `bg-primaryColor text-textColor hover:opacity-90`

@@ -122,13 +122,13 @@ const OrderOptions: React.FC<OrderOptionsProps> = ({
   if (!cartDetails?.orderType) return null;
 
   return (
-    <div className="w-full font-online-ordering overflow-x-hidden mt-2 mb-1">
+    <div className="w-full font-subheading-oo overflow-x-hidden mt-2 mb-1">
       <div className="flex flex-row items-stretch gap-1 w-full">
         {/* Toggle */}
         <div className="flex bg-gray-100 p-1 rounded-md flex-shrink-0">
           <div
             onClick={handlePickupClick}
-            className={`px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
+            className={`px-2 sm:px-3 py-2 rounded-md text-sm font-semibold font-subheading-oo transition-colors flex items-center ${
               cartDetails.orderType === OrderType.Pickup
                 ? "bg-white shadow-sm text-black"
                 : "text-gray-500 hover:text-gray-700 cursor-pointer"
@@ -138,7 +138,7 @@ const OrderOptions: React.FC<OrderOptionsProps> = ({
           </div>
           <div
             onClick={handleDeliveryClick}
-            className={`px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
+            className={`px-2 sm:px-3 py-2 rounded-md text-sm font-semibold font-subheading-oo transition-colors flex items-center ${
               cartDetails.orderType === OrderType.Delivery
                 ? "bg-white shadow-sm text-black"
                 : "text-gray-500 hover:text-gray-700 cursor-pointer"
@@ -149,7 +149,7 @@ const OrderOptions: React.FC<OrderOptionsProps> = ({
         </div>
 
         {/* Time Box */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 font-body-oo">
           {cartDetails.orderType === OrderType.Pickup && (
             <div
               onClick={handlePickupClick}

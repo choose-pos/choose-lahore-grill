@@ -153,10 +153,10 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
     setLoadingOffers((prev) => ({ ...prev, [points]: true }));
 
     try {
-      const res = await fetchWithAuth(() =>
+       const res = await fetchWithAuth(() =>
         sdk.validateLoyaltyRedemptionOnCart({
           input: { loyaltyPointsRedeemed: points, redeemType: type },
-        })
+        }),
       );
 
       if (res.validateLoyaltyRedemptionOnCart) {
@@ -183,10 +183,11 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
   }
 
   return (
-    <div className="font-online-ordering z-40">
+    <div className="z-40">
       {loyaltyOffers && loyaltyRewards.length > 0 && (
         <>
-          <h2 className="text-xl sm:text-3xl font-medium mb-4 font-online-ordering">
+          <h2 className="text-xl sm:text-xl font-semibold mb-4 font-subheading-oo">
+            {" "}
             Loyalty Offers
           </h2>
           <div className="my-2">
@@ -227,10 +228,12 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                       </div>
                                     )}
                                     <div className="flex-1">
-                                      <p className="sm:text-lg text-base font-bold text-gray-900 line-clamp-1 font-online-ordering">
+                                      <p className="sm:text-lg text-base font-semibold text-gray-900 line-clamp-1 font-subheading-oo">
+                                        {" "}
                                         {offer.name}
                                       </p>
-                                      <p className="text-xs text-gray-600 line-clamp-1 font-online-ordering">
+                                      <p className="text-xs text-gray-600 line-clamp-1 font-body-oo font-normal">
+                                        {" "}
                                         {offer.points}{" "}
                                         {loyaltyRule?.name ?? "points"} required
                                       </p>
@@ -243,11 +246,11 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                         onClick={() => {
                                           handleApplyLoyalty(
                                             offer.points,
-                                            offer.type
+                                            offer.type,
                                           );
                                         }}
                                         disabled={loadingOffers[offer.points]}
-                                        className={`inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300`}
+                                        className={`inline-flex items-center px-3 py-1.5 text-sm font-semibold font-subheading-oo transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300`}
                                       >
                                         {loadingOffers[offer.points] ? (
                                           <div className="text-black flex items-center">
@@ -255,7 +258,7 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                             {isRewardApplied(
                                               offer.points,
                                               offer.type,
-                                              cartDetails
+                                              cartDetails,
                                             ) ? (
                                               <p>Loading...</p>
                                             ) : (
@@ -265,7 +268,7 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                         ) : isRewardApplied(
                                             offer.points,
                                             offer.type,
-                                            cartDetails
+                                            cartDetails,
                                           ) ? (
                                           <Link href={"/menu/cart"}>
                                             <p className="text-black">

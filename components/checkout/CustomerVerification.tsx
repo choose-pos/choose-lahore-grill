@@ -11,7 +11,7 @@ import { TAmounts } from "@/utils/types";
 import { extractErrorMessage, formatUSAPhoneNumber } from "@/utils/UtilFncs";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import LoyaltyIcon from "../common/LoyaltyIcon";
+import StarIcon from "../common/StarIcon";
 
 const CustomerVerification = ({
   isOtpVerified,
@@ -244,7 +244,7 @@ const CustomerVerification = ({
         Guest Details
       </h2> */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-online-ordering text-xl capitalize">
+        <h2 className="font-subheading-oo font-semibold text-xl capitalize">
           Guest Details
         </h2>
         {showOtp && (
@@ -266,7 +266,7 @@ const CustomerVerification = ({
           <div>
             <label
               htmlFor="firstName"
-              className="block text-sm font-medium text-gray-700 capitalize"
+              className="block text-sm font-body-oo font-semibold text-gray-700 capitalize"
             >
               First Name
             </label>
@@ -277,14 +277,14 @@ const CustomerVerification = ({
               disabled={showOtp}
               value={formData.firstName}
               onChange={handleChange}
-              className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="mt-1 block w-full font-body-oo border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               placeholder="Alex"
             />
           </div>
           <div>
             <label
               htmlFor="lastName"
-              className="block text-sm font-medium text-gray-700 capitalize"
+              className="block text-sm font-body-oo font-semibold text-gray-700 capitalize"
             >
               Last Name
             </label>
@@ -295,7 +295,7 @@ const CustomerVerification = ({
               disabled={showOtp}
               value={formData.lastName}
               onChange={handleChange}
-              className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="mt-1 block w-full font-body-oo border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               placeholder="D"
             />
           </div>
@@ -303,7 +303,7 @@ const CustomerVerification = ({
         <div>
           <label
             htmlFor="phone"
-            className="block text-sm font-medium text-gray-700 capitalize"
+            className="block text-sm font-body-oo font-semibold text-gray-700 capitalize"
           >
             Phone
           </label>
@@ -314,14 +314,14 @@ const CustomerVerification = ({
             disabled={showOtp}
             value={formData.phone}
             onChange={handleChange}
-            className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            className="mt-1 block w-full font-body-oo  border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             placeholder="800-555-0175"
           />
         </div>
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 capitalize"
+            className="block text-sm font-body-oo font-semibold  text-gray-700 capitalize"
           >
             Email
           </label>
@@ -332,11 +332,11 @@ const CustomerVerification = ({
             disabled={showOtp}
             value={formData.email}
             onChange={handleChange}
-            className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            className="mt-1 block w-full font-body-oo border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             placeholder="alex@example.com"
           />
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs font-body-oo text-gray-500">
           {`By verifying your OTP, you agree to receive promotional and transactional emails and SMS from ${restaurantData?.name} and our technology partner Choose, and accept our`}{" "}
           <Link
             href={"https://www.choosepos.com/terms-conditions"}
@@ -361,7 +361,7 @@ const CustomerVerification = ({
             <div>
               <label
                 htmlFor="otp"
-                className="block text-sm font-medium text-gray-700 capitalize"
+                className="block font-body-oo text-sm font-medium text-gray-700 capitalize"
               >
                 OTP
               </label>
@@ -372,7 +372,7 @@ const CustomerVerification = ({
                 id="otp"
                 value={formData.otp}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                className="mt-1 block w-full font-body-oo  border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                 placeholder="Enter 6 digit OTP"
                 maxLength={6}
               />
@@ -382,7 +382,7 @@ const CustomerVerification = ({
                     type="button"
                     onClick={generateOtp}
                     disabled={timer > 0}
-                    className="text-sm text-black  disabled:cursor-not-allowed"
+                    className="text-sm font-body-oo font-semibold text-black  disabled:cursor-not-allowed"
                   >
                     {timer > 0 ? `Resend in ${timer}s` : "Resend OTP"}
                   </button>
@@ -390,20 +390,20 @@ const CustomerVerification = ({
               )}
             </div>
             {isOtpVerified && customerData?.otp && (
-              <p className="text-green-600 text-sm">
+              <p className="text-green-600 font-body-oo text-sm">
                 OTP verified! You may now proceed to place your order.
               </p>
             )}
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {error && <p className="text-red-600 text-sm font-body-oo">{error}</p>}
             {promoCodeMessage && (
-              <p className="text-red-600 text-sm">{promoCodeMessage}</p>
+              <p className="text-red-600 text-sm font-body-oo">{promoCodeMessage}</p>
             )}
           </div>
         ) : (
           <button
             type="submit"
             onClick={generateOtp}
-            className="w-full md:w-[40%] bg-primary text-white !text-base py-2 px-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary capitalize"
+            className="w-full md:w-[40%] bg-primary font-subheading-oo font-semibold text-white !text-base py-2 px-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary capitalize"
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -434,7 +434,7 @@ const CustomerVerification = ({
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-green-800">
+                <p className="text-sm text-green-800 font-body-oo">
                   Great news! {`We've`} found an existing account for{" "}
                   {formatUSAPhoneNumber(existingCustomer.phone)}, we will credit{" "}
                   <span className="font-semibold">
@@ -453,7 +453,7 @@ const CustomerVerification = ({
           !!cartDetails?.discountString &&
           !promoCodeMessage && (
             <div className="flex items-center">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm font-body-oo text-gray-500">
                 Thank you for applying the promo code. Since you are using this
                 promotion, we will create a new account using{" "}
                 {formatUSAPhoneNumber(formData.phone)} to complete your order.
@@ -466,18 +466,19 @@ const CustomerVerification = ({
           <>
             <hr className="my-4" />
             <div>
-              <h3 className="font-online-ordering text-lg font-medium mb-3">
+              <h3 className="font-subheading-oo font-semibold text-lg mb-3">
                 Stay in touch
               </h3>
               <div className="rounded-xl border bg-gray-50 overflow-hidden">
                 {/* Loyalty info row */}
                 <div className="flex items-start gap-3 px-4 py-3 border-b">
                   <div className="mt-0.5 flex-shrink-0 text-gray-700">
-                    <LoyaltyIcon size={20} />
+                    <StarIcon size={20} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-800">
-                      Sign up and earn loyalty points with every order.
+                    <p className="text-sm font-body-oo text-gray-800">
+                      Sign up and earn {loyaltyRule?.signUpValue}{" "}
+                      {loyaltyRule?.name ?? "loyalty points"} with every order.
                     </p>
                   </div>
                 </div>
@@ -509,14 +510,14 @@ const CustomerVerification = ({
                       }`}
                     />
                   </button>
-                  <span className="text-sm font-medium text-gray-800">
+                  <span className="text-sm font-body-oo font-semibold text-gray-800">
                     Sign up
                   </span>
                 </div>
               </div>
 
               {(hasPromo || signUpToggle) && (
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs font-body-oo text-gray-400 mt-2">
                   By signing up, you agree to receive marketing texts and
                   Loyalty messages.
                 </p>

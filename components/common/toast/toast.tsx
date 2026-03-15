@@ -15,7 +15,7 @@ export const Toast: FC<ToastProps> = ({ message, type, bottom }) => {
   const { setToastData } = ToastState(); // Access the setToastData function from the global store
   const whiteHasGoodContrast = isContrastOkay(
     Env.NEXT_PUBLIC_PRIMARY_COLOR,
-    "#ffffff"
+    "#ffffff",
   );
   const getTypeStyles = () => {
     switch (type) {
@@ -113,7 +113,7 @@ export const Toast: FC<ToastProps> = ({ message, type, bottom }) => {
         </span>
       </div>
       <div
-        className="ms-3 text-sm font-normal"
+        className="ms-3 text-sm font-normal font-body-oo"
         style={{
           color: whiteHasGoodContrast
             ? "#ffffff"

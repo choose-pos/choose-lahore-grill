@@ -7,7 +7,9 @@ import { Check, Copy, X } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import discountImg2 from "../../assets/OBJECT.png";
-// Modal Component
+import { AnimatePresence, motion } from "framer-motion";
+import { fadeIn } from "@/utils/motion";
+
 const PromoModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -23,15 +25,26 @@ const PromoModal: React.FC<{
   handleCopy,
   copiedCode,
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-md max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 sm:p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        variants={fadeIn("up", "tween", 0, 0.25)}
+        initial="hidden"
+        animate="show"
+        exit="hidden"
+        className="bg-white rounded-t-xl sm:rounded-md max-w-md w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6">
           {/* Header with close button */}
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-bold text-gray-900 font-online-ordering">
+            <h3 className="text-xl font-semibold text-gray-900 font-subheading-oo">
               Offer Details
             </h3>
             <button
@@ -45,7 +58,7 @@ const PromoModal: React.FC<{
 
           {/* Discount text */}
           <div className="text-start mb-4">
-            <p className="text-lg font-bold text-gray-900 mb-2 font-online-ordering">
+            <p className="text-lg font-bold text-gray-900 mb-2 font-subheading-oo">
               {getDiscountText(promoData)}
             </p>
           </div>
@@ -53,10 +66,10 @@ const PromoModal: React.FC<{
           {/* Description */}
           {promoData.description && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2 font-online-ordering">
+              <h4 className="text-sm font-medium text-gray-700 mb-2  font-subheading-oo">
                 Description:
               </h4>
-              <p className="text-sm text-gray-600 font-online-ordering leading-relaxed">
+              <p className="text-sm text-gray-600 font-body-oo leading-relaxed">
                 {promoData.description}
               </p>
             </div>
@@ -64,11 +77,11 @@ const PromoModal: React.FC<{
 
           {/* Promo code */}
           <div className="border-t pt-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2 font-online-ordering">
+            <h4 className="text-sm font-medium text-gray-700 mb-2 font-subheading-oo">
               Promo Code:
             </h4>
             <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-              <code className="font-mono text-base font-medium">
+              <code className="font-subheading-oo text-base font-medium">
                 {promoData.code}
               </code>
               <button
@@ -94,14 +107,14 @@ const PromoModal: React.FC<{
           {/* Additional info */}
           {promoData.minCartValue && (
             <div className="mt-3">
-              <p className="text-xs text-gray-500 font-online-ordering">
+              <p className="text-xs text-gray-500 font-subheading-oo">
                 Minimum cart value: ${promoData.minCartValue}
               </p>
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -109,12 +122,11 @@ const PromoCodes: React.FC = () => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [promoCodeData, setPromoCodes] = useState<PromoData[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPromo, setSelectedPromo] = useState<PromoData | null>(null);
   const { setToastData } = ToastStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollIntervalRef = useRef<NodeJS.Timeout>();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedPromo, setSelectedPromo] = useState<PromoData | null>(null);
-
 
   const fetchRestaurantPromoCodes = useCallback(() => {
     const fetchFunc = async () => {
@@ -133,7 +145,7 @@ const PromoCodes: React.FC = () => {
             minCartValue: code.minCartValue,
             promoCodeDiscountType: code.promoCodeDiscountType,
             uptoAmount: code.uptoAmount,
-          })
+          }),
         );
         setPromoCodes(promoData);
       } catch (error) {
@@ -229,6 +241,10 @@ const PromoCodes: React.FC = () => {
         return `$${code.discountValue} off`;
       case PromoDiscountType.Item:
         return `Free item with purchase`;
+      case PromoDiscountType.Free:
+        return `Free entire cart`;
+      case PromoDiscountType.FreeDelivery:
+        return `Free delivery`;
     }
   };
 
@@ -243,8 +259,8 @@ const PromoCodes: React.FC = () => {
   };
 
   return (
-    <div className="w-full py-4 max-w-8xl mx-auto">
-      <h2 className="text-xl sm:text-3xl font-medium mb-4 font-online-ordering">
+    <div className="w-full py-2 max-w-8xl mx-auto">
+      <h2 className="text-xl sm:text-xl font-semibold mb-4 font-subheading-oo">
         Offers and Rewards
       </h2>
       <div className="w-full max-w-full overflow-hidden">
@@ -264,18 +280,18 @@ const PromoCodes: React.FC = () => {
                 key={index}
                 onClick={() => openModal(code)}
                 data-promo-card
-                className="bg-white border  transition-all duration-300 w-64 md:w-72 shrink-0 rounded-md"
+                className="bg-white border transition-all duration-300 w-64 md:w-72 shrink-0 rounded-md"
               >
                 <div className="p-3 md:p-4 h-full flex flex-col justify-center">
                   <div className="flex items-center justify-between">
                     <div className="flex-grow pr-2">
-                      <p className="sm:text-lg text-base font-bold text-gray-900 mb-1 line-clamp-1 font-online-ordering">
+                      <p className="sm:text-lg text-base font-semibold text-gray-900 mb-1 line-clamp-1 font-subheading-oo">
                         {getDiscountText(code)}
                       </p>
                       {code.description && (
                         <div className="relative group">
                           <div className="flex flex-wrap items-center gap-1">
-                            <p className="text-xs sm:text-sm text-gray-600 font-online-ordering truncate">
+                            <p className="text-xs sm:text-sm text-gray-600 font-body-oo font-normal truncate">
                               {code.description && code.description.length > 30
                                 ? `${code.description.substring(0, 30)}...`
                                 : code.description}
@@ -283,7 +299,7 @@ const PromoCodes: React.FC = () => {
                             {code.description.length > 30 && (
                               <button
                                 onClick={() => openModal(code)}
-                                className="text-xs text-black hover:text-black/80 font-semibold whitespace-nowrap"
+                                className="text-xs text-black hover:text-black/80 font-semibold font-body-oo whitespace-nowrap"
                               >
                                 Read More
                               </button>
@@ -292,7 +308,7 @@ const PromoCodes: React.FC = () => {
                         </div>
                       )}
                       <div className="flex items-center justify-start mt-2">
-                        <code className="font-mono text-xs sm:text-sm  font-medium mr-1">
+                        <code className="font-subheading-oo font-normal text-xs sm:text-sm mr-1">
                           {code.code}
                         </code>
                         <button
@@ -338,17 +354,20 @@ const PromoCodes: React.FC = () => {
           ))}
         </div>
       </div>
+
       {/* Modal */}
-      {selectedPromo && (
-        <PromoModal
-          isOpen={modalOpen}
-          onClose={closeModal}
-          promoData={selectedPromo}
-          getDiscountText={getDiscountText}
-          handleCopy={handleCopy}
-          copiedCode={copiedCode}
-        />
-      )}
+      <AnimatePresence>
+        {selectedPromo && modalOpen && (
+          <PromoModal
+            isOpen={modalOpen}
+            onClose={closeModal}
+            promoData={selectedPromo}
+            getDiscountText={getDiscountText}
+            handleCopy={handleCopy}
+            copiedCode={copiedCode}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

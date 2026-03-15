@@ -79,6 +79,9 @@ export default {
         primary: "var(--primary-font)",
         secondary: "var(--secondary-font)",
         "online-ordering": "var(--font-online-ordering)",
+        "heading-oo": "var(--font-heading-oo)",
+        "subheading-oo": "var(--font-subheading-oo)",
+        "body-oo": "var(--font-body-oo)",
         rubik: ["var(--font-rubik)", "serif"],
         bebas: ["var(--font-bebas)", "serif"],
       },
@@ -90,7 +93,7 @@ export default {
       maxWidth: {
         "8xl": "100rem",
       },
-       animation: {
+      animation: {
         "bounce-flash": "bounce-flash 1.2s infinite",
       },
       keyframes: {

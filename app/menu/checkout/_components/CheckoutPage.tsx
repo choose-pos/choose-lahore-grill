@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CartBreakdown from "../../cart/_components/CartBreakdown";
 import CartHeader from "../../cart/_components/CartHeader";
-import CartOrderType from "../../cart/_components/CartOrderType";
+import CartRemarks from "../../cart/_components/CartRemarks";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutStripeForm from "./StripeForm";
 
@@ -62,9 +62,9 @@ const CheckoutPage = ({
     setCartData,
     setCartDetails,
     setFreeItemInCart,
-    setFreeItemImage,
     setSpecialRemarks,
     setTotalAmount,
+    setFreeItemImage,
   } = useCartStore();
   const { meCustomerData, setMeCustomerData } = meCustomerStore();
 
@@ -144,7 +144,7 @@ const CheckoutPage = ({
 
           // Check if we have a free item
           const freeItemObj = extractFreeDiscountItemDetails(
-            groupedCart.discountString ?? ""
+            groupedCart.discountString ?? "",
           );
 
           setFreeItemInCart(freeItemObj);
@@ -275,7 +275,7 @@ const CheckoutPage = ({
                   refreshData={() => setStateChange((prev) => !prev)}
                 />
               </div>
-              <hr className="mx-6 my-4 lg:my-6" />
+              <hr className="mx-6 my-5 border-gray-200" />
             </>
           ) : null}
 
@@ -290,7 +290,7 @@ const CheckoutPage = ({
                   variables: {
                     colorPrimary: isContrastOkay(
                       "#ffffff",
-                      Env.NEXT_PUBLIC_PRIMARY_COLOR
+                      Env.NEXT_PUBLIC_PRIMARY_COLOR,
                     )
                       ? Env.NEXT_PUBLIC_PRIMARY_COLOR
                       : "#000000",
@@ -318,14 +318,11 @@ const CheckoutPage = ({
         <div className="lg:block hidden col-span-1"></div>
 
         {/* Right Side */}
-        <div className="col-span-1 lg:col-span-5 w-full lg:rounded-xl lg:border">
+        <div className="col-span-1 lg:col-span-5 w-full">
           <br className="hidden lg:block" />
 
-          <CartOrderType />
-          <hr className="mx-6 my-4 lg:my-6" />
-
           <CheckoutOrderSummary />
-          <hr className="mx-6 my-4 lg:my-6" />
+          <hr className="mx-6 my-5 border-gray-200" />
 
           <p
             ref={errorRef}
@@ -336,11 +333,15 @@ const CheckoutPage = ({
             {placeOrderError}
           </p>
 
+          <CartRemarks />
+          <hr className="mx-6 my-5 border-gray-200" />
           <div ref={totalRef}>
             <CartBreakdown amounts={amounts} loyaltyRule={loyaltyRule} />
           </div>
-          <div className="mb-12 lg:hidden" />
-          <div className="px-6 w-full my-2 hidden lg:block">
+          <div className="px-6 w-full my-2">
+            <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
+              You saved upto 25% by ordering directly instead of third party app
+            </p>
             <button
               onClick={() => {
                 if (stripeFormRef.current) {
@@ -353,11 +354,11 @@ const CheckoutPage = ({
               disabled={
                 placeOrderLoading || (!meCustomerData && !isOtpVerified)
               }
-              className="w-full bg-primary mt-2 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+              className="w-full bg-primary mt-2 py-2 rounded-md hover:bg-opacity-90 transition-all duration-200 font-subheading-oo font-bold disabled:opacity-50"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                 )
                   ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                   : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -369,28 +370,29 @@ const CheckoutPage = ({
           <br />
         </div>
 
-        {/* Floating Button */}
-        <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t">
-          {(() => {
-            const orderTotal =
+        {/* Floating Button - hidden when actual total is in view */}
+        {!showStickyTotal && (
+          <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t z-20">
+            {(() => {
+              const orderTotal =
               (amounts?.subTotalAmt ?? 0) -
               (amounts?.discAmt ?? 0) +
               (amounts?.taxAmt ?? 0) +
               (amounts?.tipAmt ?? 0) +
               (amounts?.platformFeeAmt ?? 0) +
               (amounts?.deliveryFeeAmt ?? 0);
-            return orderTotal > 0 ? (
-              <div
-                className={`flex justify-between items-center text-base font-online-ordering overflow-hidden transition-all duration-300 ease-in-out ${
-                  showStickyTotal
-                    ? "max-h-0 opacity-0 mb-0"
-                    : "max-h-10 opacity-100 mb-2"
-                }`}
-              >
-                <span className="font-medium">Order Total</span>
-                <span className="font-medium">${orderTotal.toFixed(2)}</span>
-              </div>
-            ) : null;
+              return (
+                <>
+                  <div className="flex justify-between items-center mb-1 font-subheading-oo font-semibold">
+                    <span className="text-base ">Order Total</span>
+                    <span className="text-base ">${orderTotal.toFixed(2)}</span>
+                  </div>
+                  <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
+                    You saved upto 25% by ordering directly instead of third
+                    party app
+                  </p>
+                </>
+              );
           })()}
           <button
             onClick={() => {
@@ -398,12 +400,14 @@ const CheckoutPage = ({
                 stripeFormRef.current.click();
               }
             }}
-            disabled={placeOrderLoading || (!meCustomerData && !isOtpVerified)}
-            className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+              disabled={
+                placeOrderLoading || (!meCustomerData && !isOtpVerified)
+              }
+              className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                Env.NEXT_PUBLIC_BACKGROUND_COLOR,
               )
                 ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                 : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -411,7 +415,8 @@ const CheckoutPage = ({
           >
             {placeOrderLoading ? "Processing..." : "Place Order"}
           </button>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

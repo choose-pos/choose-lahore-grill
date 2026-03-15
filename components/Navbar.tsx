@@ -51,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
   >([]);
   const { restaurantData } = RestaurantStore();
   const { cartCountInfo } = useCartStore();
-  const { setCartOpen, setSignInOpen, isMenuOpen, setIsMenuOpen } = useSidebarStore();
+  const { setSignInOpen, isMenuOpen, setIsMenuOpen } = useSidebarStore();
   const { setToastData } = ToastStore();
   const { meCustomerData, setMeCustomerData } = meCustomerStore();
   const { NavData } = NavDataStore();
@@ -128,7 +128,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
     setIsOpen(!isOpen);
   };
 
-  const toggleOffers = () => {
+    const toggleOffers = () => {
     setIsOffersOpen(!isOffersOpen);
   };
 
@@ -138,7 +138,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
         pathname === "/menu" ? "" : "sticky top-0"
       } bg-white z-50 shadow-sm border-b border-b-black/20   font-online-ordering`}
     >
-      <div className="max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
+      <div className="max-w-8xl mx-auto px-4 md:px-20 lg:px-28">
         <div className="flex justify-between items-center h-16 md:h-24">
           {/* Logo */}
           <div className="flex items-center ">
@@ -163,19 +163,17 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
           <nav className="hidden lg:flex items-center space-x-2">
             {navItems?.map((item) => (
               <Link key={item.href} href={item.href} passHref>
-                <p className="px-4 py-2 rounded-md text-2xl md:text-lg font-normal text-black hover:text-gray-600">
+                <p className="px-4 py-2 rounded-md text-2xl md:text-lg font-body-oo font-normal text-black hover:text-gray-600">
                   {item.label}
                 </p>
               </Link>
             ))}
             {offerNavitems.length > 0 && (
               <div
-                className=" relative px-4 py-2 rounded-md text-2xl md:text-lg font-medium "
-                onClick={toggleOffers}
+                className="relative px-4 py-2 rounded-md text-2xl md:text-lg font-body font-normal"                onClick={toggleOffers}
               >
                 <div
-                  className="flex items-center gap-1 px-4 py-2 text-lg text-black hover:text-gray-600 font-normal"
-                  onClick={toggleOffersDropdown}
+                  className="flex items-center font-body-oo space-x-1 cursor-pointer hover:text-primaryColor transition-colors duration-200"                  onClick={toggleOffersDropdown}
                 >
                   <span>Promotions</span>
                   <FiChevronDown
@@ -206,7 +204,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                               >
                                 <Link href={offer.link}>
                                   <span
-                                    className="block px-4 py-2 text-sm text-black hover:text-gray-600 hover:bg-gray-50 transition-all"
+                                    className="block px-4 py-2 text-sm text-black hover:text-gray-600 hover:bg-gray-50 transition-all font-body-oo"
                                     onClick={() => setIsOffersOpen(false)}
                                   >
                                     {offer.title}
@@ -238,7 +236,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 {cartCountInfo > 0 ? (
                   <Link href={`/menu/cart`}>
                     <button
-                      className="bg-primary text-white px-6 py-2 rounded-md flex items-center space-x-2"
+                      className="bg-primary text-white px-6 py-2 rounded-md flex items-center font-body-oo space-x-2"
                       style={{
                         color: isContrastOkay(
                           Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -281,15 +279,14 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               <>
                 {meCustomerData ? (
                   <Link href={`/menu/my-account`} passHref>
-                    <div className="flex items-center space-x-2 text-gray-600 ">
-                      <MdAccountCircle size={28} />
+                    <div className="flex items-center font-body-oo space-x-2 text-gray-600 ">                      <MdAccountCircle size={28} />
                       <span>{meCustomerData.firstName}</span>
                     </div>
                   </Link>
                 ) : (
                   <button
                     onClick={() => setSignInOpen(true)}
-                    className="text-gray-600 font-normal"
+                    className="text-gray-600 font-normal font-body-oo"
                   >
                     Sign In
                   </button>
@@ -319,7 +316,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                         }}
                       />
                       <span
-                        className="font-online-ordering"
+                        className="font-body-oo"
                         style={{
                           color: isContrastOkay(
                             Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -346,7 +343,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 <Link href={`/menu/my-account`} passHref>
                   <div className="flex items-center space-x-1 text-gray-600 ">
                     <MdAccountCircle size={24} />
-                    <span className="truncate max-w-[100px]">
+                    <span className="truncate max-w-[100px] font-body-oo">
                       {meCustomerData.firstName}
                     </span>
                   </div>
@@ -354,7 +351,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               ) : (
                 <button
                   onClick={() => setSignInOpen(true)}
-                  className="text-gray-800 font-medium"
+                  className="text-gray-800 font-medium font-body-oo"
                 >
                   Sign In
                 </button>
@@ -460,7 +457,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               )}
             </nav>
 
-            <div className="px-4 sm:px-8 py-6 font-online-ordering mt-auto flex flex-col gap-6">              
+            <div className="px-4 sm:px-8 py-6 font-body-oo mt-auto flex flex-col gap-6">              
               {myaccount ? (
                 <>
                   <button
@@ -493,7 +490,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                         setSignInOpen(true);
                         closeMenu();
                       }}
-                      className="w-full font-online-ordering text-xl font-medium py-3 text-black"
+                      className="w-full font-body-oo text-xl font-medium py-3 text-black"
                     >
                       Sign In
                     </button>

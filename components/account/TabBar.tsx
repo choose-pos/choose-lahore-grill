@@ -105,16 +105,16 @@ export const StickyTabbar: React.FC<TabProps> = ({ onTabChange }) => {
         </div>
       </div>
 
-      <div className="md:hidden font-online-ordering  z-20 bg-white border-b-[1px] border-gray-100  rounded-md mb-3 mx-auto">
-        <div className="flex overflow-x-auto  items-center justify-between">
+      <div className="md:hidden font-body-oo z-20 bg-white shadow-sm border border-gray-100 rounded-lg mb-3 mx-auto p-1">
+        <div className="flex w-full items-center justify-between">
           {tabs.map((tab, index) => (
             <button
               key={index}
               onClick={() => handleTabClick(tab)}
-              className={`flex-shrink-0 px-7 py-2 rounded-md text-start ${
+              className={`flex-1 py-2 text-center rounded-md font-semibold font-subheading-oo text-[15px] transition-colors ${
                 activeTab === tab
-                  ? "bg-primaryColor text-white"
-                  : "text-gray-500 hover:bg-bgGray"
+                  ? "bg-primary border-primary shadow-sm"
+                  : "text-gray-600 hover:bg-gray-50 bg-transparent"
               }`}
               style={
                 activeTab === tab
@@ -320,10 +320,10 @@ export const RewardsContent: React.FC<RewardsProps> = ({
                 </div>
               )}
               <div className="flex flex-col items-start space-y-2">
-                <h3 className="text-lg sm:text-xl font-medium text-gray-800 line-clamp-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 line-clamp-2 font-subheading-oo">
                   {title}
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600 font-body-oo">
                   {description}
                 </p>
               </div>
@@ -335,7 +335,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
                   className="w-4 h-4 sm:w-5 sm:h-5 object-cover"
                   alt="icon"
                 />
-                <span className="text-base sm:text-lg font-medium">
+                <span className="text-base sm:text-lg font-semibold font-subheading-oo">
                   {points}
                 </span>
               </div>
@@ -410,11 +410,13 @@ export const RewardsContent: React.FC<RewardsProps> = ({
     <div className="py-4 sm:py-6 lg:px-12 xl:px-20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-lg p-4 sm:p-6 mb-6 sm:mb-10 shadow-md border-[1px] border-gray-100">
         <div className="w-full sm:w-auto mb-4 sm:mb-0">
-          <h2 className="text-2xl sm:text-3xl font-medium text-gray-800 mb-2 font-online-ordering">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2 font-subheading-oo">
             Your {name === "Points" ? "Reward Points" : name}
           </h2>
           <div className="flex items-center">
-            <p className="text-base sm:text-lg text-gray-600">{desc}</p>
+            <p className="text-base sm:text-lg text-gray-600 font-body-oo">
+              {desc}
+            </p>
           </div>
         </div>
         <div className="flex items-center rounded-md px-4 sm:px-6 py-2 sm:py-3 shadow-inner bg-bgGray w-full sm:w-auto justify-center">
@@ -423,7 +425,9 @@ export const RewardsContent: React.FC<RewardsProps> = ({
             className="w-6 h-6 sm:w-8 sm:h-8 mr-2 object-cover"
             alt="icon"
           />
-          <span className="text-2xl sm:text-3xl font-medium">{balance}</span>
+          <span className="text-2xl sm:text-3xl font-semibold font-subheading-oo">
+            {balance}
+          </span>
         </div>
       </div>
 
@@ -443,7 +447,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
           </>
         ) : (
           <div className="w-full flex justify-start items-center col-span-2">
-            <p className="text-lg sm:text-xl font-medium text-gray-900 mb-4 font-online-ordering">
+            <p className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 font-subheading-oo">
               No available rewards at the moment! please check back later.
             </p>
           </div>
@@ -569,10 +573,10 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
 
   return (
     <div className="px-0 sm:px-6 lg:px-12 xl:px-20">
-      <h2 className="text-3xl md:text-3xl font-medium mb-3 md:mb-4 font-online-ordering">
+      <h2 className="text-3xl md:text-3xl font-semibold mb-3 md:mb-4 font-subheading-oo">
         Details
       </h2>
-      <p className="mb-4 text-sm text-gray-600">
+      <p className="mb-4 text-sm text-gray-600 font-body-oo">
         We use this information for communications and to make ordering quick
         and easy.
       </p>
@@ -583,7 +587,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Email
           </label>
@@ -594,13 +598,13 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             value={profile.email || ""}
             onChange={handleInputChange}
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm font-body-oo"
           />
         </div>
         <div>
           <label
             htmlFor="firstName"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             First Name
           </label>
@@ -610,13 +614,13 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             value={profile.firstName || ""}
             onChange={handleInputChange}
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm font-body-oo"
           />
         </div>
         <div>
           <label
             htmlFor="lastName"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Last Name
           </label>
@@ -626,13 +630,13 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             value={profile.lastName || ""}
             onChange={handleInputChange}
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-sm font-body-oo"
           />
         </div>
         <div>
           <label
             htmlFor="dob"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Date of Birth
           </label>
@@ -647,7 +651,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
         <div>
           <label
             htmlFor="phone"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Phone
           </label>
@@ -656,7 +660,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             name="phone"
             value={profile.phone}
             readOnly
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 shadow-sm focus:ring-opacity-50 py-2 px-3 text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 shadow-sm focus:ring-opacity-50 py-2 px-3 text-sm font-body-oo"
           />
         </div>
         <div className="flex items-center space-x-2">
@@ -667,7 +671,10 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             onChange={handleEmail}
             className="h-4 w-4 accent-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
           />
-          <label htmlFor="emailOffers" className="text-sm text-gray-700">
+          <label
+            htmlFor="emailOffers"
+            className="text-sm text-gray-700 font-body-oo"
+          >
             Receive exclusive offers in your inbox
           </label>
         </div>
@@ -679,7 +686,10 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             onChange={handleSms}
             className="h-4 w-4 accent-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
           />
-          <label htmlFor="smsOffers" className="text-sm text-gray-700">
+          <label
+            htmlFor="smsOffers"
+            className="text-sm text-gray-700 font-body-oo"
+          >
             Receive special offers by text
           </label>
         </div>
@@ -691,7 +701,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             passHref
             className="inline-block"
           >
-            <span className="underline font-medium">{`Platform Terms`}</span>
+            <span className="underline font-semibold font-subheading-oo">{`Platform Terms`}</span>
           </Link>{" "}
           and{" "}
           <Link
@@ -699,14 +709,14 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
             passHref
             className="inline-block"
           >
-            <span className="underline font-medium">{`Privacy Policy`}</span>
+            <span className="underline font-semibold font-subheading-oo">{`Privacy Policy`}</span>
           </Link>
         </p>
         <br />
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-1.5 md:py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          className="w-full py-1.5 md:py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold font-subheading-oo text-white bg-primary hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-offset-2"
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -739,8 +749,8 @@ export type Order = {
   items: Items[];
   status?: string | null;
   systemRemark?: string;
-canBeReOrdered?: boolean;
-  appliedDiscount?: {
+  canBeReOrdered?: boolean;
+    appliedDiscount?: {
     discountType: OrderDiscountType;
     discountAmount?: number | null;
     promoData?: {
@@ -1161,9 +1171,9 @@ export const OrdersContent: React.FC = () => {
               <FaSpinner className="animate-spin text-3xl text-gray-600" />
             </div>
           ) : selectedOrder ? (
-            <div className="font-online-ordering text-sm">
+            <div className="font-body-oo text-sm">
               <div className="text-center mb-4">
-                <h3 className="text-xl md:text-2xl font-medium">
+                <h3 className="text-xl md:text-2xl font-semibold font-subheading-oo">
                   {selectedOrder.restaurantInfo.name}
                 </h3>
                 <p className="text-sm text-gray-700">
@@ -1239,7 +1249,7 @@ export const OrdersContent: React.FC = () => {
                 )} */}
 
               <div className="border-t border-b py-2 mb-4">
-                <div className="grid grid-cols-12 font-medium">
+                <div className="grid grid-cols-12 font-semibold font-subheading-oo">
                   <span className="col-span-9">Item</span>
                   {/* <span className="col-span-3 text-center">Qty</span> */}
                   <span className="col-span-3 text-right">Total</span>
@@ -1354,7 +1364,7 @@ export const OrdersContent: React.FC = () => {
                   </div>
                 ) : null}
 
-                {selectedOrder.taxAmount &&
+                 {selectedOrder.taxAmount &&
                 (selectedOrder.platformFees !== null ||
                   selectedOrder.platformFees !== undefined) ? (
                   <div className="flex justify-between">
@@ -1395,7 +1405,7 @@ export const OrdersContent: React.FC = () => {
                   </div>
                 ) : null}
 
-                <div className="flex justify-between font-medium text-lg">
+                <div className="flex justify-between font-semibold font-subheading-oo text-lg">
                   <span>Total</span>
                   <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
                 </div>
@@ -1512,7 +1522,9 @@ export const OrdersContent: React.FC = () => {
 
               {selectedOrder.specialRemark && (
                 <div className="mt-4 bg-yellow-50 p-4 rounded-md">
-                  <h4 className="font-medium mb-2">Restaurant Remarks</h4>
+                  <h4 className="font-semibold font-subheading-oo mb-2">
+                    Restaurant Remarks
+                  </h4>
                   <p>{selectedOrder.specialRemark}</p>
                 </div>
               )}
@@ -1559,29 +1571,37 @@ export const OrdersContent: React.FC = () => {
               {/* Left Column - Order Info */}
               <div className="w-full lg:w-1/4 grid grid-cols-2  sm:grid-cols-2 lg:grid-cols-1 gap-4 pr-4">
                 <div className="space-y-2">
-                  <div className="text-base text-gray-600">Date:</div>
-                  <span className="text-base lg:text-lg font-medium">
+                  <div className="text-base text-gray-600 font-body-oo">
+                    Date:
+                  </div>
+                  <span className="text-base lg:text-lg font-semibold font-subheading-oo">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </span>
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-base text-gray-600">Order Id:</div>
-                  <span className="text-base lg:text-lg font-medium">
+                  <div className="text-base text-gray-600 font-body-oo">
+                    Order Id:
+                  </div>
+                  <span className="text-base lg:text-lg font-semibold font-subheading-oo">
                     {order.orderId}
                   </span>
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-base text-gray-600">Order Type:</div>
-                  <span className="text-base lg:text-lg font-medium">
+                  <div className="text-base text-gray-600 font-body-oo">
+                    Order Type:
+                  </div>
+                  <span className="text-base lg:text-lg font-semibold font-subheading-oo">
                     {order.orderType}
                   </span>
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-base text-gray-600">Total Amount:</div>
-                  <span className="text-base lg:text-lg font-medium">
+                  <div className="text-base text-gray-600 font-body-oo">
+                    Total Amount:
+                  </div>
+                  <span className="text-base lg:text-lg font-semibold font-subheading-oo">
                     ${order.totalAmount?.toFixed(2)}
                   </span>
                 </div>
@@ -1603,7 +1623,7 @@ export const OrdersContent: React.FC = () => {
                   )} */}
                 {/* Items Section with Scroll */}
                 <div className="flex-1 mb-4">
-                  <div className="text-base font-medium text-gray-600 mb-2">
+                  <div className="text-base font-semibold text-gray-600 mb-2 font-subheading-oo">
                     Items (
                     {order.items.length +
                       (order.appliedDiscount?.promoData?.discountItemName
@@ -1633,7 +1653,7 @@ export const OrdersContent: React.FC = () => {
                         {order.appliedDiscount?.promoData?.discountItemName ? (
                           <TableRow key={0}>
                             <TableCell className="py-3 w-1/2">
-                              <span className="text-base font-medium">
+                              <span className="text-base font-semibold font-subheading-oo">
                                 {
                                   order.appliedDiscount.promoData
                                     .discountItemName
@@ -1656,7 +1676,7 @@ export const OrdersContent: React.FC = () => {
                           ?.itemName ? (
                           <TableRow key={1}>
                             <TableCell className="py-3 w-1/2">
-                              <span className="text-base font-medium">
+                              <span className="text-base font-semibold font-subheading-oo">
                                 {
                                   order.appliedDiscount.loyaltyData.redeemItem
                                     ?.itemName
@@ -1668,10 +1688,7 @@ export const OrdersContent: React.FC = () => {
                               1
                             </TableCell>
                             <TableCell className="text-right py-3 text-base">
-                              $
-                              {(
-                                order.appliedDiscount.discountAmount ?? 0
-                              ).toFixed(2)}
+                                ${(order.appliedDiscount.discountAmount ?? 0).toFixed(2)}
                             </TableCell>
                           </TableRow>
                         ) : null}
@@ -1680,7 +1697,7 @@ export const OrdersContent: React.FC = () => {
                           return (
                             <TableRow key={itemIndex}>
                               <TableCell className="py-3 w-1/2">
-                                <span className="text-base font-medium">
+                                <span className="text-base font-semibold font-subheading-oo">
                                   {item.itemName}
                                 </span>
                               </TableCell>

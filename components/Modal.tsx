@@ -68,11 +68,11 @@ const Modal: React.FC<{
     setIsAsap,
     setTimesList,
     timesList,
-    showMenu,
     clickState,
-    loadingItem,
     setClickState,
+    loadingItem,
     setLoadingItem,
+    showMenu,
   } = useModalStore();
   const { setTempOrderType, tempOrderType } = OrderTypeData();
   const { setToastData } = ToastStore();
@@ -88,9 +88,8 @@ const Modal: React.FC<{
   const [showSchedule, setShowSchedule] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showAllDates, setShowAllDates] = useState(false);
-  const [restaurantClose, setRestaurantClose] = useState<boolean>(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [distance, setDistance] = useState<number | null>(null);
+  const [restaurantClose, setRestaurantClose] = useState<boolean>(false);
   const [selectedPickupPlace, setSelectedPickupPlace] =
     useState<PlaceType | null>(null);
   const [selectedDeliveryPlace, setSelectedDeliveryPlace] =
@@ -100,6 +99,7 @@ const Modal: React.FC<{
   // );
   const [tempUserAddress, setTempUserAddress] =
     useState<AddressInfoInput | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [tempDeliveryDay, setTempDeliveryDay] = useState<string>("");
   const [tempDeliveryTime, setTempDeliveryTime] = useState<string>("");
   const isDelivery = restaurantData?.deliveryConfig.provideDelivery;
@@ -176,14 +176,16 @@ const Modal: React.FC<{
     }
   };
 
+
+
   // useEffect(() => {
   //   if (!showMenu) {
-  //     document.body.style.overflow = "hidden";
+  //     document.body.classList.add("overflow-y-hidden");
   //   } else {
-  //     document.body.style.overflow = "unset";
+  //     document.body.classList.remove("overflow-y-hidden");
   //   }
   //   return () => {
-  //     document.body.style.overflow = "unset";
+  //     document.body.classList.remove("overflow-y-hidden");
   //   };
   // }, [showMenu]);
 
@@ -269,7 +271,7 @@ const Modal: React.FC<{
           if (res2?.CartDetails) {
             // Check if we have a free item
             const currentFreeItem = extractFreeDiscountItemDetails(
-              res2.CartDetails.discountString ?? ""
+              res2.CartDetails.discountString ?? "",
             );
 
             // Set cart count including free item if it exists
@@ -310,14 +312,14 @@ const Modal: React.FC<{
 
   const loadOptions = (
     inputValue: string,
-    callback: (options: PlaceType[]) => void
+    callback: (options: PlaceType[]) => void,
   ) => {
     sdk.AllPlaces({ input: inputValue }).then((d) => {
       callback(
         d.getPlacesList.map((el: { displayName: string; placeId: string }) => ({
           label: el.displayName,
           value: el.placeId,
-        }))
+        })),
       );
     });
   };
@@ -339,7 +341,7 @@ const Modal: React.FC<{
             latitude,
             longitude,
             address.coordinate.coordinates[0],
-            address.coordinate.coordinates[1]
+            address.coordinate.coordinates[1],
           );
           setDistance(distance);
         }
@@ -359,6 +361,7 @@ const Modal: React.FC<{
       );
 
       if (res.validateLoyaltyRedemptionOnCart) {
+        // Refresh cart details after applying loyalty
         const updatedCart = await refreshCartDetails();
         if (updatedCart?.CartDetails) {
           setCartDetails(updatedCart.CartDetails);
@@ -439,7 +442,7 @@ const Modal: React.FC<{
                 : convertToUtcForTimeSlots(
                     tempDeliveryDay,
                     tempDeliveryTime,
-                    restaurantTimeZone
+                    restaurantTimeZone,
                   ),
               isAsap: isAsapOrder,
             },
@@ -473,7 +476,7 @@ const Modal: React.FC<{
                 : convertToUtcForTimeSlots(
                     tempDeliveryDay,
                     tempDeliveryTime,
-                    restaurantTimeZone
+                    restaurantTimeZone,
                   ),
               isAsap: isAsapOrder,
             },
@@ -560,7 +563,7 @@ const Modal: React.FC<{
           : restaurantData.fulfillmentConfig.deliveryTime +
               restaurantData.fulfillmentConfig.prepTime,
         restaurantData.onlineOrderTimingConfig?.startAfterMinutes ?? 0,
-        restaurantData.onlineOrderTimingConfig?.endBeforeMinutes ?? 0
+        restaurantData.onlineOrderTimingConfig?.endBeforeMinutes ?? 0,
       );
 
       setIsAsap(checkAsap);
@@ -590,7 +593,7 @@ const Modal: React.FC<{
 
         const dayName = selectedDate.weekdayLong ?? "";
         const availability = avl.find(
-          (day) => day.day.toLowerCase() === dayName.toLowerCase()
+          (day) => day.day.toLowerCase() === dayName.toLowerCase(),
         );
 
         if (!availability || !availability.active) {
@@ -636,7 +639,7 @@ const Modal: React.FC<{
           : restaurantData.fulfillmentConfig.deliveryTime +
               restaurantData.fulfillmentConfig.prepTime,
         restaurantData.onlineOrderTimingConfig?.startAfterMinutes ?? 0,
-        restaurantData.onlineOrderTimingConfig?.endBeforeMinutes ?? 0
+        restaurantData.onlineOrderTimingConfig?.endBeforeMinutes ?? 0,
       );
 
       setTimesList(slots);
@@ -662,14 +665,14 @@ const Modal: React.FC<{
             onClick={() => {
               setShowMenu(true);
             }}
-            className="absolute top-0 right-0 z-50 p-2  rounded-full hover:bg-gray-100"
+            className="absolute top-3 right-3 z-50 p-1 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
           >
-            <IoClose size={24} />
+            <IoClose size={20} />
           </button>
         )}
         {!showSchedule ? (
           <>
-            <div className="pt-12 px-6 pb-3">
+            <div className="pt-10  px-6 sm:px-8 pb-5">
               <div className="flex relative bg-gray-100 rounded-md p-1 items-center shadow-inner">
                 <div
                   className="absolute top-1 bottom-1 bg-white transition-transform duration-300 ease-in-out rounded-md shadow-sm"
@@ -684,9 +687,9 @@ const Modal: React.FC<{
                   }}
                 />
                 <button
-                  className={`flex-1 py-2 text-center focus:outline-none relative z-10 font-online-ordering text-[15px] md:text-base transition-colors duration-300 ${
+                  className={`flex-1 py-2 text-center focus:outline-none relative z-10 font-subheading-oo text-[15px] md:text-base transition-colors duration-300 ${
                     tempOrderType === OrderType.Pickup
-                      ? "text-gray-900 font-medium"
+                      ? "text-gray-900 font-semibold"
                       : "text-gray-500"
                   } ${!isPickUp ? "opacity-40 cursor-not-allowed" : ""}`}
                   onClick={() => isPickUp && setTempOrderType(OrderType.Pickup)}
@@ -695,9 +698,9 @@ const Modal: React.FC<{
                   {isPickUp ? "Pickup" : "Pickup Unavailable"}
                 </button>
                 <button
-                  className={`flex-1 py-2 text-center focus:outline-none relative z-10 font-online-ordering text-[15px] md:text-base transition-colors duration-300 ${
+                  className={`flex-1 py-2 text-center focus:outline-none relative z-10 font-subheading-oo text-[15px] md:text-base transition-colors duration-300 ${
                     tempOrderType === OrderType.Delivery
-                      ? "text-gray-900 font-medium"
+                      ? "text-gray-900 font-semibold"
                       : "text-gray-500"
                   } ${!isDelivery ? "opacity-40 cursor-not-allowed" : ""}`}
                   disabled={!isDelivery}
@@ -707,11 +710,10 @@ const Modal: React.FC<{
                 </button>
               </div>
             </div>
-            <div className="pb-12 px-6 pt-6 border-t">
+            <div className="pb-6 sm:pb-10 px-6 sm:px-8 pt-6 border-t border-gray-100">
               {tempOrderType === OrderType.Pickup ? (
                 <div>
-                  <h3 className="sm:text-2xl text-xl font-medium mb-2 sm:mb-4 text-gray-800 font-online-ordering">
-                    {" "}
+                  <h3 className="sm:text-2xl text-xl font-semibold font-subheading-oo mb-2 sm:mb-4 text-gray-900 ">
                     Pickup Details
                   </h3>
                   {/* <AsyncSelect
@@ -720,15 +722,15 @@ const Modal: React.FC<{
                     value={selectedPickupPlace}
                     placeholder="Find the closest location for your order"
                     className="mb-4"
-                    isClearable={true}
                   /> */}
-                  <div className="rounded-lg sm:mt-4 mt-6 flex justify-between items-center">
-                    {" "}
+                  <div className="rounded-lg sm:mt-4 mt-4 flex justify-between items-center">
                     <div>
-                      <p className="font-medium font-online-ordering">
+                      <p className="font-semibold text-gray-900 font-subheading-oo">
                         {restaurantName}
                       </p>
-                      <p>{address.addressLine1}</p>
+                      <p className="text-gray-800 font-body-oo">
+                        {address.addressLine1}
+                      </p>
                     </div>
                     <div className="flex">
                       <p className="mr-1">
@@ -738,7 +740,6 @@ const Modal: React.FC<{
                       </p>
                       <input
                         type="radio"
-                        // defaultChecked={showCalendar}
                         checked={showCalendar}
                         className="flex items-center justify-center w-6 h-6 rounded-full text-white cursor-pointer accent-primary focus:ring-primary border-gray-300"
                         onChange={(e) => {
@@ -752,46 +753,48 @@ const Modal: React.FC<{
                       onClick={async () => {
                         await handleScheduleOrder(true);
                       }}
-                      className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
+                      className="flex justify-between items-center border-b border-gray-200 py-5 cursor-pointer mt-4"
                     >
                       <div>
-                        <h4 className="text-base font-medium">ASAP Order</h4>
-                        <p className="text-sm text-gray-600">
+                        <h4 className="text-base font-semibold font-subheading-oo text-gray-900">
+                          ASAP Order
+                        </h4>
+                        <p className="text-sm font-body-oo text-gray-500 mt-0.5">
                           Pickup available in{" "}
                           {restaurantData?.fulfillmentConfig?.prepTime} mins
                         </p>
                       </div>
-                      <IoArrowForward size={20} className="" />
+                      <IoArrowForward size={20} className="text-gray-900" />
                     </div>
                   )}
                   {showCalendar && (
                     <div
                       onClick={() => setShowSchedule(!showSchedule)}
-                      className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
+                      className="flex justify-between font-subheading-oo items-center border-b border-gray-200 py-5 cursor-pointer"
                     >
                       <div>
-                        <h4 className="text-base font-medium">
+                        <h4 className="text-base font-semibold font-subheading-oo text-gray-900">
                           Schedule Your Order
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm font-body-oo text-gray-500 mt-0.5">
                           Select a date and time for your order.
                         </p>
                       </div>
-                      <IoArrowForward size={20} className="" />
+                      <IoArrowForward size={20} className="text-gray-900" />
                     </div>
                   )}
                 </div>
               ) : (
                 <div>
-                  <div className="p-3 pl-0 sm:pl-0 sm:p-4 rounded-r-lg mb-4">
-                    <p className="text-xs sm:text-sm text-gray-600">
+                  <div className="p-3 pl-0 sm:pl-0 sm:p-4 rounded-r-lg font-body-oo mb-2">
+                    <p className="text-xs sm:text-sm text-gray-600 font-body-oo">
                       <span className="font-semibold">Note: </span>
                       Delivery fees are charged by Uber. The restaurant earns
                       nothing from delivery services. Please reach out to Uber
                       support for any issues.
                     </p>
                   </div>
-                  <h3 className="sm:text-2xl text-xl  font-medium mb-4  text-gray-800 font-online-ordering">
+                  <h3 className="sm:text-2xl text-xl  font-semibold mb-4  text-gray-800 font-subheading-oo">
                     Delivery Address
                   </h3>
                   <div className="space-y-4">
@@ -800,11 +803,11 @@ const Modal: React.FC<{
                       onChange={handleDeliveryPlaceSelect}
                       value={selectedDeliveryPlace}
                       placeholder="Street Address"
-                      className="mb-4"
+                      className="mb-4 font-body-oo"
                       isClearable={true}
                     />
                     <input
-                      className="w-full py-2 px-3 bg-white rounded-sm focus:outline-none border border-gray-300  focus:ring-1 focus:ring-primary focus:border-primary"
+                      className="w-full py-2 px-3 font-body-oo bg-white rounded-sm focus:outline-none border border-gray-300  focus:ring-1 focus:ring-primary focus:border-primary"
                       placeholder="Apartment / Unit Number"
                       value={tempUserAddress?.addressLine2 || ""}
                       onChange={(e) =>
@@ -822,11 +825,13 @@ const Modal: React.FC<{
                         onClick={async () => {
                           await handleScheduleOrder(true);
                         }}
-                        className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
+                        className="flex justify-between items-center border-b border-gray-200 py-5 cursor-pointer mt-2"
                       >
                         <div>
-                          <h4 className="text-base font-medium">ASAP Order</h4>
-                          <p className="text-sm text-gray-600">
+                          <h4 className="text-base font-semibold font-subheading-oo text-gray-900">
+                            ASAP Order
+                          </h4>
+                          <p className="text-sm font-body-oo text-gray-500 mt-0.5">
                             Delivery in{" "}
                             {(restaurantData?.fulfillmentConfig?.prepTime ??
                               0) +
@@ -835,24 +840,24 @@ const Modal: React.FC<{
                             mins
                           </p>
                         </div>
-                        <IoArrowForward size={20} className="" />
+                        <IoArrowForward size={20} className="text-gray-900" />
                       </div>
                     )}
                   </div>
                   {tempUserAddress?.addressLine1 && (
                     <div
                       onClick={() => setShowSchedule(!showSchedule)}
-                      className="flex justify-between items-center border-b border-gray-300 py-4 cursor-pointer mt-4"
+                      className="flex justify-between items-center border-b border-gray-200 py-5 cursor-pointer"
                     >
                       <div>
-                        <h4 className="text-base font-medium">
+                        <h4 className="text-base font-semibold font-subheading-oo text-gray-900">
                           Schedule Your Order
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm font-body-oo text-gray-500 mt-0.5">
                           Select a date and time for your order.
                         </p>
                       </div>
-                      <IoArrowForward size={20} className="" />
+                      <IoArrowForward size={20} className="text-gray-900" />
                     </div>
                   )}
                 </div>
@@ -872,11 +877,11 @@ const Modal: React.FC<{
               <span className="text-base sm:text-lg font-medium">Back</span>
             </button>
 
-            <h3 className="text-lg md:text-xl font-medium  font-online-ordering text-gray-800">
+            <h3 className="text-lg md:text-xl font-semibold font-subheading-oo text-gray-800">
               Schedule Your Order
             </h3>
             <div className="flex justify-between items-center mb-2">
-              <p className="text-sm md:text-sm text-gray-600">
+              <p className="text-sm md:text-sm text-gray-600 font-body-oo">
                 Select a date and time for your order.
               </p>
             </div>
@@ -921,7 +926,7 @@ const Modal: React.FC<{
                                     Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                                   )
                                   ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                                  : "#ffffff"
+                                  : "#000000"
                                 : "#374151",
                           }}
                           onClick={() => setTempDeliveryDay(day.label)}
@@ -930,7 +935,7 @@ const Modal: React.FC<{
                             {day.label.split(" ")[0]}
                           </span>
                           {day.label.split(" ").slice(1).length > 0 && (
-                            <span className="block text-sm font-normal mt-1">
+                            <span className="block  font-body-oo text-sm font-normal mt-1">
                               {day.label.split(" ").slice(1).join(" ")}
                             </span>
                           )}
@@ -954,7 +959,7 @@ const Modal: React.FC<{
                             {day.label.split(" ")[0]}
                           </span>
                           {day.label.split(" ").slice(1).length > 0 && (
-                            <span className="block text-sm font-normal mt-1">
+                            <span className="block font-body-oo text-sm font-normal mt-1">
                               {day.label.split(" ").slice(1).join(" ")}
                             </span>
                           )}
@@ -967,7 +972,7 @@ const Modal: React.FC<{
                 {" "}
                 {timesList.length === 0 && restaurantClose ? (
                   <div className="w-full justify-center flex items-center">
-                    <p className="teext-lg md:text-xl mt-10 text-center">
+                    <p className="text-lg font-subheading-oo md:text-xl mt-10 text-center">
                       Restaurant is closed for today!
                       <br />
                       We&apos;ll back tommorow...
@@ -1026,7 +1031,7 @@ const Modal: React.FC<{
                           />
                         </div>
                       </div>
-                      <span className="text-sm font-medium text-gray-800 flex-grow text-left">
+                      <span className="text-sm  font-subheading-oo font-medium text-gray-800 flex-grow text-left">
                         {time}
                       </span>
                     </label>
@@ -1036,7 +1041,7 @@ const Modal: React.FC<{
             </div>
 
             <button
-              className={`w-full p-2 rounded-md text-md mt-2 font-medium transition-all duration-200 ${
+              className={`w-full p-2 rounded-md text-md mt-2 font-subheading-oo font-semibold transition-all duration-200 ${
                 tempDeliveryDay && tempDeliveryTime
                   ? "bg-primary hover:bg-primary-dark shadow-lg"
                   : "bg-gray-300 cursor-not-allowed"
@@ -1049,7 +1054,7 @@ const Modal: React.FC<{
                         Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                       )
                       ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                      : "#ffffff"
+                      : "#000000"
                     : "#000000",
               }}
               disabled={!tempDeliveryDay || !tempDeliveryTime}

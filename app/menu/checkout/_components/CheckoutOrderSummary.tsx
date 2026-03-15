@@ -6,6 +6,8 @@ import { GroupedCartItem } from "@/utils/types";
 import Image from "next/image";
 import { useState } from "react";
 import { FiX } from "react-icons/fi";
+import { AnimatePresence, motion } from "framer-motion";
+import { fadeIn } from "@/utils/motion";
 
 const CheckoutOrderSummary = () => {
   // Stores
@@ -60,22 +62,15 @@ const CheckoutOrderSummary = () => {
   return (
     <>
       <div className="w-full px-6">
-        <p className="font-online-ordering text-xl">
+        <p className="font-subheading-oo font-semibold text-xl">
           Order Summary ({cartCountInfo})
         </p>
-
-        {specialRemarks.length > 0 ? (
-          <p className="text-sm md:text-base font-online-ordering mt-4">
-            <span className="font-medium">Special Requests:</span>{" "}
-            {specialRemarks}
-          </p>
-        ) : null}
 
         <p
           onClick={() => {
             setShowOrderItems(true);
           }}
-          className="text-base font-semibold text-primary underline font-online-ordering cursor-pointer mt-4 w-max"
+          className="text-base text-primary underline font-subheading-oo font-semibold cursor-pointer mt-4 w-max"
           style={{
             color: isContrastOkay("#ffffff", Env.NEXT_PUBLIC_BACKGROUND_COLOR)
               ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
@@ -87,127 +82,119 @@ const CheckoutOrderSummary = () => {
       </div>
 
       {/* View Items List */}
-      {showOrderItems ? (
-        <div
-          onClick={() => setShowOrderItems(false)}
-          className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white p-4 sm:p-6 rounded-md shadow-lg w-11/12 max-w-lg"
+      <AnimatePresence>
+        {showOrderItems && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowOrderItems(false)}
+            className="fixed inset-0 flex items-end sm:items-center justify-center bg-gray-900 bg-opacity-50 z-50 sm:p-4"
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl sm:text-2xl font-online-ordering">
-                Order Items ({cartCountInfo})
-              </h2>
-              <button
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => {
-                  setShowOrderItems(false);
-                }}
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-            <div className="w-full flex flex-col overflow-y-scroll h-auto max-h-[50vh]">
-              {freeItemInCart ? (
-                <div className="py-4 bg-white border-b border-gray-200">                  <div className="w-full flex justify-between items-start space-x-2">
-                    <div className="flex items-start gap-4">
-                      {freeItemImage ? (
-                        <div className="w-14 h-14 relative self-start flex-shrink-0">
-                          <Image
-                            src={freeItemImage}
-                            alt={freeItemInCart.name}
-                            fill
-                            className={`object-cover object-center w-full h-full rounded-lg`}
-                          />
-                        </div>
-                      ) : null}
-                      <h3 className="font-semibold font-online-ordering text-base md:text-lg lg:text-xl">
+            <motion.div
+              variants={fadeIn("up", "tween", 0, 0.25)}
+              initial="hidden"
+              animate="show"
+              exit="hidden"
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white p-4 sm:p-6 rounded-t-md sm:rounded-md shadow-xl w-full sm:w-11/12 max-w-lg flex flex-col max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4 flex-shrink-0">
+                <h2 className="text-xl sm:text-2xl font-subheading-oo font-semibold">
+                  Order Items ({cartCountInfo})
+                </h2>
+                <button
+                  className="text-gray-400 hover:text-gray-700 transition-colors"
+                  onClick={() => setShowOrderItems(false)}
+                >
+                  <FiX size={22} />
+                </button>
+              </div>
+
+              {/* Items list */}
+              <div className="flex flex-col overflow-y-auto divide-y divide-gray-100 scrollbar-hide">
+                {/* Free item */}
+                {freeItemInCart && (
+                  <div className="py-3 flex items-center gap-3">
+                    {freeItemImage && (
+                      <div className="w-20 h-20 relative flex-shrink-0">
+                        <Image
+                          src={freeItemImage}
+                          alt={freeItemInCart.name}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-grow min-w-0">
+                      <h3 className="font-subheading-oo font-semibold text-base leading-snug">
                         {freeItemInCart.name}
                       </h3>
-                    </div>
-
-                    <div className="flex flex-col items-end space-y-2">
-                      <div className="flex justify-center items-center space-x-2">
-                        <p className="lg:text-lg md:text-base text-base font-semibold font-online-ordering text-green-500">
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-green-500 font-semibold text-sm font-subheading-oo">
                           FREE
-                        </p>
-                        <p className="lg:text-lg md:text-base text-base font-semibold font-online-ordering line-through">
+                        </span>
+                        <span className="text-gray-400 text-sm font-subheading-oo line-through">
                           ${freeItemInCart.price}
-                        </p>
+                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : null}
-              {cartData.map((item) => (
-                <div
-                  key={item._id}
-                  className="py-4 bg-white border-b border-gray-200 last:border-b-0"                >
-                  <div className="flex items-center gap-4">
-                    {/* Content wrapper */}
-                    {item.itemImage ? (
-                      <div className="w-14 h-14 relative self-start flex-shrink-0">
+                )}
+
+                {/* Cart items */}
+                {cartData.map((item) => (
+                  <div key={item._id} className="py-3 flex items-center gap-3">
+                    {item.itemImage && (
+                      <div className="w-20 h-20 relative flex-shrink-0">
                         <Image
                           src={item.itemImage}
                           alt={item.itemName}
                           fill
-                          className={`object-cover rounded-md object-center w-full h-full`}                        />
+                          className="object-cover rounded-md"
+                        />
                       </div>
-                    ) : null}
-                    <div className="flex-grow flex flex-col gap-2">
-                      {/* Top section with title and buttons */}
-                      <div className="flex justify-between items-start">
-                        <div className="flex-grow pr-4">
-                          <h3 className="font-medium font-online-ordering text-base md:text-lg">
-                            {item.itemName} x {item.qty}
-                          </h3>
-                        </div>
-                      </div>
-
-                      {/* Modifier groups */}
-                      {item.modifierGroups &&
-                        item.modifierGroups.length > 0 && (
-                          <div className="font-online-ordering text-sm text-textGrayColor flex flex-wrap">
-                            {item.modifierGroups.map((mg, index) => {
-                              return (
-                                <span key={mg._id} className="inline-block">
-                                  {mg.selectedModifiers
-                                    ?.map((m) => m.mid.name + " x " + m.qty)
-                                    .join(", ")}
-                                  {index ===
-                                  (item.modifierGroups ?? []).length -
-                                    1 ? null : (
-                                    <span className="pr-1">,</span>
-                                  )}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        )}
-
-                      {/* Remarks */}
-                      {item.remarks && (
-                        <p className="lg:mt-1 text-sm font-extralight capitalize font-online-ordering italic">
-                          {item.remarks}
-                        </p>
-                      )}
-
-                      {/* Bottom section with price and quantity controls */}
-                      <div className="flex justify-between items-center pt-2">
-                        <p className="md:text-lg text-base font-medium font-online-ordering">
+                    )}
+                    <div className="flex-grow min-w-0">
+                      <div className="flex justify-between items-start gap-2">
+                        <h3 className="font-subheading-oo font-semibold text-base leading-snug">
+                          {item.itemName}{" "}
+                          <span className="text-gray-400">x {item.qty}</span>
+                        </h3>
+                        <p className="font-subheading-oo font-semibold text-base flex-shrink-0">
                           ${calculateItemPrice(item)}
                         </p>
                       </div>
+
+                      {/* Modifiers */}
+                      {(item.modifierGroups?.length ?? 0) > 0 && (
+                        <p className="text-sm text-gray-400 font-body-oo mt-0.5 leading-snug">
+                          {item.modifierGroups
+                            ?.flatMap(
+                              (mg) =>
+                                mg.selectedModifiers?.map(
+                                  (m) => `${m.mid.name} x ${m.qty}`,
+                                ) ?? [],
+                            )
+                            .join(", ")}
+                        </p>
+                      )}
+
+                      {/* Remarks */}
+                      {item.remarks && (
+                        <p className="text-sm italic font-subheading-oo font-semibold mt-0.5 capitalize">
+                          {item.remarks}
+                        </p>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 

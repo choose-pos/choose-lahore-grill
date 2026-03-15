@@ -6,6 +6,9 @@
   --primary-font: var(--font-primary);
   --secondary-font: var(--font-secondary);
   --font-online-ordering: var(--font-online-ordering);
+  --font-heading-oo: var(--font-heading);
+  --font-subheading-oo: var(--font-subheading);
+  --font-body-oo: var(--font-body);
 }
 
 * {

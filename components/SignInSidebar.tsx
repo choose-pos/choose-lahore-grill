@@ -322,8 +322,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
   };
 
   const renderSignUpForm = () => (
-    <form onSubmit={handleSubmit} className="font-online-ordering">
-      <h2 className="text-2xl font-medium mb-4 font-online-ordering">
+    <form onSubmit={handleSubmit} className="font-body-oo">
+      <h2 className="text-2xl font-semibold mb-4 font-subheading-oo">
         Sign up and start earning {programName}!
       </h2>
       <hr />
@@ -332,7 +332,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           <div>
             <label
               htmlFor="firstName"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-semibold text-gray-700 font-subheading-oo"
             >
               First Name
             </label>
@@ -340,7 +340,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               required
               type="text"
               id="firstName"
-              className={`mt-1 block w-full border ${
+              className={`mt-1 block w-full border font-body-oo ${
                 errors.firstName ? "border-red-500" : "border-gray-300"
               } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
               value={firstName}
@@ -354,7 +354,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           <div>
             <label
               htmlFor="lastName"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-semibold text-gray-700 font-subheading-oo"
             >
               Last Name
             </label>
@@ -362,7 +362,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               required
               type="text"
               id="lastName"
-              className={`mt-1 block w-full border ${
+              className={`mt-1 block w-full border font-body-oo ${
                 errors.lastName ? "border-red-500" : "border-gray-300"
               } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
               value={lastName}
@@ -377,7 +377,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         <div>
           <label
             htmlFor="phone"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Phone
           </label>
@@ -386,7 +386,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             minLength={10}
             type="tel"
             id="phone"
-            className={`mt-1 block w-full border ${
+            className={`mt-1 block w-full border font-body-oo ${
               errors.phone ? "border-red-500" : "border-gray-300"
             } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
             value={phoneNumber}
@@ -400,7 +400,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Email
           </label>
@@ -408,7 +408,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             required
             type="email"
             id="email"
-            className={`mt-1 block w-full border ${
+            className={`mt-1 block w-full border font-body-oo ${
               errors.email ? "border-red-500" : "border-gray-300"
             } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
             value={email}
@@ -422,7 +422,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         <div>
           <label
             htmlFor="dob"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Date of Birth
           </label>
@@ -510,8 +510,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
   };
 
   const renderSignInForm = () => (
-    <form onSubmit={handleSignInSubmit} className="font-online-ordering">
-      <h2 className="text-2xl font-medium mb-4 font-online-ordering">
+    <form onSubmit={handleSignInSubmit} className="font-body-oo">
+      <h2 className="text-2xl font-semibold mb-4 font-subheading-oo">
         Sign In to earn {programName}
       </h2>
       <hr />
@@ -519,7 +519,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         <div>
           <label
             htmlFor="phone"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-semibold text-gray-700 font-subheading-oo"
           >
             Phone
           </label>
@@ -528,7 +528,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             minLength={10}
             type="tel"
             id="phone"
-            className={`mt-1 block w-full border ${
+            className={`mt-1 block w-full border font-body-oo ${
               errors.phone ? "border-red-500" : "border-gray-300"
             } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
             value={phoneNumber}
@@ -541,7 +541,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         </div>
         <button
           type="submit"
-          className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary  capitalize font-online-ordering"
+          className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary  capitalize font-subheading-oo font-semibold"
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -571,7 +571,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
     const isShowingSmsVerification = isResendClicked || !signUpOtpId;
 
     return (
-      <form onSubmit={handleOtpSubmit} className="font-online-ordering">
+      <form onSubmit={handleOtpSubmit} className="font-body-oo">
         <div className="flex items-center mb-4">
           <button
             type="button"
@@ -580,7 +580,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           >
             <IoArrowBack size={24} />
           </button>
-          <h2 className="text-2xl font-medium font-online-ordering">
+          <h2 className="text-2xl font-semibold font-subheading-oo">
             {isShowingSmsVerification ? "Verify SMS OTP" : "Verify Email OTP"}
           </h2>
         </div>
@@ -591,10 +591,10 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               {`Note: Please check your spam / trash folder if you don't find the verification code in your inbox.`}
             </p>
           ) : null}
-          <div>
+          <div className="">
             <label
               htmlFor="otp"
-              className="block text-base font-medium text-gray-700"
+              className="block text-base font-semibold text-gray-700 font-subheading-oo"
             >
               {isShowingSmsVerification
                 ? " Enter the code we sent on your SMS"
@@ -603,7 +603,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             <input
               type="text"
               id="otp"
-              className={`mt-1 block w-full border ${
+              className={`mt-1 block w-full border font-body-oo ${
                 errors.otp ? "border-red-500" : "border-gray-300"
               } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary`}
               value={otp}
@@ -625,7 +625,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
                   : "text-gray-600 hover:underline"
               }`}
             >
-               {resendTimer > 0
+                {resendTimer > 0
                 ? `Resend in ${resendTimer}s`
                 : isSignUpOpen
                 ? "Not received? Resend on SMS"
@@ -635,7 +635,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           <div className="flex justify-between">
             <button
               type="submit"
-              className="w-full bg-primary text-white py-2 px-4 rounded-md font-online-ordering capitalize hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              className="w-full bg-primary text-white py-2 px-4 rounded-md font-subheading-oo font-semibold capitalize hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,

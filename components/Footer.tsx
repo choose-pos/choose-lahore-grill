@@ -13,16 +13,14 @@ const Footer: React.FC<FooterProps> = ({ isProfile }) => {
 
   return (
     <div
-      className={`flex items-center justify-center w-full md:h-16 bg-gray-100 mt-auto font-online-ordering`}
+      className={`flex items-center justify-center w-full md:h-16 bg-gray-100 mt-auto font-subheading-oo `}
     >
       <div
         className={`max-w-8xl flex flex-col items-center justify-center w-full px-6 md:px-20 lg:px-28`}
       >
         {/* Footer Bottom Section */}
         <div
-          className={`flex flex-col md:flex-row justify-between items-center w-full h-full gap-4 sm:gap-0
-          ${isProfile ? "md:pb-0 pb-5" : "md:pb-0 pb-5"}
-          `}
+          className={`flex flex-col md:flex-row justify-between items-center w-full h-full gap-4 sm:gap-0 ${isProfile ? "md:pb-0 pb-5" : "md:pb-0 pb-5"}`}
         >
           {/* Social Icons */}
           <div className="flex items-center space-x-4 pt-2 md:pt-0">
@@ -44,7 +42,7 @@ const Footer: React.FC<FooterProps> = ({ isProfile }) => {
           </p>
 
           <div className="flex items-center">
-            <span className="text-gray-700 text-xs sm:text-lg mr-2 font-online-ordering">
+            <span className="text-gray-700 text-xs sm:text-lg mr-2 font-subheading-oo">
               Powered by
             </span>
             <Link
