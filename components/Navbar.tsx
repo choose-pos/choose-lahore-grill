@@ -399,7 +399,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               </div>
             </div>
 
-            <nav className="flex-1 flex flex-col items-center justify-center px-4 py-6 space-y-3 overflow-y-auto">
+            <nav className="flex-1 flex flex-col items-center font-body-oo justify-center px-4 py-6 space-y-3 overflow-y-auto">
               {navItems?.map((item) => (
                 <Link key={item.href} href={item.href} passHref>
                   <p
@@ -411,7 +411,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 </Link>
               ))}
               {offerNavitems && offerNavitems.length > 0 && (
-                <li className="justify-between flex flex-col text-lg items-center font-medium">
+                <li className="justify-between flex flex-col font-body-oo text-lg items-center font-medium">
                   <button
                     onClick={() => setIsMobileOffersOpen(!isMobileOffersOpen)}
                     className="flex items-center justify-center gap-1 px-4 py-2 cursor-pointer w-full  transition-all duration-300"
@@ -438,7 +438,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                           <motion.li
                             key={index}
                             variants={staggerItem}
-                            className="w-full flex justify-center"
+                            className="w-full flex font-body-oo justify-center"
                           >
                             <Link href={offer.link} className="w-full">
                               <span

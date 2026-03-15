@@ -912,7 +912,7 @@ const Modal: React.FC<{
                     ? daysList.map((day) => (
                         <button
                           key={day.label}
-                          className={`flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 border 
+                          className={`flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] font-body-oo rounded-md text-sm md:text-base font-medium transition-all duration-200 border 
                             ${
                               tempDeliveryDay === day.label
                                 ? "bg-primary border-primary shadow-md"
@@ -944,7 +944,7 @@ const Modal: React.FC<{
                     : daysList.slice(0, 1).map((day) => (
                         <button
                           key={day.label}
-                          className="flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 bg-primary border border-primary text-white shadow-md"
+                          className="flex flex-col items-start font-body-oo justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 bg-primary border border-primary text-white shadow-md"
                           onClick={() => setTempDeliveryDay(day.label)}
                           style={{
                             color: isContrastOkay(

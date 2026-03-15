@@ -80,7 +80,7 @@ export default async function NotFound() {
         {/* Action Buttons */}
         <div className="flex flex-row gap-4 justify-center">
           <Link href="/">
-            <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-full transition-all duration-200 font-subheading-oo  font-medium bg-primaryColor text-bg2 hover:opacity-90">
+            <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-md transition-all duration-200 font-subheading-oo  font-medium bg-primaryColor text-bg2 hover:opacity-90">
               <FiHome size={20} />
               Back to Home
             </button>
