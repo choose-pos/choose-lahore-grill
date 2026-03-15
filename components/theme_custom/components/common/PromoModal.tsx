@@ -8,6 +8,7 @@ import { X } from "lucide-react";
 import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
 import { getOrCreateUserHash } from "@/utils/analytics";
 import { Env } from "@/env";
+import { usePathname } from "next/navigation";
 
 interface ModalProps {
   isOpen: boolean;
@@ -49,6 +50,9 @@ const PromoModal: React.FC<ModalProps> = ({
   image,
   isVerticallyAligned = true,
 }) => {
+  const pathname = usePathname();
+  const isMenuPage = pathname.includes("/menu");
+  const buttonRoundedClass = isMenuPage ? "rounded-md" : "rounded-[15px]";
   useEffect(() => {
     if (isOpen) {
       const userHash = getOrCreateUserHash();
@@ -106,12 +110,12 @@ const PromoModal: React.FC<ModalProps> = ({
             animate="visible"
             exit="exit"
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white shadow-lg overflow-hidden"
+            className={`relative w-full max-w-4xl max-h-[90vh] ${isMenuPage ? "rounded-md" : "rounded-2xl"} bg-white shadow-lg overflow-hidden`}
           >
             {/* Close button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition shadow-sm"
+              className={`absolute top-4 right-4 z-10 p-1 md:p-2 ${isMenuPage ? "rounded-md" : "rounded-full"} bg-white/90 backdrop-blur-sm hover:bg-white transition shadow-sm`}
             >
               <X className="w-5 h-5 text-gray-600" />
             </button>
@@ -138,10 +142,10 @@ const PromoModal: React.FC<ModalProps> = ({
                   </div>
                 )}
                 <div className="p-4 md:p-8 flex-1 overflow-y-auto">
-                  <h2 className="text-3xl md:text-4xl font-secondary mb-4">
+                  <h2 className="text-3xl md:text-4xl font-secondary mb-2 md:mb-4">
                     {title}
                   </h2>
-                  <p className="text-gray-600 mb-6 text-sm md:text-lg font-primary leading-relaxed">
+                  <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-lg font-primary leading-relaxed">
                     {description}
                   </p>
                   <Link
@@ -168,7 +172,9 @@ const PromoModal: React.FC<ModalProps> = ({
                       });
                       onClose();
                     }}
-                    className={`md:px-6 px-4 py-3 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
+                    className={`inline-block px-8 py-2 uppercase ${buttonRoundedClass}
+                      bg-primaryColor text-white font-primary font-medium leading-relaxed tracking-wide
+                    transition-opacity duration-500`}
                   >
                     {button.text}
                   </Link>
@@ -195,10 +201,10 @@ const PromoModal: React.FC<ModalProps> = ({
                   </div>
                 )}
                 <div className="p-4 md:p-6 flex flex-col justify-center items-start md:w-1/2 flex-1">
-                  <h2 className="text-3xl font-secondary md:text-4xl  mb-4">
+                  <h2 className="text-3xl font-secondary md:text-4xl  mb-2 md:mb-4">
                     {title}
                   </h2>
-                  <p className="text-gray-600 mb-6 text-sm font-primary md:text-base leading-relaxed">
+                  <p className="text-gray-600 mb-4 md:mb-6 text-sm font-primary md:text-base leading-relaxed">
                     {description}
                   </p>
                   <Link
@@ -225,7 +231,9 @@ const PromoModal: React.FC<ModalProps> = ({
                       });
                       onClose();
                     }}
-                    className={`md:px-6 px-4 py-2 border-2 border-bg3 mt-5 uppercase bg-bg1 font-primary font-medium rounded-[10px] text-bg3 transition-opacity duration-500`}
+                    className={`inline-block px-8 py-2 uppercase ${buttonRoundedClass}
+                    bg-primaryColor text-white font-primary font-medium leading-relaxed tracking-wide
+                  transition-opacity duration-500`}
                   >
                     {button.text}
                   </Link>

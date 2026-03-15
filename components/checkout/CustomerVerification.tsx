@@ -476,9 +476,8 @@ const CustomerVerification = ({
                     <StarIcon size={20} />
                   </div>
                   <div>
-                    <p className="text-sm font-body-oo text-gray-800">
-                      Sign up and earn {loyaltyRule?.signUpValue}{" "}
-                      {loyaltyRule?.name ?? "loyalty points"} with every order.
+                    <p className="text-sm font-medium text-gray-800">
+                      Sign up and earn loyalty points with every order.
                     </p>
                   </div>
                 </div>
