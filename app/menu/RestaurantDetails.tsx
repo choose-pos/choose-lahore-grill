@@ -73,10 +73,8 @@ RestaurantDetailsProps) {
     ItemOptionsEnum[] | null
   >(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
   const [categoryType, setCategoryType] = useState<ItemOptionsEnum[] | null>(
-    null
+    null,
   );
   const [showFilter, setShowFilter] = useState<boolean>(false);
   const { setRestaurantData } = RestaurantStore();
@@ -95,9 +93,8 @@ RestaurantDetailsProps) {
   const [showButton, setShowButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const { setSignInOpen, setIsSignUpOpen } = useSidebarStore();
-
-  const [isSticky, setIsSticky] = useState(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
   // const IntialCategory = categories;
 
   const isDelivery = restaurant.deliveryConfig.provideDelivery;
@@ -106,19 +103,18 @@ RestaurantDetailsProps) {
 
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const mobileCategoryBarRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-    const { setTempOrderType, tempOrderType, setPendingOrderType } =
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isSticky, setIsSticky] = useState(false);
+  const { setSignInOpen, setIsSignUpOpen } = useSidebarStore();
+  const { setTempOrderType, tempOrderType, setPendingOrderType } =
     OrderTypeData();
-
   const toggleFilter = () => {
     setShowFilter(!showFilter);
   };
-
-  const filterRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const filterRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
@@ -141,7 +137,7 @@ RestaurantDetailsProps) {
         "",
         `${window.location.pathname}${
           newSearchParams.toString() ? "?" + newSearchParams.toString() : ""
-        }`
+        }`,
       );
     }
   }, [searchParams]);
@@ -223,7 +219,7 @@ RestaurantDetailsProps) {
         if (groupedCart) {
           // Check if we have a free item
           const currentFreeItem = extractFreeDiscountItemDetails(
-            groupedCart.discountString ?? ""
+            groupedCart.discountString ?? "",
           );
 
           // Set cart count including free item if it exists
@@ -328,7 +324,7 @@ RestaurantDetailsProps) {
 
       if (prevCategories.includes(option)) {
         const updatedCategories = prevCategories.filter(
-          (category) => category !== option
+          (category) => category !== option,
         );
         setCategoryType(updatedCategories.length ? updatedCategories : null);
         return updatedCategories.length ? updatedCategories : null;
@@ -714,14 +710,14 @@ RestaurantDetailsProps) {
               {shouldShow && !isMobile && cartCountInfo > 0 ? (
                 <Link href={`/menu/cart`} passHref>
                   <button
-                    className={`bg-white font-body-oo border border-primaryColor px-6 py-2 rounded-md flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
+                    className={`bg-primary font-body-oo px-6 py-2 rounded-md flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
                     style={{
                       color: isContrastOkay(
-                        "#ffffff",
                         Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                       )
-                        ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                        : "#000000",
+                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        : Env.NEXT_PUBLIC_TEXT_COLOR,
                     }}
                   >
                     <FaCartShopping size={18} className="mr-2" />
@@ -826,7 +822,7 @@ RestaurantDetailsProps) {
             ))}
           </div>
         ) : (
-          <div className="flex items-start w-full font-online-ordering">
+          <div className="flex items-start w-full">
             {/* Main Content */}
             <div className="w-full max-w-8xl mx-auto xl:overflow-y-auto px-6 md:px-20 lg:px-28">
               {!searchQuery && <RecentOrders />}
@@ -856,7 +852,7 @@ RestaurantDetailsProps) {
                           className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 `}
                           type="button"
                         >
-                          <span className="font-medium font-online-ordering">
+                          <span className="font-medium font-subheading-oo">
                             Schedule Order
                           </span>
                         </button>
@@ -864,7 +860,7 @@ RestaurantDetailsProps) {
                     ) : (
                       // Has search query or filters - show no results found
                       <>
-                        <h1 className="md:text-4xl text-2xl font-medium">
+                        <h1 className="md:text-4xl text-2xl font-medium font-subheading-oo">
                           No result found
                         </h1>
                         <p className="md:text-lg text-base">
@@ -899,25 +895,34 @@ RestaurantDetailsProps) {
       </div>
 
       {loading || isMenuOpen ? null : (
-        <div className="sticky bottom-0 pb-6 mt-auto pointer-events-none z-40 flex flex-row items-stretch justify-end px-4 gap-3 md:justify-center w-full md:hidden">
-          {cartCountInfo > 0 && <FloatingCartButton count={cartCountInfo} />}
-          <button
-            onClick={() => {
-              setIsCategoriesPopupOpen(!isCategoriesPopupOpen);
-            }}
-            className={`font-subheading-oo flex-col text-white px-3 py-2 rounded-md flex items-center justify-center text-sm w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}
-            style={{
-              color: isContrastOkay(
-                Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                Env.NEXT_PUBLIC_BACKGROUND_COLOR
-              )
-                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                : Env.NEXT_PUBLIC_TEXT_COLOR,
-            }}
+        <div className="sticky bottom-0 mt-auto pointer-events-none z-40 w-full md:hidden">
+          {cartCountInfo > 0 && (
+            <div className="h-10 w-full bg-gradient-to-t from-white to-transparent" />
+          )}
+          <div
+            className={`pb-4 flex flex-row items-stretch justify-end px-4 gap-3 md:justify-center w-full ${
+              cartCountInfo > 0 ? "bg-white" : "bg-transparent"
+            }`}
           >
-            <MdMenuBook size={20} className="mb-0.5" />
-            <span>Menu</span>
-          </button>
+            {cartCountInfo > 0 && <FloatingCartButton count={cartCountInfo} />}
+            <button
+              onClick={() => {
+                setIsCategoriesPopupOpen(!isCategoriesPopupOpen);
+              }}
+              className={`font-subheading-oo flex-col text-white px-3 py-2 rounded-md flex items-center justify-center text-sm w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}
+              style={{
+                color: isContrastOkay(
+                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                )
+                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  : Env.NEXT_PUBLIC_TEXT_COLOR,
+              }}
+            >
+              <MdMenuBook size={20} className="mb-0.5" />
+              <span>Menu</span>
+            </button>
+          </div>
         </div>
       )}
       <AnimatePresence>
@@ -950,7 +955,7 @@ RestaurantDetailsProps) {
                   </button>
                 </div>
 
-                <div className="overflow-y-scroll pb-3">
+                <div className="overflow-y-scroll  pb-3">
                   <div className="space-y-2">
                     {filteredCategories &&
                       filteredCategories.map((category) => (

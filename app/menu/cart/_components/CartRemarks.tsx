@@ -83,10 +83,10 @@ const CartRemarks = () => {
             className="text-gray-400 mt-0.5 flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-400 font-online-ordering mb-0.5">
+            <p className="text-xs text-gray-400 font-body-oo mb-0.5">
               Order remark
             </p>
-            <p className="text-sm text-gray-700 font-online-ordering leading-snug break-words">
+            <p className="text-sm text-gray-700 font-body-oo leading-snug break-words">
               {specialRemarks}
             </p>
           </div>
@@ -96,13 +96,22 @@ const CartRemarks = () => {
         <button
           type="button"
           onClick={openSheet}
-          className="flex items-center justify-between w-full gap-2 p-3 rounded-md border border-dashed border-gray-300 text-gray-500 font-medium font-subheading-oo text-sm hover:bg-gray-50 hover:border-gray-400 transition-colors"
+          className="flex items-center justify-between w-full gap-3 p-4 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-colors"
         >
-          <div className="flex items-center gap-2">
-            <FiFileText size={16} />
-            Add order level remark
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <FiEdit2 size={15} className="text-gray-500" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold font-subheading-oo text-gray-700">
+                Add notes for your order
+              </p>
+              <p className="text-xs text-gray-400 font-body-oo mt-0.5">
+                Special requests, allergies, etc.
+              </p>
+            </div>
           </div>
-          <span className="text-lg leading-none">+</span>
+          <span className="text-xl text-gray-400 leading-none">+</span>
         </button>
       )}
 

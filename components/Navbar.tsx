@@ -138,7 +138,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
         pathname === "/menu" ? "" : "sticky top-0"
       } bg-white z-50 shadow-sm border-b border-b-black/20   font-online-ordering`}
     >
-      <div className="max-w-8xl mx-auto px-4 md:px-20 lg:px-28">
+      <div className="max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
         <div className="flex justify-between items-center h-16 md:h-24">
           {/* Logo */}
           <div className="flex items-center ">

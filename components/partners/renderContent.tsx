@@ -99,7 +99,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
               alt={categoryItem.name}
               fill
               sizes=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         )}

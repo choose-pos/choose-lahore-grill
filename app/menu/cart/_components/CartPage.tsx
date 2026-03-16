@@ -445,10 +445,13 @@ const CartPage = ({
             totalRef={totalRef}
           />
           {/* <div className="mb-12 lg:hidden" /> */}
-          <div className={`px-6 w-full my-2 ${isTotalVisible ? "block" : "hidden lg:block"}`}
+          <div
+            className={`px-6 w-full my-2 ${isTotalVisible ? "block" : "hidden lg:block"}`}
           >
             <p className="text-sm text-green-700 font-medium font-subheading-oo mb-3">
-              You saved upto 25% by ordering directly instead of third party app
+              You&apos;re saving $
+              {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by ordering
+              directly instead of third-party delivery apps
             </p>
             <button
               // onClick={() => {
@@ -487,7 +490,9 @@ const CartPage = ({
             <span className="text-base ">${total.toFixed(2)}</span>
           </div>
           <p className="text-xs text-green-700 font-subheading-oo font-semibold mb-3">
-            You saved upto 25% by ordering directly instead of third party app
+            You&apos;re saving $
+            {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by ordering
+            directly instead of third-party delivery apps
           </p>
           <button
             disabled={actionLoading || isCartLoading}

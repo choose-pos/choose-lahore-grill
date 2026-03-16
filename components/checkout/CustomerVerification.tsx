@@ -261,7 +261,7 @@ const CustomerVerification = ({
           </button>
         )}
       </div>
-      <div className="space-y-4 mt-5 font-online-ordering">
+      <div className="space-y-4 mt-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
@@ -361,7 +361,7 @@ const CustomerVerification = ({
             <div>
               <label
                 htmlFor="otp"
-                className="block font-body-oo text-sm font-medium text-gray-700 capitalize"
+                className="block font-body-oo text-sm font-semibold text-gray-700 capitalize"
               >
                 OTP
               </label>
@@ -394,9 +394,13 @@ const CustomerVerification = ({
                 OTP verified! You may now proceed to place your order.
               </p>
             )}
-            {error && <p className="text-red-600 text-sm font-body-oo">{error}</p>}
+            {error && (
+              <p className="text-red-600 text-sm font-body-oo">{error}</p>
+            )}
             {promoCodeMessage && (
-              <p className="text-red-600 text-sm font-body-oo">{promoCodeMessage}</p>
+              <p className="text-red-600 text-sm font-body-oo">
+                {promoCodeMessage}
+              </p>
             )}
           </div>
         ) : (
@@ -516,11 +520,31 @@ const CustomerVerification = ({
                 </div>
               </div>
 
-              {(hasPromo || signUpToggle) && (
+              {/* {(hasPromo || signUpToggle) && (
                 <p className="text-xs font-body-oo text-gray-400 mt-2">
                   By signing up, you agree to receive marketing texts and
                   Loyalty messages.
                 </p>
+              )} */}
+
+              {!signUpToggle && !hasPromo && loyaltyRule && (
+                <div className="mt-2 flex  gap-2 bg-amber-50 border items-center border-amber-200 rounded-md px-3 py-2">
+                  <span className="text-amber-500 mt-0.5 flex-shrink-0">
+                    ⚠
+                  </span>
+                  <p className="text-xs font-body-oo text-amber-700">
+                    You&apos;ll miss out on{" "}
+                    <span className="font-semibold">
+                      {loyaltyRule.signUpValue} signup bonus
+                    </span>{" "}
+                    +{" "}
+                    <span className="font-semibold">
+                      {Math.round(amounts?.netAmt ?? 0) * 10} order{" "}
+                      {loyaltyRule.name}
+                    </span>{" "}
+                    by not signing up.
+                  </p>
+                </div>
               )}
             </div>
           </>

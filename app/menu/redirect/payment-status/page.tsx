@@ -314,8 +314,8 @@ const PaymentStatusPage = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center font-online-ordering">
-        <span className="mb-2">Please wait...</span>
+      <div className="w-full min-h-screen flex flex-col items-center justify-center font-body-oo">
+        <span className="mb-2 text-gray-600">Please wait...</span>
         <LoadingDots />
       </div>
     );
@@ -323,7 +323,7 @@ const PaymentStatusPage = () => {
 
   if (error) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center h-64">
+      <div className="w-full min-h-screen flex items-center justify-center h-64 font-body-oo">
         <div className="text-center text-red-600">
           <FaExclamationCircle className="mx-auto text-3xl mb-2" />
           <p className="text-sm">{error}</p>
@@ -334,22 +334,22 @@ const PaymentStatusPage = () => {
 
   if (paymentFailed) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 font-online-ordering">
+      <div className="min-h-screen flex items-center justify-center p-4 ">
         <div className="rounded-md p-8 text-center flex flex-col items-center justify-center relative">
           <Link href={"/menu"}>
             <div className="absolute top-4 left-4 flex items-center text-gray-500 hover:text-black cursor-pointer">
               <IoMdArrowBack size={16} />
-              <p className="ml-2 text-base sm:text-lg font-online-ordering">
+              <p className="ml-2 text-base sm:text-lg font-subheading-oo">
                 Back to Menu
               </p>
             </div>
           </Link>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-body-oo font-bold text-gray-800 mb-4">
             Oops! Payment Failed
           </h1>
 
           <div className="space-y-4 text-xl md:text-2xl">
-            <div className="flex items-center justify-center space-x-3">
+            <div className="flex items-center font-body-oo justify-center space-x-3">
               <span>
                 Don&apos;t worry! <br /> no charges were made.
               </span>
@@ -555,7 +555,7 @@ const PaymentStatusPage = () => {
                     </button>
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 mt-4 min-h-[20px]">
+                <p className="text-sm font-body-oo text-gray-600 mt-4 min-h-[20px]">
                   {getRatingMessage(hoveredRating || rating)}
                 </p>
               </div>
@@ -565,7 +565,7 @@ const PaymentStatusPage = () => {
             <div className="mb-8">
               <label
                 htmlFor="overall-remarks"
-                className="block font-semibold mb-3 text-gray-900"
+                className="block font-subheading-oo font-semibold mb-3 text-gray-900"
               >
                 Tell us more about your experience
               </label>
@@ -577,7 +577,7 @@ const PaymentStatusPage = () => {
                 placeholder="Share your thoughts..."
                 className="w-full p-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent resize-none h-32"
               />
-              <p className="text-sm text-gray-500 mt-2 text-right">
+              <p className="text-sm text-gray-500 mt-2  font-body-oo text-right">
                 {feedbackRemark.length}/500 characters
               </p>
             </div>
@@ -587,15 +587,15 @@ const PaymentStatusPage = () => {
               <button
                 onClick={handleSubmitFeedback}
                 disabled={rating === 0}
-                className={`inline-block px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-md transition-all duration-200 ${
+                className={`inline-block px-8 py-2 text-lg sm:text-xl font-medium font-subheading-oo rounded-md transition-all duration-200 ${
                   rating === 0
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : isContrastOkay(
-                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                        Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                      )
-                    ? `bg-primaryColor text-background hover:opacity-90`
-                    : `bg-primaryColor text-textColor hover:opacity-90`
+                          Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                          Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                        )
+                      ? `bg-primaryColor text-background hover:opacity-90`
+                      : `bg-primaryColor text-textColor hover:opacity-90`
                 }`}
               >
                 Submit Feedback
@@ -639,7 +639,7 @@ const PaymentStatusPage = () => {
 
             {/* Modal Content */}
             <div className="mt-2">
-              <h4 className="font-bold mb-4 text-lg font-primary text-center">
+              <h4 className="font-bold pt-2 mb-4 text-lg font-subheading-oo text-center">
                 How was your ordering experience?
               </h4>
 
@@ -671,7 +671,7 @@ const PaymentStatusPage = () => {
               </div>
 
               {/* Rating Message */}
-              <p className="text-sm text-gray-600 mb-4 min-h-[20px] font-primary text-center">
+              <p className="text-sm text-gray-600 mb-4 min-h-[20px] font-body-oo text-center">
                 {getRatingMessage(hoveredRating || rating)}
               </p>
 
@@ -679,7 +679,7 @@ const PaymentStatusPage = () => {
               <div className="text-left">
                 <label
                   htmlFor="feedback-remark-modal"
-                  className="mb-2 block font-semibold font-primary text-base"
+                  className="mb-2 block font-semibold font-subheading-oo text-base"
                 >
                   Your Feedback
                 </label>
@@ -689,9 +689,9 @@ const PaymentStatusPage = () => {
                   onChange={(e) => setFeedbackRemark(e.target.value)}
                   maxLength={150}
                   placeholder="Share your experience with us..."
-                  className="w-full p-2 border rounded-md font-primary focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
                 />
-                <p className="text-sm mt-1 text-right font-primary">
+                <p className="text-sm mt-1 text-right font-body-oo">
                   {feedbackRemark.length}/150 characters
                 </p>
               </div>
@@ -700,7 +700,7 @@ const PaymentStatusPage = () => {
               <button
                 onClick={handleSubmitFeedback}
                 disabled={rating === 0}
-                className={`mt-4 w-full px-6 py-2 rounded-md font-primary font-semibold transition-colors ${
+                className={`mt-4 w-full px-6 py-2 rounded-md font-subheading-oo font-semibold transition-colors ${
                   rating === 0
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-black text-white hover:bg-gray-800"
@@ -718,7 +718,7 @@ const PaymentStatusPage = () => {
           <Link href={"/menu"}>
             <div className="flex items-center text-gray-500 hover:text-black cursor-pointer mb-6 ">
               <IoMdArrowBack size={16} />
-            <p className="ml-2 text-base sm:text-lg font-online-ordering">
+              <p className="ml-2 text-base sm:text-lg font-subheading-oo">
                 Back to Menu
               </p>
             </div>
@@ -728,9 +728,9 @@ const PaymentStatusPage = () => {
               <FaSpinner className="animate-spin text-3xl text-gray-600" />
             </div>
           ) : selectedOrder ? (
-          <div className="font-online-ordering text-sm">
+            <div className="font-body-oo text-sm">
               <div className="text-center mb-4">
-                <h3 className="text-xl md:text-2xl font-bold">
+                <h3 className="text-xl md:text-2xl font-subheading-oo font-semibold">
                   {selectedOrder.restaurantInfo.name}
                 </h3>
                 <p className="text-sm text-gray-700">
@@ -751,8 +751,9 @@ const PaymentStatusPage = () => {
                   <p className="text-gray-500">Order Time:</p>
                   <p className="text-gray-500">
                     {convertToRestoTimezone(
-                    restaurantData?.timezone?.timezoneName?.split(" ")[0] ?? "",
-                      new Date(selectedOrder.createdAt)
+                      restaurantData?.timezone?.timezoneName?.split(" ")[0] ??
+                        "",
+                      new Date(selectedOrder.createdAt),
                     )}
                   </p>
                 </div>
@@ -765,11 +766,12 @@ const PaymentStatusPage = () => {
                   </p>
                   <p className="text-gray-500">
                     {convertToRestoTimezone(
-                    restaurantData?.timezone?.timezoneName?.split(" ")[0] ?? "",
+                      restaurantData?.timezone?.timezoneName?.split(" ")[0] ??
+                        "",
                       selectedOrder.orderType === OrderType.Pickup &&
                         selectedOrder.pickUpDateAndTime
                         ? new Date(selectedOrder.pickUpDateAndTime)
-                        : new Date(selectedOrder.deliveryDateAndTime ?? "")
+                        : new Date(selectedOrder.deliveryDateAndTime ?? ""),
                     )}
                   </p>
                 </div>
@@ -951,7 +953,7 @@ const PaymentStatusPage = () => {
               {selectedOrder.appliedDiscount &&
                 selectedOrder.appliedDiscount.discountType ===
                   OrderDiscountType.Promo && (
-                  <div className="mt-4 bg-blue-50 p-4 rounded-md">
+                  <div className="mt-4 bg-blue-50 p-4 rounded-md ">
                     <p>
                       You used code{" "}
                       {selectedOrder.appliedDiscount.promoData?.code} for{" "}
@@ -960,27 +962,27 @@ const PaymentStatusPage = () => {
                         PromoDiscountType.Free
                         ? `${selectedOrder.appliedDiscount?.promoData?.discountValue} off`
                         : selectedOrder.appliedDiscount.promoData
-                            ?.discountValue &&
-                          selectedOrder.appliedDiscount.promoData
-                            .discountType === PromoDiscountType.FreeDelivery
-                        ? "free delivery"
-                        : selectedOrder.appliedDiscount.promoData
-                            ?.discountValue &&
-                          selectedOrder.appliedDiscount.promoData
-                            .discountType === PromoDiscountType.FixedAmount
-                      ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
-                            2
-                          )} off`
-                        : selectedOrder.appliedDiscount.promoData
-                            ?.discountValue &&
-                          selectedOrder.appliedDiscount.promoData
-                            .discountType === PromoDiscountType.Percentage
-                      ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
-                            2
-                          )} off`
-                        : selectedOrder.appliedDiscount.promoData
-                            ?.discountItemName &&
-                          `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
+                              ?.discountValue &&
+                            selectedOrder.appliedDiscount.promoData
+                              .discountType === PromoDiscountType.FreeDelivery
+                          ? "free delivery"
+                          : selectedOrder.appliedDiscount.promoData
+                                ?.discountValue &&
+                              selectedOrder.appliedDiscount.promoData
+                                .discountType === PromoDiscountType.FixedAmount
+                            ? `Discount: ${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
+                                2,
+                              )} off`
+                            : selectedOrder.appliedDiscount.promoData
+                                  ?.discountValue &&
+                                selectedOrder.appliedDiscount.promoData
+                                  .discountType === PromoDiscountType.Percentage
+                              ? `${selectedOrder.appliedDiscount.discountAmount?.toFixed(
+                                  2,
+                                )} off`
+                              : selectedOrder.appliedDiscount.promoData
+                                  ?.discountItemName &&
+                                `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
                     </p>
                   </div>
                 )}
@@ -988,7 +990,7 @@ const PaymentStatusPage = () => {
               {selectedOrder.appliedDiscount &&
                 selectedOrder.appliedDiscount.discountType ===
                   OrderDiscountType.Loyalty && (
-                  <div className="mt-4 bg-blue-50 p-4 rounded-md">
+                  <div className="mt-4 bg-blue-50 p-4 rounded-md font-body-oo">
                     <p>
                       You used your{" "}
                       {
@@ -996,31 +998,33 @@ const PaymentStatusPage = () => {
                           ?.loyaltyPointsRedeemed
                       }{" "}
                       points for{" "}
-                    {selectedOrder.appliedDiscount.loyaltyData?.redeemItem && (
+                      {selectedOrder.appliedDiscount.loyaltyData
+                        ?.redeemItem && (
                         <>
                           Item:{" "}
                           {
-                          selectedOrder.appliedDiscount.loyaltyData?.redeemItem
-                            .itemName
+                            selectedOrder.appliedDiscount.loyaltyData
+                              ?.redeemItem.itemName
                           }{" "}
                           (Value: $
                           {selectedOrder.appliedDiscount.loyaltyData?.redeemItem.itemPrice.toFixed(
-                            2
+                            2,
                           )}
                           )
                         </>
                       )}
                       {selectedOrder.appliedDiscount.loyaltyData?.redeemDiscount
                         ?.discountValue &&
-                      (selectedOrder.appliedDiscount.loyaltyData?.redeemDiscount
-                        .discountType === DiscountType.FixedAmount ||
+                        (selectedOrder.appliedDiscount.loyaltyData
+                          ?.redeemDiscount.discountType ===
+                          DiscountType.FixedAmount ||
                           selectedOrder.appliedDiscount.loyaltyData
                             ?.redeemDiscount.discountType ===
                             DiscountType.Percentage) && (
                           <>
                             Discount: $
                             {selectedOrder.appliedDiscount.loyaltyData?.redeemDiscount.discountValue.toFixed(
-                              2
+                              2,
                             )}{" "}
                             off
                           </>
@@ -1031,7 +1035,7 @@ const PaymentStatusPage = () => {
               {(selectedOrder?.guestData ?? null) === null &&
               loyaltyRule !== null &&
               Math.round(selectedOrder?.grossAmount ?? 0) * 10 > 0 ? (
-                <div className="mt-4 bg-green-50 p-4 rounded-md">
+                <div className="mt-4 bg-green-50 p-4 rounded-md font-body-oo">
                   <p>
                     You earned{" "}
                     {Math.round(selectedOrder?.grossAmount ?? 0) * 10}{" "}
@@ -1041,7 +1045,7 @@ const PaymentStatusPage = () => {
               ) : null}
 
               {selectedOrder?.guestData && loyaltyRule !== null ? (
-                <div className="mt-4 bg-gray-100 p-4 rounded-md">
+                <div className="mt-4 bg-gray-100 p-4 rounded-md font-body-oo">
                   <p>
                     You could have earned{" "}
                     {Math.round(selectedOrder?.grossAmount ?? 0) * 10}{" "}
@@ -1051,14 +1055,14 @@ const PaymentStatusPage = () => {
               ) : null}
 
               {selectedOrder.specialRemark && (
-                <div className="mt-4 bg-yellow-50 p-4 rounded-md">
+                <div className="mt-4 bg-yellow-50 p-4 rounded-md font-subheading-oo">
                   <h4 className="font-bold mb-2">Restaurant Remarks</h4>
                   <p>{selectedOrder.specialRemark}</p>
                 </div>
               )}
 
               <div className="mt-6 text-center">
-                <p className="text-gray-500 text-xs mb-6">
+                <p className="text-gray-500 text-xs mb-6 font-subheading-oo">
                   Thank you for your order!
                 </p>
 
@@ -1066,7 +1070,7 @@ const PaymentStatusPage = () => {
                 {!feedbackSubmitted &&
                   (!isMobile || modalClosedWithoutSubmission) && (
                     <div className="border-t pt-6">
-                      <h4 className="font-bold mb-4 text-lg font-primary">
+                      <h4 className="font-bold mb-4 text-lg font-subheading-oo">
                         How was your ordering experience?
                       </h4>
 
@@ -1098,7 +1102,7 @@ const PaymentStatusPage = () => {
                       </div>
 
                       {/* Rating Message */}
-                      <p className="text-sm text-gray-600 mb-4 min-h-[20px] font-primary">
+                      <p className="text-sm text-gray-600 mb-4 min-h-[20px] font-body-oo">
                         {getRatingMessage(hoveredRating || rating)}
                       </p>
 
@@ -1106,7 +1110,7 @@ const PaymentStatusPage = () => {
                       <div className="text-left">
                         <label
                           htmlFor="feedback-remark"
-                          className="mb-2 block font-semibold font-primary text-base"
+                          className="mb-2 block font-semibold font-body-oo text-base"
                         >
                           Your Feedback
                         </label>
@@ -1118,7 +1122,7 @@ const PaymentStatusPage = () => {
                           placeholder="Share your experience with us..."
                           className="w-full p-2 border rounded-md font-primary focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
                         />
-                        <p className="text-sm mt-1 text-right font-primary">
+                        <p className="text-sm mt-1 text-right font-body-oo">
                           {feedbackRemark.length}/150 characters
                         </p>
                       </div>
@@ -1128,7 +1132,7 @@ const PaymentStatusPage = () => {
                         <button
                           onClick={handleSubmitFeedback}
                           disabled={rating === 0}
-                          className={`inline-block mt-4 px-8 py-2 text-lg sm:text-xl font-medium font-primary rounded-md transition-all duration-200 ${
+                          className={`inline-block mt-4 px-8 py-2 text-lg sm:text-xl font-medium font-subheading-oo rounded-md transition-all duration-200 ${
                             rating === 0
                               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                               : isContrastOkay(
@@ -1165,7 +1169,7 @@ const PaymentStatusPage = () => {
                           ))}
                         </div>
                       </div>
-                      <p className="font-semibold text-center">
+                      <p className="font-semibold font-subheading-oo text-center ">
                         Thank you for your feedback! We appreciate your input.
                       </p>
                     </div>
@@ -1174,7 +1178,9 @@ const PaymentStatusPage = () => {
               </div>
             </div>
           ) : (
-            <p className="text-red-500">Failed to load order details.</p>
+            <p className="text-red-500 font-body-oo">
+              Failed to load order details.
+            </p>
           )}
         </div>
       </div>

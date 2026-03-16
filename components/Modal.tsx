@@ -176,7 +176,15 @@ const Modal: React.FC<{
     }
   };
 
-
+  useEffect(() => {
+    if (cartDetails?.delivery && cartDetails.delivery.place) {
+      setTempUserAddress(cartDetails.delivery as AddressInfoInput);
+      setSelectedDeliveryPlace({
+        label: cartDetails.delivery.place?.displayName,
+        value: cartDetails.delivery.place?.placeId,
+      });
+    }
+  }, [cartDetails]);
 
   // useEffect(() => {
   //   if (!showMenu) {
@@ -651,7 +659,7 @@ const Modal: React.FC<{
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-end sm:items-center justify-center !z-50 bg-black bg-opacity-50 bottom-0 font-online-ordering"
+      className="fixed inset-0 flex items-end sm:items-center justify-center !z-50 bg-black bg-opacity-50 bottom-0 "
     >
       <motion.div
         variants={fadeIn("up", "tween", 0, 0.3)}
@@ -874,7 +882,9 @@ const Modal: React.FC<{
                 className="sm:mr-2 mr-1 mb-[2px] sm:mb-0"
                 size={24}
               />
-              <span className="text-base sm:text-lg font-medium">Back</span>
+              <span className="text-base font-subheading-oo sm:text-lg font-medium">
+                Back
+              </span>
             </button>
 
             <h3 className="text-lg md:text-xl font-semibold font-subheading-oo text-gray-800">
@@ -912,7 +922,7 @@ const Modal: React.FC<{
                     ? daysList.map((day) => (
                         <button
                           key={day.label}
-                          className={`flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] font-body-oo rounded-md text-sm md:text-base font-medium transition-all duration-200 border 
+                          className={`flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 border 
                             ${
                               tempDeliveryDay === day.label
                                 ? "bg-primary border-primary shadow-md"
@@ -931,7 +941,7 @@ const Modal: React.FC<{
                           }}
                           onClick={() => setTempDeliveryDay(day.label)}
                         >
-                          <span className="block">
+                          <span className="block font-body-oo">
                             {day.label.split(" ")[0]}
                           </span>
                           {day.label.split(" ").slice(1).length > 0 && (
@@ -944,7 +954,7 @@ const Modal: React.FC<{
                     : daysList.slice(0, 1).map((day) => (
                         <button
                           key={day.label}
-                          className="flex flex-col items-start font-body-oo justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 bg-primary border border-primary text-white shadow-md"
+                          className="flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 bg-primary border border-primary text-white shadow-md"
                           onClick={() => setTempDeliveryDay(day.label)}
                           style={{
                             color: isContrastOkay(
@@ -955,7 +965,7 @@ const Modal: React.FC<{
                               : "#000000",
                           }}
                         >
-                          <span className="block">
+                          <span className="block font-body-oo">
                             {day.label.split(" ")[0]}
                           </span>
                           {day.label.split(" ").slice(1).length > 0 && (

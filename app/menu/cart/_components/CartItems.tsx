@@ -352,7 +352,7 @@ const CartItems = ({
                     </button>
                   </div>
 
-                  <p className="lg:text-xl md:text-lg text-base font-semibold font-online-ordering">
+                  <p className="lg:text-xl md:text-lg text-base font-subheading-oo font-semibold">
                     {" "}
                     ${calculateItemPrice(item)}
                   </p>

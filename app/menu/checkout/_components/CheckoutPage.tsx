@@ -326,7 +326,7 @@ const CheckoutPage = ({
 
           <p
             ref={errorRef}
-            className={`mt-2 mb-4 p-3 mx-6 bg-red-100 text-red-700 rounded ${
+            className={`mt-2 mb-4 p-3 mx-6 bg-red-100 text-red-700 rounded font-body-oo ${
               (placeOrderError ?? "").length > 0 ? "block" : "hidden"
             }`}
           >
@@ -340,7 +340,9 @@ const CheckoutPage = ({
           </div>
           <div className="px-6 w-full my-2">
             <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
-              You saved upto 25% by ordering directly instead of third party app
+              You&apos;re saving $
+              {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by ordering
+              directly instead of third-party delivery apps
             </p>
             <button
               onClick={() => {
@@ -388,8 +390,9 @@ const CheckoutPage = ({
                     <span className="text-base ">${orderTotal.toFixed(2)}</span>
                   </div>
                   <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
-                    You saved upto 25% by ordering directly instead of third
-                    party app
+                    You&apos;re saving $
+                    {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by
+                    ordering directly instead of third-party delivery apps
                   </p>
                 </>
               );
@@ -403,18 +406,18 @@ const CheckoutPage = ({
               disabled={
                 placeOrderLoading || (!meCustomerData && !isOtpVerified)
               }
-              className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
-            style={{
-              color: isContrastOkay(
-                Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                Env.NEXT_PUBLIC_BACKGROUND_COLOR,
-              )
-                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                : Env.NEXT_PUBLIC_TEXT_COLOR,
-            }}
-          >
-            {placeOrderLoading ? "Processing..." : "Place Order"}
-          </button>
+              className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-subheading-oo disabled:opacity-50"
+              style={{
+                color: isContrastOkay(
+                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                )
+                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  : Env.NEXT_PUBLIC_TEXT_COLOR,
+              }}
+            >
+              {placeOrderLoading ? "Processing..." : "Place Order"}
+            </button>
           </div>
         )}
       </div>
