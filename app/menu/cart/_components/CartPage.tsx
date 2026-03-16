@@ -449,7 +449,7 @@ const CartPage = ({
             className={`px-6 w-full my-2 ${isTotalVisible ? "block" : "hidden lg:block"}`}
           >
             <p className="text-sm text-green-700 font-medium font-subheading-oo mb-3">
-              You&apos;re saving $
+              You&apos;re saving up to $
               {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by ordering
               directly instead of third-party delivery apps
             </p>
@@ -463,7 +463,7 @@ const CartPage = ({
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                 )
                   ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                   : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -490,7 +490,7 @@ const CartPage = ({
             <span className="text-base ">${total.toFixed(2)}</span>
           </div>
           <p className="text-xs text-green-700 font-subheading-oo font-semibold mb-3">
-            You&apos;re saving $
+            You&apos;re saving up to $
             {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by ordering
             directly instead of third-party delivery apps
           </p>

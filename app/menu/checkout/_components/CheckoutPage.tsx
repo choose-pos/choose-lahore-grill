@@ -340,7 +340,7 @@ const CheckoutPage = ({
           </div>
           <div className="px-6 w-full my-2">
             <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
-              You&apos;re saving $
+              You&apos;re saving up to $
               {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by ordering
               directly instead of third-party delivery apps
             </p>
@@ -377,12 +377,12 @@ const CheckoutPage = ({
           <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t z-20">
             {(() => {
               const orderTotal =
-              (amounts?.subTotalAmt ?? 0) -
-              (amounts?.discAmt ?? 0) +
-              (amounts?.taxAmt ?? 0) +
-              (amounts?.tipAmt ?? 0) +
-              (amounts?.platformFeeAmt ?? 0) +
-              (amounts?.deliveryFeeAmt ?? 0);
+                (amounts?.subTotalAmt ?? 0) -
+                (amounts?.discAmt ?? 0) +
+                (amounts?.taxAmt ?? 0) +
+                (amounts?.tipAmt ?? 0) +
+                (amounts?.platformFeeAmt ?? 0) +
+                (amounts?.deliveryFeeAmt ?? 0);
               return (
                 <>
                   <div className="flex justify-between items-center mb-1 font-subheading-oo font-semibold">
@@ -390,19 +390,19 @@ const CheckoutPage = ({
                     <span className="text-base ">${orderTotal.toFixed(2)}</span>
                   </div>
                   <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
-                    You&apos;re saving $
+                    You&apos;re saving up to $
                     {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by
                     ordering directly instead of third-party delivery apps
                   </p>
                 </>
               );
-          })()}
-          <button
-            onClick={() => {
-              if (stripeFormRef.current) {
-                stripeFormRef.current.click();
-              }
-            }}
+            })()}
+            <button
+              onClick={() => {
+                if (stripeFormRef.current) {
+                  stripeFormRef.current.click();
+                }
+              }}
               disabled={
                 placeOrderLoading || (!meCustomerData && !isOtpVerified)
               }

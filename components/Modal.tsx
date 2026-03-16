@@ -111,15 +111,8 @@ const Modal: React.FC<{
     "right" | "left"
   >("right");
 
-  useEffect(() => {
-    if (cartDetails?.delivery && cartDetails.delivery.place) {
-      setTempUserAddress(cartDetails.delivery as AddressInfoInput);
-      setSelectedDeliveryPlace({
-        label: cartDetails.delivery.place?.displayName,
-        value: cartDetails.delivery.place?.placeId,
-      });
-    }
-  }, [cartDetails]);
+
+
 
   useEffect(() => {
     const checkMobile = () => {
