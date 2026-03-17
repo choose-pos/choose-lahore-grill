@@ -371,7 +371,7 @@ const OrderFeedbackComponent = () => {
           <h1 className="text-3xl md:text-4xl font-semibold font-subheading-oo mb-2">
             Share Your Feedback
           </h1>
-          <p className="text-gray-600 mb-8">Help us improve your experience</p>
+          <p className="text-gray-600 mb-8 font-body-oo">Help us improve your experience</p>
 
           {/* Order Details */}
           <div className="bg-gray-50 p-4 rounded-xl mb-8">

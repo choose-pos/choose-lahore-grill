@@ -505,7 +505,7 @@ const PaymentStatusPage = () => {
             <h1 className="text-3xl md:text-4xl font-semibold mb-2">
               Share Your Feedback
             </h1>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 font-body-oo mb-8">
               Help us improve your experience
             </p>
 
