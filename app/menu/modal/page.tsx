@@ -531,13 +531,12 @@ const ItemModal = () => {
       onClick={closeModal}
       className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-[2px] flex justify-center items-end sm:items-center z-50"
     >
-      <AnimatePresence mode="wait">
           <motion.div
             key="modal-content"
-            initial={{ y: "100vh", opacity: 0 }}
+        initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100vh", opacity: 0 }}
-            transition={{ type: "tween", stiffness: 300, damping: 30, mass: 1 }}
+        exit={{ y: "100%", opacity: 0 }}
+        transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
             className="relative bg-white rounded-t-md sm:rounded-md overflow-hidden shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] md:max-h-[90vh]"
           >
@@ -604,7 +603,6 @@ const ItemModal = () => {
             )}
           </div>
         </motion.div>
-      </AnimatePresence>
     </motion.div>
   );
 };

@@ -12,6 +12,7 @@ import { extractErrorMessage, formatUSAPhoneNumber } from "@/utils/UtilFncs";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import StarIcon from "../common/StarIcon";
+import { FiInfo } from "react-icons/fi";
 
 const CustomerVerification = ({
   isOtpVerified,
@@ -527,19 +528,13 @@ const CustomerVerification = ({
                 </p>
               )} */}
 
-              {!signUpToggle && !hasPromo && loyaltyRule && (
-                <div className="mt-2 flex  gap-2 bg-amber-50 border items-center border-amber-200 rounded-md px-3 py-2">
-                  <span className="text-amber-500 mt-0.5 flex-shrink-0">
-                    ⚠
-                  </span>
-                  <p className="text-xs font-body-oo text-amber-700">
+                {!signUpToggle && !hasPromo && loyaltyRule && (
+                <div className="mt-2 flex gap-2 bg-primary/10 border items-center border-primary/30 rounded-md px-3 py-2">
+                  <p className="text-sm font-body-oo text-gray-800">
                     You&apos;ll miss out on{" "}
                     <span className="font-semibold">
-                      {loyaltyRule.signUpValue} signup bonus
-                    </span>{" "}
-                    +{" "}
-                    <span className="font-semibold">
-                      {Math.round(amounts?.netAmt ?? 0) * 10} order{" "}
+                      {loyaltyRule.signUpValue +
+                        Math.round(amounts?.netAmt ?? 0) * 10}{" "}
                       {loyaltyRule.name}
                     </span>{" "}
                     by not signing up.

@@ -808,17 +808,34 @@ RestaurantDetailsProps) {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center bg-white my-40 w-[95vw] space-x-2">
-            <span className="sr-only">Loading...</span>
-            {[0, 1, 2, 3].map((index) => (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-full bg-primary animate-bounce-flash opacity-40`}
-                style={{
-                  animationDelay: `${index * 0.3}s`,
-                  animationDuration: "1.2s",
-                }}
-              ></div>
+          <div className="w-full max-w-8xl mx-auto px-6 md:px-20 lg:px-28 py-4">
+            {/* Shimmer loading for menu items */}
+            {[1, 2].map((categoryIndex) => (
+              <div key={categoryIndex} className="mb-8">
+                {/* Category title shimmer */}
+                <div className="h-7 w-48 rounded-md mb-4 shimmer" />
+
+                {/* Items grid shimmer */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3, 4, 5, 6].map((itemIndex) => (
+                    <div
+                      key={itemIndex}
+                      className="flex gap-3 p-3 border border-gray-100 rounded-lg"
+                    >
+                      {/* Image shimmer */}
+                      <div className="w-24 h-24 rounded-md flex-shrink-0 shimmer" />
+
+                      {/* Content shimmer */}
+                      <div className="flex-1 space-y-2">
+                        <div className="h-5 w-3/4 rounded shimmer" />
+                        <div className="h-4 w-full rounded shimmer" />
+                        <div className="h-4 w-2/3 rounded shimmer" />
+                        <div className="h-5 w-16 rounded shimmer mt-2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         ) : (
