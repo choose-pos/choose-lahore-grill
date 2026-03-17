@@ -228,7 +228,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               <>
                 <button
                   onClick={handleLogOut}
-                  className="flex items-center space-x-2 text-gray-600"
+                  className="flex items-center space-x-2 font-body text-gray-600 font-body-oo"
                 >
                   <MdAccountCircle size={28} />
                   <span>Log Out</span>
@@ -465,7 +465,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                       handleLogOut();
                       closeMenu();
                     }}
-                    className="w-full flex items-center justify-center space-x-2 text-gray-600 py-3"
+                    className="w-full flex items-center  font-body-oo justify-center space-x-2 text-gray-600 py-3"
                   >
                     <MdAccountCircle size={28} />
                     <span>Log Out</span>

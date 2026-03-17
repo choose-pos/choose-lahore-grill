@@ -458,7 +458,7 @@ const CartOffers = ({
               <button
                 type="button"
                 onClick={() => setShowPromoModal(true)}
-                className="text-sm text-gray-500 underline mt-2 font-medium hover:opacity-80 transition-opacity"
+                className="text-sm text-gray-500 underline mt-2 font-medium font-body-oo hover:opacity-80 transition-opacity"
               >
                 View All Offers
               </button>

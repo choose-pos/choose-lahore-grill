@@ -295,7 +295,7 @@ const GiftCard = () => {
                           onClick={() => copyToClipboard(card.code)}
                           className="text-primary focus:outline-none focus:underline"
                         >
-                          <FaCopy className="inline mr-1" /> Copy Code
+                          <FaCopy className="inline mr-1 font-body-oo" /> Copy Code
                         </button>
                       )}
                     </td>

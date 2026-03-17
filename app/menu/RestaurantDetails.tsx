@@ -863,7 +863,7 @@ RestaurantDetailsProps) {
                         <h1 className="md:text-4xl text-2xl font-medium font-subheading-oo">
                           No result found
                         </h1>
-                        <p className="md:text-lg text-base">
+                        <p className="md:text-lg  font-subheading-oo text-base">
                           {`Sorry, we couldn't find any available item. Please refine your search or try changing your filters.`}
                         </p>
                       </>

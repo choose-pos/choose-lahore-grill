@@ -86,12 +86,12 @@ const PromoModal: React.FC<{
               </code>
               <button
                 onClick={(e) => handleCopy(e, promoData.code || "")}
-                className="p-2 flex items-center gap-2 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-2 flex items-center gap-2 hover:bg-gray-200 rounded-lg font-body-oo transition-colors"
                 aria-label={
                   copiedCode === promoData.code ? "Copied!" : "Copy code"
                 }
               >
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-gray-700 font-body-oo">
                   {copiedCode === promoData.code ? "Copied!" : "Copy"}
                 </span>
 
@@ -313,7 +313,7 @@ const PromoCodes: React.FC = () => {
                         </code>
                         <button
                           onClick={(e) => handleCopy(e, code.code || "")}
-                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-1.5 hover:bg-gray-100 rounded-lg font-body-oo transition-colors"
                           aria-label={
                             copiedCode === code.code ? "Copied!" : "Copy code"
                           }

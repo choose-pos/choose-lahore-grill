@@ -255,7 +255,7 @@ const CustomerVerification = ({
               setShowOtp(false);
               setFormData((prev) => ({ ...prev, otp: "" }));
             }}
-            className="text-black hover:underline text-sm font-medium"
+            className="text-black hover:underline text-sm font-body-oo font-medium"
           >
             Edit
           </button>
