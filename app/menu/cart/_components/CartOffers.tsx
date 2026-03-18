@@ -58,12 +58,17 @@ const CartOffers = ({
   >([]);
 
   useEffect(() => {
-    if (isSwappingPromo) setIsSwappingPromo(false);
+    setIsSwappingPromo(false);
   }, [cartDetails?.discountString]);
 
   const handleSwapStart = async () => {
     setIsSwappingPromo(true);
     await handleRemoveOffer(true);
+  };
+
+  const handleSwapSuccess = async () => {
+    await refreshData();
+    setIsSwappingPromo(false);
   };
 
   const handleSwapFailed = async () => {
@@ -654,7 +659,7 @@ const CartOffers = ({
       {showPromoModal && (
         <PromoCodesModal
           onClose={() => setShowPromoModal(false)}
-          onApplied={() => refreshData()}
+          onApplied={() => handleSwapSuccess()}
           promoCodes={visiblePromoCodes}
           appliedCode={cartDetails?.discountCode}
           onRemoveExisting={
