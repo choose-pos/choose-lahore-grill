@@ -45,8 +45,8 @@ const CartRemarks = () => {
         onChange={(e) => setDraft(e.target.value)}
         maxLength={150}
         placeholder="E.g. No onions, extra napkins, ring the doorbell..."
-        className="w-full p-3 border border-gray-200 rounded-md font-body-oo text-sm focus:outline-none focus:border-gray-400 resize-none h-24 bg-gray-50 placeholder:text-gray-400 transition-colors"
-        autoFocus
+        className="w-full p-3 border border-gray-200 rounded-md font-body-oo  text-base sm:text-sm focus:outline-none focus:border-gray-400 resize-none h-24 bg-gray-50 placeholder:text-gray-400 transition-colors"
+        
       />
       <p className="text-xs text-gray-500 font-body-oo text-right mt-1">
         {draft.length}/150
