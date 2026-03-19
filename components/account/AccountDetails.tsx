@@ -171,16 +171,16 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-online-ordering bg-bgGray">
+    <div className="min-h-screen flex flex-col font-body-oo bg-bgGray">
       <main className="flex-grow py-8 sm:py-12 lg:py-16 max-w-8xl w-full mx-auto px-6 md:px-20 ">
         <div
           onClick={handleBack}
-          className="flex items-center text-gray-500 hover:text-black cursor-pointer mb-6 px-4 sm:px-6  xl:px-10 w-max"
+          className="flex items-center text-gray-500 hover:text-black cursor-pointer mb-6 xl:px-10 w-max"
         >
           <IoMdArrowBack size={16} />
-          <p className="ml-2 text-base sm:text-lg font-online-ordering">Menu</p>
+          <p className="ml-2 text-base sm:text-lg font-body-oo">Menu</p>
         </div>
-        <div className="flex flex-col md:flex-row items-start xl:px-10 w-full  font-online-ordering">
+        <div className="flex flex-col md:flex-row items-start xl:px-10 w-full  font-body-oo">
           <StickyTabbar onTabChange={handleTabChange} />
 
           <div className="w-full">

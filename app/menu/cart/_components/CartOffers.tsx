@@ -1,3 +1,4 @@
+import LoadingDots from "@/components/common/LoadingDots";
 import {
   Carousel,
   CarouselApi,
@@ -5,7 +6,10 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { Env } from "@/env";
-import { LoyaltyRedeemType } from "@/generated/graphql";
+import {
+  LoyaltyRedeemType,
+  FetchVisiblePromoCodesQuery,
+} from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import meCustomerStore from "@/store/meCustomer";
 import { useSidebarStore } from "@/store/sidebar";
@@ -19,6 +23,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FiX } from "react-icons/fi";
+import { CiDiscount1 } from "react-icons/ci";
+import PromoCodesModal from "@/components/cart/PromoCodesModal";
+import StarIcon from "@/components/common/StarIcon";
 
 interface ICartOffersProps {
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
@@ -43,6 +50,39 @@ const CartOffers = ({
   const [addPromoLoading, setAddPromoLoading] = useState(false);
   const [promoCodeInput, setPromoCodeInput] = useState<string>("");
   const [promoError, setPromoError] = useState<string>();
+  const [isPromoFocused, setIsPromoFocused] = useState(false);
+  const [showPromoModal, setShowPromoModal] = useState(false);
+  const [isSwappingPromo, setIsSwappingPromo] = useState(false);
+  const [visiblePromoCodes, setVisiblePromoCodes] = useState<
+    FetchVisiblePromoCodesQuery["fetchVisiblePromoCodes"]
+  >([]);
+
+  useEffect(() => {
+    setIsSwappingPromo(false);
+  }, [cartDetails?.discountString]);
+
+  const handleSwapStart = async () => {
+    setIsSwappingPromo(true);
+    await handleRemoveOffer(true);
+  };
+
+  const handleSwapSuccess = async () => {
+    await refreshData();
+    setIsSwappingPromo(false);
+  };
+
+  const handleSwapFailed = async () => {
+    try {
+      if (cartDetails?.discountCode) {
+        await fetchWithAuth(() =>
+          sdk.ValidatePromoCode({ code: cartDetails.discountCode! }),
+        );
+      }
+    } finally {
+      setIsSwappingPromo(false);
+      refreshData();
+    }
+  };
 
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -67,7 +107,6 @@ const CartOffers = ({
         image?: string | null;
       }[] = [];
       loyaltyOffers.itemRedemptions.forEach((i) => {
-        console.log("loyaltyOffers", i.item.image);
         arr.push({
           name: `Free ${i.item.name}`,
           points: i.pointsThreshold,
@@ -107,8 +146,15 @@ const CartOffers = ({
     });
   }, [carouselApi]);
 
+  useEffect(() => {
+    sdk
+      .fetchVisiblePromoCodes()
+      .then((res) => setVisiblePromoCodes(res.fetchVisiblePromoCodes ?? []))
+      .catch(() => setVisiblePromoCodes([]));
+  }, []);
+
   // Handlers / Functions
-  const handleRemoveOffer = async () => {
+  const handleRemoveOffer = async (skipRefresh = false) => {
     try {
       const res = await sdk.updateCartDetails({
         input: { amounts: { discountAmount: 0 }, discountString: null },
@@ -116,12 +162,11 @@ const CartOffers = ({
 
       if (res.updateCartDetails) {
         setPromoError(undefined);
-
-        // Trigger refetch of cart data
-        refreshData();
+        if (!skipRefresh) refreshData();
       }
     } catch (error) {
       setToastData({ message: extractErrorMessage(error), type: "error" });
+      throw error;
     }
   };
 
@@ -137,7 +182,7 @@ const CartOffers = ({
     setAddPromoLoading(true);
     try {
       const res = await fetchWithAuth(() =>
-        sdk.ValidatePromoCode({ code: promoCodeInput.trim() })
+        sdk.ValidatePromoCode({ code: promoCodeInput.trim() }),
       );
 
       if (res.validatePromoCode) {
@@ -156,7 +201,7 @@ const CartOffers = ({
 
   const handleApplyLoyalty = async (
     points: number,
-    type: LoyaltyRedeemType
+    type: LoyaltyRedeemType,
   ) => {
     setLoyaltyError(undefined);
     setApplyLoyaltyLoading(true);
@@ -164,7 +209,7 @@ const CartOffers = ({
       const res = await fetchWithAuth(() =>
         sdk.validateLoyaltyRedemptionOnCart({
           input: { loyaltyPointsRedeemed: points, redeemType: type },
-        })
+        }),
       );
 
       if (res.validateLoyaltyRedemptionOnCart) {
@@ -184,76 +229,69 @@ const CartOffers = ({
 
   return (
     <>
-      <div className="px-6 font-online-ordering z-40">
+      <div className="px-6 z-40">
         {loyaltyRule && !meCustomerData ? (
           <>
-            <p className="text-sm text-gray-600 mb-2">
-              <span className="hidden md:inline-block">
-                Already a member?&nbsp;
-              </span>
-              <span
-                className="font-semibold cursor-pointer underline"
-                onClick={() => {
-                  setSignInOpen(true);
-                }}
-              >
-                Sign In
-              </span>{" "}
-              {`and earn`}{" "}
-              <span className="font-semibold">
-                {Math.round(amounts.netAmt) * 10} {loyaltyRule?.name}
-              </span>{" "}
-              {`on this order.`}
-            </p>
-            {loyaltyRule.signUpValue > 0 ? (
-              <p className="text-sm text-gray-600 mb-2">
-                <span className="hidden md:inline-block">
-                  Not a member?&nbsp;
-                </span>
-                <span
-                  className="font-semibold cursor-pointer underline"
-                  onClick={() => {
-                    setCartOpen(false);
-                    setSignInOpen(true);
-                    setIsSignUpOpen(true);
-                  }}
-                >
-                  Sign Up
-                </span>{" "}
-                {`and earn`}{" "}
-                <span className="font-semibold">
-                  {loyaltyRule.signUpValue} {loyaltyRule?.name}
-                </span>
-              </p>
-            ) : null}
-
-            <div className="my-2 pt-4 relative">
-              <div className="grid grid-cols-12 gap-4">
-                <input
-                  type="text"
-                  value={promoCodeInput}
-                  placeholder="Enter your promo code"
-                  className="w-full p-2 border border-gray-300 rounded-md col-span-8 outline-none"
-                  disabled
-                />
-                <button
-                  disabled={true}
-                  className="w-full bg-primary text-white px-4 rounded-full h-auto transition duration-200 flex items-center justify-center col-span-4 disabled:bg-primary/60"
-                  style={{
-                    color: isContrastOkay(
-                      Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                      Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                    )
-                      ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                      : Env.NEXT_PUBLIC_TEXT_COLOR,
-                  }}
-                >
-                  Apply
-                </button>
+            <div className="mb-8">
+              <h4 className="text-xl font-semibold font-subheading-oo  mb-6 text-gray-900 leading-none">
+                Stay in touch
+              </h4>
+              <div className="flex flex-col gap-4">
+                <div className="border border-gray-200 rounded-md bg-white flex flex-col shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
+                  <div className="flex flex-col gap-3 p-4">
+                    <div className="flex items-start gap-2">
+                      <StarIcon
+                        size={18}
+                        className="mt-[1px] text-[#344054] flex-shrink-0"
+                      />
+                      <p className="text-[14px] leading-snug font-medium font-subheading-oo text-[#344054]">
+                        Already a member? Sign In and earn{" "}
+                        {Math.round(amounts.netAmt) * 10} {loyaltyRule?.name} on
+                        this order.
+                      </p>
+                    </div>
+                    {loyaltyRule.signUpValue > 0 ? (
+                      <div className="flex items-start gap-2">
+                        <StarIcon
+                          size={18}
+                          className="mt-[1px] text-[#344054] flex-shrink-0"
+                        />
+                        <p className="text-[14px] leading-snug font-medium font-subheading-oo text-[#344054]">
+                          Not a member? Sign Up and earn{" "}
+                          {loyaltyRule.signUpValue} {loyaltyRule?.name}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="border-t border-gray-200" />
+                  <div className="flex">
+                    <div
+                      className={`flex-1 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-center ${loyaltyRule.signUpValue > 0 ? "rounded-bl-xl border-r border-gray-200" : "rounded-b-xl"}`}
+                      onClick={() => setSignInOpen(true)}
+                    >
+                      <p className="text-[14px] font-subheading-oo font-bold text-[#344054]">
+                        Sign in
+                      </p>
+                    </div>
+                    {loyaltyRule.signUpValue > 0 ? (
+                      <div
+                        className="flex-1 px-4 py-3 cursor-pointer hover:bg-gray-50 rounded-br-xl transition-colors flex items-center justify-center"
+                        onClick={() => {
+                          setCartOpen(false);
+                          setSignInOpen(true);
+                          setIsSignUpOpen(true);
+                        }}
+                      >
+                        <p className="text-[14px] font-subheading-oo font-bold text-[#344054]">
+                          Sign up
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs font-thin text-gray-400 mb-4 mt-1">
-                Sign Up / Sign In to apply promocode
-              </p>
+            </div>
+            <div className="mt-4">
               <Carousel
                 setApi={setCarouselApi}
                 opts={{
@@ -271,18 +309,11 @@ const CartOffers = ({
                       <div
                         key={index}
                         data-promo-card
-                        className="bg-white border transition-all duration-300 w-full md:h-32 rounded-[20px] -z-10"
+                        className="bg-white border transition-all duration-300 w-full md:h-28 rounded-md -z-10"
                       >
                         <div className="p-3 md:p-4 h-full flex flex-col justify-center">
                           <div className="flex items-start justify-between">
                             <div className="flex-grow pr-2">
-                              {/* <p className="sm:text-lg text-base font-bold text-gray-900 mb-1 line-clamp-1 font-online-ordering">
-                                {offer.name}
-                              </p>
-                              <p className="text-xs text-gray-600 line-clamp-1 font-online-ordering">
-                                {offer.points} {loyaltyRule?.name ?? "points"}{" "}
-                                required
-                              </p> */}
                               <div className="flex items-center gap-2 mb-1">
                                 {offer?.image && (
                                   <div className="w-14 h-14 relative self-start flex-shrink-0">
@@ -290,22 +321,22 @@ const CartOffers = ({
                                       src={offer.image}
                                       alt={offer.name}
                                       fill
-                                      className={`object-cover object-center w-full h-full rounded-lg`}
+                                      className={`object-cover object-center w-full h-full rounded-md`}
                                     />
                                   </div>
                                 )}
                                 <div className="flex-1">
-                                  <p className="sm:text-lg text-base font-bold text-gray-900 line-clamp-1 font-online-ordering">
+                                  <p className="sm:text-lg text-base font-semibold text-gray-900 line-clamp-1 font-subheading-oo">
                                     {offer.name}
                                   </p>
-                                  <p className="text-xs text-gray-600 line-clamp-1 font-online-ordering">
+                                  <p className="text-xs text-gray-600 line-clamp-1 font-body-oo font-normal">
                                     {offer.points}{" "}
                                     {loyaltyRule?.name ?? "points"} required
                                   </p>
                                 </div>
                               </div>
                               <div className="flex items-center justify-end mt-2">
-                                <p className="text-xs sm:text-sm px-2 py-1 text-gray-600">
+                                <p className="text-xs sm:text-sm px-2 py-1 font-body-oo font-semibold text-gray-600">
                                   Sign Up / Sign In to redeem
                                 </p>
                               </div>
@@ -316,7 +347,6 @@ const CartOffers = ({
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-
                 <div className="flex gap-4 mt-4 justify-center">
                   {loyaltyRewards.map((_, index) => (
                     <button
@@ -334,79 +364,120 @@ const CartOffers = ({
                 </div>
               </Carousel>
             </div>
+            {!cartDetails?.discountString && (
+              <div className="relative mt-4">
+                <form
+                  onSubmit={handleApplyOffer}
+                  className="grid grid-cols-12 gap-2 sm:gap-4"
+                >
+                  <div
+                    className={`relative transition-all duration-300 ${
+                      isPromoFocused || promoCodeInput.length > 0
+                        ? "col-span-8"
+                        : "col-span-12 md:col-span-8"
+                    }`}
+                  >
+                    <CiDiscount1 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+                    <input
+                      type="text"
+                      value={promoCodeInput}
+                      onFocus={() => setIsPromoFocused(true)}
+                      onBlur={() => setIsPromoFocused(false)}
+                      onChange={(e) => {
+                        const input = e.target.value.toUpperCase();
+                        setPromoCodeInput(input);
+                      }}
+                      placeholder="Enter your promo code"
+                      className="w-full pl-10 pr-2 py-2 sm:py-2 border border-black/30 font-body-oo border-black rounded-md outline-none bg-transparent"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={addPromoLoading || promoCodeInput.length === 0}
+                    className={`w-full bg-primary text-white px-4 font-body-oo font-semibold rounded-md h-auto transition duration-200 items-center justify-center col-span-4 disabled:bg-primary/60 ${
+                      !isPromoFocused && promoCodeInput.length === 0
+                        ? "hidden md:flex"
+                        : "flex"
+                    }`}
+                    style={{
+                      color: isContrastOkay(
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                      )
+                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        : Env.NEXT_PUBLIC_TEXT_COLOR,
+                    }}
+                  >
+                    {addPromoLoading ? (
+                      <>
+                        <AiOutlineLoading3Quarters className="animate-spin mr-2" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Apply"
+                    )}
+                  </button>
+                </form>
+                {promoError ? (
+                  <p className="text-red-500 text-sm mt-2 col-span-12">
+                    {promoError}
+                  </p>
+                ) : null}
+                {visiblePromoCodes.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPromoModal(true)}
+                    className="text-sm text-gray-500 font-body-oo font-medium underline mt-2 hover:opacity-80 transition-opacity"
+                  >
+                    View All Offers
+                  </button>
+                )}
+              </div>
+            )}
           </>
         ) : null}
 
         {cartDetails?.discountString ? (
-          <div className="bg-green-50 py-3 px-3 rounded-md shadow-sm flex items-center justify-between font-online-ordering">
-            <div className="flex items-center">
-              <div className="text-green-700 font-medium mr-6">
-                <p>Offer applied!</p>
-                {cartDetails.discountString}
+          <>
+            {isSwappingPromo ? (
+              <div className="py-4 flex justify-center">
+                <LoadingDots />
               </div>
-            </div>
-            <button
-              onClick={handleRemoveOffer}
-              className="text-gray-500 hover:text-gray-700 focus:outline-none"
-            >
-              <FiX className="w-5 h-5" />
-            </button>
-          </div>
+            ) : (
+              <div className="bg-green-50 py-3 mt-6 px-3 rounded-md shadow-sm flex items-center justify-between font-body-oo font-semibold">
+                <div className="flex items-center">
+                  <div className="text-green-700 font-medium mr-6">
+                    <p>Offer applied!</p>
+                    {cartDetails.discountString}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRemoveOffer()}
+                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+            {!isSwappingPromo && visiblePromoCodes.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowPromoModal(true)}
+                className="text-sm text-gray-500 underline mt-2 font-medium font-body-oo hover:opacity-80 transition-opacity"
+              >
+                View All Offers
+              </button>
+            )}
+          </>
         ) : null}
 
         {meCustomerData && !cartDetails?.discountString ? (
           <>
-            <form
-              onSubmit={handleApplyOffer}
-              className="grid grid-cols-12 gap-4 w-full"
-            >
-              <input
-                type="text"
-                value={promoCodeInput}
-                onChange={(e) => {
-                  let input = e.target.value.toUpperCase();
-                  if (input.length > 12) {
-                    input = input.slice(0, 12);
-                  }
-                  setPromoCodeInput(input);
-                }}
-                placeholder="Enter your promo code"
-                className="w-full p-2 border border-gray-300 rounded-md col-span-8 outline-none"
-              />
-              <button
-                type="submit"
-                disabled={addPromoLoading || promoCodeInput.length === 0}
-                className="w-full bg-primary text-white px-4 rounded-full h-auto transition duration-200 flex items-center justify-center col-span-4 disabled:bg-primary/60"
-                style={{
-                  color: isContrastOkay(
-                    Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                    Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                  )
-                    ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                    : Env.NEXT_PUBLIC_TEXT_COLOR,
-                }}
-              >
-                {addPromoLoading ? (
-                  <>
-                    <AiOutlineLoading3Quarters className="animate-spin mr-2" />
-                    Loading...
-                  </>
-                ) : (
-                  "Apply"
-                )}
-              </button>
-            </form>
-            {promoError ? (
-              <p className="text-red-500 text-sm mt-2 col-span-12">
-                {promoError}
-              </p>
-            ) : null}
-
             {/* Loyalty */}
-            <div className="my-2 pt-4">
-              <p className="text-sm text-gray-600 mb-2">
+            <div className="mb-4">
+              <p className="text-[14px] font-body-oo text-gray-600 mb-2">
                 {`Your loyalty balance is`}{" "}
-                <span className="font-semibold">
+                <span className="font-body-oo font-semibold">
                   {meCustomerData?.loyaltyWallet?.balance} {loyaltyRule?.name}
                 </span>
               </p>
@@ -434,18 +505,11 @@ const CartOffers = ({
                       <div
                         key={index}
                         data-promo-card
-                        className="bg-white border transition-all duration-300 w-full h-28 md:h-32 shrink-0 rounded-[20px]"
+                        className="bg-white border border-gray-200 transition-all duration-300 w-full h-28 md:h-32 shrink-0 rounded-md"
                       >
                         <div className="p-3 md:p-4 h-full flex flex-col justify-center">
                           <div className="flex items-start justify-between">
                             <div className="flex-grow pr-2">
-                              {/* <p className="sm:text-lg text-base font-bold text-gray-900 mb-1 line-clamp-1 font-online-ordering">
-                                {offer.name}
-                              </p>
-                              <p className="text-xs text-gray-600 line-clamp-1 font-online-ordering">
-                                {offer.points} {loyaltyRule?.name ?? "points"}{" "}
-                                required
-                              </p> */}
                               <div className="flex items-center gap-2 mb-1">
                                 {offer?.image && (
                                   <div className="w-14 h-14 relative self-start flex-shrink-0">
@@ -458,10 +522,10 @@ const CartOffers = ({
                                   </div>
                                 )}
                                 <div className="flex-1">
-                                  <p className="sm:text-lg text-base font-bold text-gray-900 line-clamp-1 font-online-ordering">
+                                  <p className="sm:text-lg  text-base font-body-oo font-semibold text-gray-900 line-clamp-1 ">
                                     {offer.name}
                                   </p>
-                                  <p className="text-xs text-gray-600 line-clamp-1 font-online-ordering">
+                                  <p className="text-xs text-gray-600 line-clamp-1 font-body-oo  font-normal">
                                     {offer.points}{" "}
                                     {loyaltyRule?.name ?? "points"} required
                                   </p>
@@ -471,14 +535,14 @@ const CartOffers = ({
                                 {(meCustomerData?.loyaltyWallet?.balance ??
                                   0) >= offer.points ? (
                                   <button
-                                    onClick={() => {
+                                    onClick={() =>
                                       handleApplyLoyalty(
                                         offer.points,
-                                        offer.type
-                                      );
-                                    }}
+                                        offer.type,
+                                      )
+                                    }
                                     disabled={applyLoyaltyLoading}
-                                    className={`inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-full bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300`}
+                                    className={`inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300`}
                                   >
                                     {applyLoyaltyLoading ? (
                                       <div className="text-black flex items-center">
@@ -486,7 +550,9 @@ const CartOffers = ({
                                         <p>Applying...</p>
                                       </div>
                                     ) : (
-                                      <p className="text-black">Redeem</p>
+                                      <p className="text-black font-body-oo font-semibold">
+                                        Redeem
+                                      </p>
                                     )}
                                   </button>
                                 ) : (
@@ -520,9 +586,90 @@ const CartOffers = ({
                 </div>
               </Carousel>
             </div>
+
+            <form
+              onSubmit={handleApplyOffer}
+              className="grid grid-cols-12 gap-2 sm:gap-4 w-full"
+            >
+              <div
+                className={`relative transition-all duration-300 ${
+                  isPromoFocused || promoCodeInput.length > 0
+                    ? "col-span-8"
+                    : "col-span-12 md:col-span-8"
+                }`}
+              >
+                <CiDiscount1 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <input
+                  type="text"
+                  value={promoCodeInput}
+                  onFocus={() => setIsPromoFocused(true)}
+                  onBlur={() => setIsPromoFocused(false)}
+                  onChange={(e) => {
+                    const input = e.target.value.toUpperCase();
+                    setPromoCodeInput(input);
+                  }}
+                  placeholder="Enter your promo code"
+                  className="w-full pl-10 pr-2 py-2 sm:py-2 font-body-oo border border-black/30 rounded-md outline-none bg-transparent"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={addPromoLoading || promoCodeInput.length === 0}
+                className={`w-full bg-primary text-white font-body-oo font-semibold px-4 rounded-md h-auto transition duration-200 items-center justify-center col-span-4 disabled:bg-primary/60 ${
+                  !isPromoFocused && promoCodeInput.length === 0
+                    ? "hidden md:flex"
+                    : "flex"
+                }`}
+                style={{
+                  color: isContrastOkay(
+                    Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                    Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                  )
+                    ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                    : Env.NEXT_PUBLIC_TEXT_COLOR,
+                }}
+              >
+                {addPromoLoading ? (
+                  <>
+                    <AiOutlineLoading3Quarters className="animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  "Apply"
+                )}
+              </button>
+            </form>
+            {promoError ? (
+              <p className="text-red-500 text-sm mt-2 col-span-12">
+                {promoError}
+              </p>
+            ) : null}
+            {visiblePromoCodes.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowPromoModal(true)}
+                className="text-sm text-gray-500 underline mt-2 font-body-oo font-medium hover:opacity-80 transition-opacity"
+              >
+                View All Offers
+              </button>
+            )}
           </>
         ) : null}
       </div>
+      {showPromoModal && (
+        <PromoCodesModal
+          onClose={() => setShowPromoModal(false)}
+          onApplied={() => handleSwapSuccess()}
+          promoCodes={visiblePromoCodes}
+          appliedCode={cartDetails?.discountCode}
+          onRemoveExisting={
+            cartDetails?.discountString ? handleSwapStart : undefined
+          }
+          onSwapFailed={
+            cartDetails?.discountCode ? handleSwapFailed : undefined
+          }
+        />
+      )}
     </>
   );
 };

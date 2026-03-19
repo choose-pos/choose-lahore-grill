@@ -10,6 +10,7 @@ query verifyOTPGuestOrder($verify: CustomerDetailsInput!) {
       email
       phone
     }
+    promoCodeMessage
   }
 }
 

@@ -16,14 +16,15 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen font-online-ordering">
-      <h2 className="text-2xl font-bold mb-4">Something went wrong!</h2>
+    <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">
+      {" "}
+      <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
       <button
-        className="px-4 py-2 bg-primary text-white rounded-full"
+        className="px-4 py-2 bg-primary text-white rounded-md"
         style={{
           color: isContrastOkay(
             Env.NEXT_PUBLIC_PRIMARY_COLOR,
-            Env.NEXT_PUBLIC_BACKGROUND_COLOR
+            Env.NEXT_PUBLIC_BACKGROUND_COLOR,
           )
             ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
             : Env.NEXT_PUBLIC_TEXT_COLOR,

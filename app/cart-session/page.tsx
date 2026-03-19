@@ -95,7 +95,7 @@ const InitializeSession = () => {
       } catch (err) {
         extractErrorMessage(err);
         setError(
-          "An unexpected error occurred, please close this tab and try again."
+          "An unexpected error occurred, please close this tab and try again.",
         );
       } finally {
         setLoading(false);
@@ -118,8 +118,9 @@ const InitializeSession = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen font-online-ordering">
-        <h2 className="text-2xl font-bold mb-4">Something went wrong!</h2>
+      <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">
+        {" "}
+        <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
         <button
           style={{
             color: isContrastOkay(
@@ -129,7 +130,7 @@ const InitializeSession = () => {
               ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
               : Env.NEXT_PUBLIC_TEXT_COLOR,
           }}
-          className="px-4 py-2 bg-primary text-white rounded-full"
+          className="px-4 py-2 bg-primary text-white rounded-md"
           onClick={() => window.location.reload()}
         >
           Refresh Page

@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CartBreakdown from "../../cart/_components/CartBreakdown";
 import CartHeader from "../../cart/_components/CartHeader";
-import CartOrderType from "../../cart/_components/CartOrderType";
+import CartRemarks from "../../cart/_components/CartRemarks";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutStripeForm from "./StripeForm";
 
@@ -62,9 +62,9 @@ const CheckoutPage = ({
     setCartData,
     setCartDetails,
     setFreeItemInCart,
-    setFreeItemImage,
     setSpecialRemarks,
     setTotalAmount,
+    setFreeItemImage,
   } = useCartStore();
   const { meCustomerData, setMeCustomerData } = meCustomerStore();
 
@@ -78,6 +78,8 @@ const CheckoutPage = ({
   } | null>(null);
   const [placeOrderError, setPlaceOrderError] = useState<string>();
   const [placeOrderLoading, setPlaceOrderLoading] = useState(false);
+  const [showStickyTotal, setShowStickyTotal] = useState(false);
+  const totalRef = useRef<HTMLDivElement>(null);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   // UseEffects
@@ -142,7 +144,7 @@ const CheckoutPage = ({
 
           // Check if we have a free item
           const freeItemObj = extractFreeDiscountItemDetails(
-            groupedCart.discountString ?? ""
+            groupedCart.discountString ?? "",
           );
 
           setFreeItemInCart(freeItemObj);
@@ -246,6 +248,15 @@ const CheckoutPage = ({
     setAmounts(finalAmts);
   }, [restaurantData, cartDetails, deliveryFee, processingConfig,freeItemInCart]);
 
+    useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyTotal(entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    if (totalRef.current) observer.observe(totalRef.current);
+    return () => observer.disconnect();
+  }, [amounts]);
+
   return (
     <div className="w-full h-full min-h-screen bg-white flex flex-col justify-between items-center mb-1">
       <div className="flex-1 w-full h-full relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-6">
@@ -261,9 +272,10 @@ const CheckoutPage = ({
                   setPlaceOrderError={setPlaceOrderError}
                   amounts={amounts}
                   loyaltyRule={loyaltyRule}
+                  refreshData={() => setStateChange((prev) => !prev)}
                 />
               </div>
-              <hr className="mx-6 my-4 lg:my-6" />
+              <hr className="mx-6 my-5 border-gray-200" />
             </>
           ) : null}
 
@@ -278,7 +290,7 @@ const CheckoutPage = ({
                   variables: {
                     colorPrimary: isContrastOkay(
                       "#ffffff",
-                      Env.NEXT_PUBLIC_PRIMARY_COLOR
+                      Env.NEXT_PUBLIC_PRIMARY_COLOR,
                     )
                       ? Env.NEXT_PUBLIC_PRIMARY_COLOR
                       : "#000000",
@@ -306,27 +318,32 @@ const CheckoutPage = ({
         <div className="lg:block hidden col-span-1"></div>
 
         {/* Right Side */}
-        <div className="col-span-1 lg:col-span-5 w-full lg:rounded-xl lg:border">
+        <div className="col-span-1 lg:col-span-5 w-full">
           <br className="hidden lg:block" />
 
-          <CartOrderType />
-          <hr className="mx-6 my-4 lg:my-6" />
-
           <CheckoutOrderSummary />
-          <hr className="mx-6 my-4 lg:my-6" />
+          <hr className="mx-6 my-5 border-gray-200" />
 
           <p
             ref={errorRef}
-            className={`mt-2 mb-4 p-3 mx-6 bg-red-100 text-red-700 rounded ${
+            className={`mt-2 mb-4 p-3 mx-6 bg-red-100 text-red-700 rounded font-body-oo ${
               (placeOrderError ?? "").length > 0 ? "block" : "hidden"
             }`}
           >
             {placeOrderError}
           </p>
 
-          <CartBreakdown amounts={amounts} loyaltyRule={loyaltyRule} />
-          <div className="mb-12 lg:hidden" />
-          <div className="px-6 w-full my-2 hidden lg:block">
+          <CartRemarks />
+          <hr className="mx-6 my-5 border-gray-200" />
+          <div ref={totalRef}>
+            <CartBreakdown amounts={amounts} loyaltyRule={loyaltyRule} />
+          </div>
+          <div className="px-6 w-full my-2">
+            <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
+              You&apos;re saving up to $
+              {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by ordering
+              directly instead of third-party delivery apps
+            </p>
             <button
               onClick={() => {
                 if (stripeFormRef.current) {
@@ -339,11 +356,11 @@ const CheckoutPage = ({
               disabled={
                 placeOrderLoading || (!meCustomerData && !isOtpVerified)
               }
-              className="w-full bg-primary mt-2 py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
+              className="w-full bg-primary mt-2 py-2 rounded-md hover:bg-opacity-90 transition-all duration-200 font-subheading-oo font-bold disabled:opacity-50"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                 )
                   ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                   : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -355,28 +372,54 @@ const CheckoutPage = ({
           <br />
         </div>
 
-        {/* Floating Button */}
-        <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t">
-          <button
-            onClick={() => {
-              if (stripeFormRef.current) {
-                stripeFormRef.current.click();
+        {/* Floating Button - hidden when actual total is in view */}
+        {!showStickyTotal && (
+          <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t z-20">
+            {(() => {
+              const orderTotal =
+                (amounts?.subTotalAmt ?? 0) -
+                (amounts?.discAmt ?? 0) +
+                (amounts?.taxAmt ?? 0) +
+                (amounts?.tipAmt ?? 0) +
+                (amounts?.platformFeeAmt ?? 0) +
+                (amounts?.deliveryFeeAmt ?? 0);
+              return (
+                <>
+                  <div className="flex justify-between items-center mb-1 font-subheading-oo font-semibold">
+                    <span className="text-base ">Order Total</span>
+                    <span className="text-base ">${orderTotal.toFixed(2)}</span>
+                  </div>
+                  <p className="text-sm text-green-700 font-semibold font-subheading-oo mb-3">
+                    You&apos;re saving up to $
+                    {((amounts?.subTotalAmt ?? 0) * 0.25).toFixed(2)} by
+                    ordering directly instead of third-party delivery apps
+                  </p>
+                </>
+              );
+            })()}
+            <button
+              onClick={() => {
+                if (stripeFormRef.current) {
+                  stripeFormRef.current.click();
+                }
+              }}
+              disabled={
+                placeOrderLoading || (!meCustomerData && !isOtpVerified)
               }
-            }}
-            disabled={placeOrderLoading || (!meCustomerData && !isOtpVerified)}
-            className="w-full bg-primary py-2 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 font-online-ordering disabled:opacity-50"
-            style={{
-              color: isContrastOkay(
-                Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                Env.NEXT_PUBLIC_BACKGROUND_COLOR
-              )
-                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                : Env.NEXT_PUBLIC_TEXT_COLOR,
-            }}
-          >
-            {placeOrderLoading ? "Processing..." : "Place Order"}
-          </button>
-        </div>
+              className="w-full bg-primary py-2 rounded-md font-medium hover:bg-opacity-90 transition-all duration-200 font-subheading-oo disabled:opacity-50"
+              style={{
+                color: isContrastOkay(
+                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                )
+                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  : Env.NEXT_PUBLIC_TEXT_COLOR,
+              }}
+            >
+              {placeOrderLoading ? "Processing..." : "Place Order"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

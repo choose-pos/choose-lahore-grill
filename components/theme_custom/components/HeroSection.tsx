@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FaLocationDot } from "react-icons/fa6";
 
 interface IBanner {
@@ -49,6 +50,13 @@ const Banner: React.FC<IBanner> = ({
   subtilte,
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const searchParams = useSearchParams();
+
+  const buildMenuHref = (type: "delivery" | "pickup") => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("type", type);
+    return `/menu?${params.toString()}`;
+  };
 
   const slides = [
     { desktop: heroBannerDesktop, mobile: heroBannerMobile, title },
@@ -158,7 +166,7 @@ const Banner: React.FC<IBanner> = ({
             <div className="flex items-start justify-start space-x-2 md:space-x-4">
               <Link
                 // target="_blank"
-                href={`/menu`}
+                href={buildMenuHref("delivery")}
                 aria-label="Lahore Link"
               >
                 <button
@@ -168,7 +176,8 @@ const Banner: React.FC<IBanner> = ({
                   Delivery
                 </button>
               </Link>
-              <Link aria-label="Order Link" href={`/menu`}>
+              <Link aria-label="Order Link" 
+                href={buildMenuHref("pickup")}>
                 <button
                   aria-label="Order Now"
                   className="mt-4 px-8 py-3 tracking-wide text-sm xsm:text-lg md:text-xl font-medium font-primary border-2 text-bg3 bg-primaryColor rounded-[15px] shadow-xl"

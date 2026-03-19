@@ -6,6 +6,9 @@
   --primary-font: var(--font-primary);
   --secondary-font: var(--font-secondary);
   --font-online-ordering: var(--font-online-ordering);
+  --font-heading-oo: var(--font-heading);
+  --font-subheading-oo: var(--font-subheading);
+  --font-body-oo: var(--font-body);
 }
 
 * {
@@ -173,4 +176,19 @@ body {
 
 .animate-scroll {
   animation: scroll 20s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 4s infinite ease-in-out;
 }

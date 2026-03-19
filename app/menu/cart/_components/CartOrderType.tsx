@@ -16,7 +16,7 @@ const CartOrderType = () => {
   if (cartDetails.orderType === OrderType.Pickup) {
     return (
       <div className="w-full px-6">
-        <p className="font-online-ordering font-semibold text-xl">
+        <p className="font-online-ordering font-medium text-xl">
           Pickup Details
         </p>
 

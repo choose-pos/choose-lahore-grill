@@ -10,6 +10,7 @@ import { IoMdClose } from "react-icons/io";
 import ContactNav from "./ContactNav";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import Button from "@/components/common/Button";
 
 interface INavProps {
   logo?: string;
@@ -37,6 +38,7 @@ const Navbar: React.FC<INavProps> = ({
   const [isButtonVisible, setIsButtonVisible] = useState<boolean>(false);
   const observerTargetRef = useRef<HTMLDivElement>(null);
   const { setNavData } = NavDataStore();
+  const [showBottomButton, setShowBottomButton] = useState(false);
 
   const [isAtTop, setIsAtTop] = useState(true);
 
@@ -55,6 +57,26 @@ const Navbar: React.FC<INavProps> = ({
 
     // Cleanup
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      // Show bottom button if we have scrolled past 400px (approx height of mobile hero section)
+      if (window.scrollY > 400) {
+        setShowBottomButton(true);
+      } else {
+        setShowBottomButton(false);
+      }
+    };
+
+    // Initial check
+    handleWindowScroll();
+
+    window.addEventListener("scroll", handleWindowScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleWindowScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -80,16 +102,16 @@ const Navbar: React.FC<INavProps> = ({
   }, [pathname]);
 
   // Prevent scrolling when sidebar is open
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     document.body.style.overflow = "hidden";
-  //   } else {
-  //     document.body.style.overflow = "unset";
-  //   }
-  //   return () => {
-  //     document.body.style.overflow = "unset";
-  //   };
-  // }, [isOpen]);
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     setNavData(navItems);
@@ -278,7 +300,7 @@ const Navbar: React.FC<INavProps> = ({
 
           {/* Menu Button and Order Now grouped together */}
           <div className="flex items-center gap-4">
-            <Link href="/menu" aria-label="Order Now Link">
+            {/* <Link href="/menu" aria-label="Order Now Link">
               <button
                 aria-label="Order Now"
                 className={`md:px-6 px-4 py-1.5 md:py-2 text-base md:text-lg md:h-12 md:w-[180px] text-[20px] bg-primaryColor font-rubik font-medium  border rounded-[10px] text-white transition-opacity duration-500 ${
@@ -288,7 +310,7 @@ const Navbar: React.FC<INavProps> = ({
               >
                 ORDER NOW
               </button>
-            </Link>
+            </Link> */}
             <div
               className="text-3xl cursor-pointer z-50 block lg:hidden"
               onClick={toggleMenu}
@@ -318,7 +340,7 @@ const Navbar: React.FC<INavProps> = ({
           <IoMdClose color="white" onClick={toggleMenu} />
         </div>
 
-        <div className="flex flex-col h-full pt-24 overflow-y-auto">
+        <div className="flex flex-col h-full pt-24 overflow-y-auto pb-16">
           <ul className="flex flex-col text-xl text-gray-300">
             {navItems.map((item, index) => (
               <li
@@ -392,6 +414,11 @@ const Navbar: React.FC<INavProps> = ({
         </div>
       </div>
       <div ref={observerTargetRef} style={{ height: "1px" }} />
+       {(showBottomButton || isOpen) && (
+        <div className="fixed bottom-0 left-0 right-0 z-[60] lg:hidden bg-white px-4 py-3">
+          <Button text="Order Now" url="/menu" fullWidth={true} />
+        </div>
+      )}
     </>
   );
 };

@@ -46,9 +46,8 @@ export default async function NotFound() {
   } = restaurantData.getCmsRestaurantDetails;
 
   return (
-
-        <div
-      className="min-h-screen font-online-ordering"
+    <div
+      className="min-h-screen font-subheading-oo "
       style={{
         backgroundColor: Env.NEXT_PUBLIC_BACKGROUND_COLOR,
         color: Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -56,24 +55,24 @@ export default async function NotFound() {
     >
       <Navbar navItems={[]} logo={brandingLogo ?? ""} offerNavTitles={[]} email={email} phone={phone} />
 
-    <div className="min-h-[85vh] mt-16 flex items-center justify-center  px-6 font-online-ordering bg-bg2 text-subtext">
+    <div className="min-h-[85vh] mt-16 flex items-center justify-center  px-6 font-subheading-oo  bg-bg2 text-subtext">
       <div className="max-w-md w-full text-center ">
         {/* 404 Number */}
         <div className="mb-8">
-          <h1 className="text-8xl md:text-9xl font-bold font-online-ordering text-primaryColor">
+          <h1 className="text-8xl md:text-9xl font-medium font-subheading-oo  text-primaryColor">
             404
           </h1>
         </div>
 
         {/* Error Message */}
         <div className="mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 font-online-ordering">
+          <h2 className="text-2xl md:text-3xl font-medium mb-4 font-subheading-oo ">
             Page Not Found
           </h2>
-          <p className="text-lg mb-2 font-online-ordering opacity-80">
+          <p className="text-lg mb-2 font-subheading-oo  opacity-95">
             Oops! The page you&apos;re looking for doesn&apos;t exist.
           </p>
-          <p className="text-base font-online-ordering opacity-60">
+          <p className="text-base font-subheading-oo  opacity-80">
             It might have been moved, deleted, or you entered the wrong URL.
           </p>
         </div>
@@ -81,7 +80,7 @@ export default async function NotFound() {
         {/* Action Buttons */}
         <div className="flex flex-row gap-4 justify-center">
           <Link href="/">
-            <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-full transition-all duration-200 font-online-ordering font-medium bg-primaryColor text-bg2 hover:opacity-90">
+            <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-md transition-all duration-200 font-subheading-oo  font-medium bg-primaryColor text-bg2 hover:opacity-90">
               <FiHome size={20} />
               Back to Home
             </button>

@@ -3,7 +3,7 @@ import InActive from "../../assets/InActive.png";
 
 const InActiveMenu = () => {
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-4 font-online-ordering">
+    <div className="min-h-[85vh] flex items-center justify-center p-4 font-subheading-oo ">
       <div className="rounded-lg  p-8 text-center flex flex-col items-center justify-center">
         <div className="mb-6 max-w-28 max-h-28 flex items-center justify-center">
           <Image

@@ -5,7 +5,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { Env } from "@/env";
-import { LoyaltyRedeemType } from "@/generated/graphql";
+import { LoyaltyRedeemType, OrderType} from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import meCustomerStore from "@/store/meCustomer";
 import { useSidebarStore } from "@/store/sidebar";
@@ -20,6 +20,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useModalStore } from "@/store/global";
+
 
 interface ICartOffersProps {
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
@@ -32,6 +34,7 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
   const { cartDetails, setCartDetails } = useCartStore();
   const router = useRouter();
   const { meCustomerData } = meCustomerStore();
+  const { setShowMenu, setClickState } = useModalStore();
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [loyaltyRewards, setLoyaltyRewards] = useState<
@@ -120,18 +123,40 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
     }
   }, [loyaltyOffers]);
 
+  const isOrderTypeAndScheduleSet = (): boolean => {
+    if (!cartDetails?.orderType) return false;
+
+    const scheduleTime =
+      cartDetails.orderType === OrderType.Pickup
+        ? cartDetails.pickUpDateAndTime
+        : cartDetails.deliveryDateAndTime;
+
+    if (!scheduleTime) return false;
+
+    // Check if schedule time has expired
+    const d = new Date(scheduleTime);
+    if (new Date() > d) return false;
+
+    return true;
+  };
+
   const handleApplyLoyalty = async (
     points: number,
     type: LoyaltyRedeemType
   ) => {
+    if (!isOrderTypeAndScheduleSet()) {
+      setClickState({ type: "loyalty", points, redeemType: type });
+      setShowMenu(false);
+      return;
+    }
     setLoyaltyError(undefined);
     setLoadingOffers((prev) => ({ ...prev, [points]: true }));
 
     try {
-      const res = await fetchWithAuth(() =>
+       const res = await fetchWithAuth(() =>
         sdk.validateLoyaltyRedemptionOnCart({
           input: { loyaltyPointsRedeemed: points, redeemType: type },
-        })
+        }),
       );
 
       if (res.validateLoyaltyRedemptionOnCart) {
@@ -158,10 +183,11 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
   }
 
   return (
-    <div className="font-online-ordering z-40">
+    <div className="z-40">
       {loyaltyOffers && loyaltyRewards.length > 0 && (
         <>
-          <h2 className="text-xl sm:text-3xl font-bold mb-4 font-online-ordering">
+          <h2 className="text-xl sm:text-xl font-semibold mb-4 font-subheading-oo">
+            {" "}
             Loyalty Offers
           </h2>
           <div className="my-2">
@@ -178,15 +204,15 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
               <CarouselContent className="-ml-4">
                 {slides.map((slide, slideIndex) => (
                   <CarouselItem key={slideIndex} className="pl-4 basis-full">
-                    <div className="flex gap-4 h-full">
+                    <div className="flex gap-4 items-stretch">
                       {slide.map((offer, index) => (
                         <div
                           key={index}
-                          className={`w-full ${
+                          className={`flex flex-col w-full ${
                             itemsPerSlide === 3 ? "md:w-1/3" : ""
                           }`}
                         >
-                          <div className="bg-white border transition-all duration-300 w-full h-28 md:h-32 shrink-0 rounded-[20px]">
+                          <div className="bg-white border transition-all duration-300 w-full flex-1 shrink-0 rounded-md">
                             <div className="p-3 md:p-4 h-full flex flex-col justify-center">
                               <div className="flex items-start justify-between">
                                 <div className="flex-grow pr-2">
@@ -202,10 +228,12 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                       </div>
                                     )}
                                     <div className="flex-1">
-                                      <p className="sm:text-lg text-base font-bold text-gray-900 line-clamp-1 font-online-ordering">
+                                      <p className="sm:text-lg text-base font-semibold text-gray-900 line-clamp-1 font-subheading-oo">
+                                        {" "}
                                         {offer.name}
                                       </p>
-                                      <p className="text-xs text-gray-600 line-clamp-1 font-online-ordering">
+                                      <p className="text-xs text-gray-600 line-clamp-1 font-body-oo font-normal">
+                                        {" "}
                                         {offer.points}{" "}
                                         {loyaltyRule?.name ?? "points"} required
                                       </p>
@@ -218,11 +246,11 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                         onClick={() => {
                                           handleApplyLoyalty(
                                             offer.points,
-                                            offer.type
+                                            offer.type,
                                           );
                                         }}
                                         disabled={loadingOffers[offer.points]}
-                                        className={`inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-full bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300`}
+                                        className={`inline-flex items-center px-3 py-1.5 text-sm font-semibold font-subheading-oo transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300`}
                                       >
                                         {loadingOffers[offer.points] ? (
                                           <div className="text-black flex items-center">
@@ -230,7 +258,7 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                             {isRewardApplied(
                                               offer.points,
                                               offer.type,
-                                              cartDetails
+                                              cartDetails,
                                             ) ? (
                                               <p>Loading...</p>
                                             ) : (
@@ -240,7 +268,7 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                         ) : isRewardApplied(
                                             offer.points,
                                             offer.type,
-                                            cartDetails
+                                            cartDetails,
                                           ) ? (
                                           <Link href={"/menu/cart"}>
                                             <p className="text-black">

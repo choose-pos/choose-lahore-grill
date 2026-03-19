@@ -289,15 +289,15 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
   };
 
   return (
-    <div className="w-full font-online-ordering sm:px-8 px-4 py-4 bg-white">
-      <h3 className="text-xl sm:text-2xl font-semibold font-online-ordering pb-5">
+    <div className="w-full font-subheading-oo sm:px-8 px-4 py-4 bg-white">
+      <h3 className="text-xl sm:text-2xl font-semibold font-subheading-oo pb-5">
         Goes well with
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-1 sm:gap-4 gap-2">
         {upsellItem.map((item) => (
           <div
             key={item.itemId}
-            className="flex items-center sm:gap-4 gap-2 border-[1px] rounded-[10px] border-gray-200 shadow-md"
+            className="flex items-center sm:gap-4 gap-2 border-b-[1px] last:border-b-0 border-gray-200 py-3"
           >
             {item.image && (
               <div className="relative w-[84px] h-full sm:w-24  flex-shrink-0">
@@ -306,7 +306,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                   alt={item.name}
                   fill
                   // className="object-cover rounded-l-[10px]"
-                  className={`object-cover object-center w-full h-full rounded-l-[10px]`}
+                  className={`object-cover object-center w-full h-full rounded-[10px]`}
                 />
               </div>
             )}
@@ -315,10 +315,10 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                 <div className="flex flex-col flex-grow p-3 w-full">
                   <div className="flex-grow mb-2">
                     <div className="flex items-center justify-between w-full">
-                      <h3 className="font-bold text-lg line-clamp-1">
+                      <h3 className="font-bold text-lg line-clamp-1 font-subheading-oo">
                         {item.name}
                       </h3>
-                      <h2 className="text-xl font-online-ordering sm:px-4 px-2 font-semibold">
+                      <h2 className="text-xl font-subheading-oo sm:px-4 px-2 font-semibold">
                         $
                         {(item.price * (quantities[item.itemId] || 1)).toFixed(
                           2
@@ -326,7 +326,9 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                       </h2>
                     </div>
                     {item.desc && (
-                      <p className="text-sm line-clamp-1 mt-1">{item.desc}</p>
+                      <p className="text-sm line-clamp-1 mt-1 font-body-oo">
+                        {item.desc}
+                      </p>
                     )}
                   </div>
                   <div className="flex items-center justify-between w-full">
@@ -351,7 +353,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                       <button
                         onClick={() => handleAddToCart(item.itemId, item.name)}
                         disabled={loadingItems[item.itemId]}
-                        className="font-medium min-w-[100px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-full"
+                        className="font-medium min-w-[100px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-md"
                       >
                         {loadingItems[item.itemId] ? (
                           <Loader2 size={16} className="animate-spin mx-auto" />
@@ -375,7 +377,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
                       <button
                         onClick={() => handleDelete(item.itemId)}
                         disabled={loadingItems[item.itemId]}
-                        className="font-medium min-w-[120px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-full"
+                        className="font-medium min-w-[120px] text-center transition-colors duration-200 border-primary border-[1px] px-4 py-1 rounded-md"
                       >
                         {loadingItems[item.itemId] ? (
                           <Loader2 size={16} className="animate-spin mx-auto" />

@@ -4,7 +4,7 @@ import { OrderTypeData } from "@/store/orderType";
 import RestaurantStore from "@/store/restaurant";
 import { convertToRestoTimezone } from "@/utils/formattedTime";
 import { FetchCartDetails } from "@/utils/types";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface OrderOptionsProps {
@@ -31,7 +31,8 @@ const OrderOptions: React.FC<OrderOptionsProps> = ({
   const [deliveryStatus, setDeliveryStatus] = useState<StatusResult | null>(
     null
   );
-  const { setTempOrderType } = OrderTypeData();
+  const { setTempOrderType, pendingOrderType, setPendingOrderType } =
+    OrderTypeData();
   const { cartDetails, setCartDetails } = useCartStore();
   const { restaurantData } = RestaurantStore();
 
@@ -43,14 +44,24 @@ const OrderOptions: React.FC<OrderOptionsProps> = ({
 
   const handleDeliveryClick = () => {
     if (isDelivery) {
-      setTempOrderType(OrderType.Delivery);
+        if (pendingOrderType) {
+        setTempOrderType(pendingOrderType);
+        setPendingOrderType(null);
+      } else {
+        setTempOrderType(OrderType.Delivery);
+      }
       setShowMenu(false);
     }
   };
 
   const handlePickupClick = () => {
     if (isPickUp) {
-      setTempOrderType(OrderType.Pickup);
+      if (pendingOrderType) {
+        setTempOrderType(pendingOrderType);
+        setPendingOrderType(null);
+      } else {
+        setTempOrderType(OrderType.Pickup);
+      }
       setShowMenu(false);
     }
   };
@@ -111,64 +122,84 @@ const OrderOptions: React.FC<OrderOptionsProps> = ({
   if (!cartDetails?.orderType) return null;
 
   return (
-    <div className="border-[1px] border-gray-200 rounded-full font-online-ordering">
-      {/* Desktop Layout */}
-
-      <div className="space-y-4">
-        {cartDetails.orderType === OrderType.Pickup && (
+    <div className="w-full font-subheading-oo overflow-x-hidden mt-2 mb-1">
+      <div className="flex flex-row items-stretch gap-1 w-full">
+        {/* Toggle */}
+        <div className="flex bg-gray-100 p-1 rounded-md flex-shrink-0">
           <div
             onClick={handlePickupClick}
-            className={`flex flex-col py-2 px-4 rounded-full w-full cursor-pointer ${pickupStatus?.className}`}
+            className={`px-2 sm:px-3 py-2 rounded-md text-sm font-semibold font-subheading-oo transition-colors flex items-center ${
+              cartDetails.orderType === OrderType.Pickup
+                ? "bg-white shadow-sm text-black"
+                : "text-gray-500 hover:text-gray-700 cursor-pointer"
+            } ${!isPickUp ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            <div className="flex items-center">
-              <div className="flex items-center space-x-2">
-                {/* <FaBoxArchive size={14} /> */}
-                <p className="font-semibold text-base md:text-lg font-online-ordering">
-                  Pickup
-                </p>
-                <div> | </div>
-                <div className=" text-sm">
-                  {!isPickUp ? (
-                    <p className="text-red-500 text-sm md:text-lg">
-                      {pickupStatus?.message}
-                    </p>
-                  ) : (
-                    <p className="text-sm md:text-lg">
-                      {pickupStatus?.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {!isCart && <ChevronDown className="h-5 w-5 ml-2" />}
-            </div>
+            Pickup
           </div>
-        )}
-
-        {cartDetails.orderType === OrderType.Delivery && (
           <div
             onClick={handleDeliveryClick}
-            className={`flex flex-col py-2 px-4 rounded-full w-full cursor-pointer ${deliveryStatus?.className}`}
+            className={`px-2 sm:px-3 py-2 rounded-md text-sm font-semibold font-subheading-oo transition-colors flex items-center ${
+              cartDetails.orderType === OrderType.Delivery
+                ? "bg-white shadow-sm text-black"
+                : "text-gray-500 hover:text-gray-700 cursor-pointer"
+            } ${!isDelivery ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            <div className="flex items-center ">
-              <div className="flex items-center space-x-2 font-online-ordering">
-                {/* <CiDeliveryTruck size={24} /> */}
-                <p className="font-semibold text-base md:text-lg">Delivery</p>
-                <div> | </div>
-                <div className="text-sm">
-                  {!isDelivery ? (
-                    <p className="text-red-500">{deliveryStatus?.message}</p>
-                  ) : (
-                    <p className="text-sm md:text-lg">
-                      {deliveryStatus?.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              {!isCart && <ChevronDown className="h-5 w-5 ml-2" />}
-            </div>
+            Delivery
           </div>
-        )}
+        </div>
+
+        {/* Time Box */}
+        <div className="flex-1 min-w-0 font-body-oo">
+          {cartDetails.orderType === OrderType.Pickup && (
+            <div
+              onClick={handlePickupClick}
+              className={`flex items-center justify-between border border-gray-200 bg-white rounded-md px-2 sm:px-3 py-2 transition-colors h-full ${
+                !isPickUp
+                  ? "opacity-60 cursor-not-allowed bg-gray-50"
+                  : "cursor-pointer hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center space-x-1 sm:space-x-2 text-black min-w-0">
+                <Clock className="h-4 w-4 flex-shrink-0 text-gray-700" />
+                <span
+                  className={`text-sm font-medium truncate ${
+                    !isPickUp ? "text-red-500" : "text-black"
+                  }`}
+                >
+                  {pickupStatus?.message}
+                </span>
+              </div>
+              {!isCart && (
+                <ChevronDown className="h-4 w-4 text-gray-500 flex-shrink-0 ml-1" />
+              )}
+            </div>
+          )}
+
+          {cartDetails.orderType === OrderType.Delivery && (
+            <div
+              onClick={handleDeliveryClick}
+              className={`flex items-center justify-between border border-gray-200 bg-white rounded-md px-2 sm:px-3 py-2 transition-colors h-full ${
+                !isDelivery
+                  ? "opacity-60 cursor-not-allowed bg-gray-50"
+                  : "cursor-pointer hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center space-x-1 sm:space-x-2 text-black min-w-0">
+                <Clock className="h-4 w-4 flex-shrink-0 text-gray-700" />
+                <span
+                  className={`text-sm font-medium truncate ${
+                    !isDelivery ? "text-red-500" : "text-black"
+                  }`}
+                >
+                  {deliveryStatus?.message}
+                </span>
+              </div>
+              {!isCart && (
+                <ChevronDown className="h-4 w-4 text-gray-500 flex-shrink-0 ml-1" />
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

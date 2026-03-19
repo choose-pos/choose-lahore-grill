@@ -200,7 +200,10 @@ const PaymentStatusPage = () => {
           setError("Payment is failed, please try again later.");
         }
       } catch (error) {
-        setError("Failed to fetch orders. Please try again later.");
+        setToastData({
+          message: extractErrorMessage(error),
+          type: "error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -211,7 +214,7 @@ const PaymentStatusPage = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center font-online-ordering">
+      <div className="w-full min-h-screen flex flex-col items-center justify-center font-body-oo">
         <span className="mb-2">Please wait...</span>
         <LoadingDots />
       </div>
@@ -310,11 +313,11 @@ const PaymentStatusPage = () => {
 
   return (
     <div className="flex items-center justify-center z-50 min-h-screen mx-2">
-      <div className="bg-white p-8 my-5 rounded-lg shadow-lg w-full max-w-2xl relative overflow-y-scroll">
+      <div className="bg-white p-8 my-5 rounded-md shadow-lg w-full max-w-2xl relative overflow-y-scroll">
         <Link href={"/menu"}>
           <div className="flex items-center text-gray-500 hover:text-black cursor-pointer mb-6 ">
             <IoMdArrowBack size={16} />
-            <p className="ml-2 text-base sm:text-lg font-online-ordering">
+            <p className="ml-2 text-base sm:text-lg font-subheading-oo">
               Back to Menu
             </p>
           </div>
@@ -324,9 +327,9 @@ const PaymentStatusPage = () => {
             <FaSpinner className="animate-spin text-3xl text-gray-600" />
           </div>
         ) : selectedOrder ? (
-          <div className="font-online-ordering text-sm">
+          <div className="font-body-oo text-sm">
             <div className="text-center mb-4">
-              <h3 className="text-xl md:text-2xl font-bold">
+              <h3 className="text-xl md:text-2xl font-subheading-oo font-semibold">
                 {selectedOrder.restaurantInfo.name}
               </h3>
               <p className="text-sm text-gray-700">
@@ -618,13 +621,13 @@ const PaymentStatusPage = () => {
 
             <div className="mt-6 text-center text-gray-500 text-xs">
               <div className="mt-6 text-center">
-                <p className="text-gray-500 text-xs mb-6">
+                <p className="text-gray-500 text-xs mb-6 font-body-oo">
                   Thank you for your order!
                 </p>
 
                 {/* Feedback Section */}
                 <div className="border-t pt-6">
-                  <h4 className="font-bold mb-4 text-lg font-online-ordering">
+                  <h4 className="font-bold pt-2 mb-4 text-lg font-subheading-oo">
                     How was your ordering experience?
                   </h4>
 
@@ -656,7 +659,7 @@ const PaymentStatusPage = () => {
                   </div>
 
                   {/* Rating Message */}
-                  <p className="text-sm text-gray-600 mb-4 min-h-[20px] font-online-ordering">
+                  <p className="text-sm text-gray-600 mb-4 min-h-[20px] font-body-oo">
                     {getRatingMessage(hoveredRating || rating)}
                   </p>
 
@@ -664,7 +667,7 @@ const PaymentStatusPage = () => {
                   <div className="text-left">
                     <label
                       htmlFor="feedback-remark"
-                      className="mb-2 block font-semibold font-online-ordering text-base"
+                      className="mb-2 block font-semibold font-body-oo text-base"
                     >
                       Your Feedback
                     </label>
@@ -674,9 +677,9 @@ const PaymentStatusPage = () => {
                       onChange={(e) => setFeedbackRemark(e.target.value)}
                       maxLength={150}
                       placeholder="Share your experience with us..."
-                      className="w-full p-2 border rounded-[20px] font-online-ordering focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
+                      className="w-full p-2 border rounded-md font-subheading-oo focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
                     />
-                    <p className="text-sm mt-1 text-right font-online-ordering">
+                    <p className="text-sm mt-1 text-right font-body-oo">
                       {feedbackRemark.length}/150 characters
                     </p>
                   </div>
@@ -686,12 +689,12 @@ const PaymentStatusPage = () => {
                     <button
                       onClick={handleSubmitFeedback}
                       disabled={rating === 0}
-                      className={`inline-block mt-4 px-8 py-2 text-lg sm:text-xl font-medium font-online-ordering rounded-full transition-all duration-200 ${
+                      className={`inline-block mt-4 px-8 py-2 text-lg sm:text-xl font-medium font-subheading-oo rounded-md transition-all duration-200 ${
                         rating === 0
                           ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                           : isContrastOkay(
                                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                                Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                               )
                             ? `bg-primaryColor text-background hover:opacity-90`
                             : `bg-primaryColor text-textColor hover:opacity-90`

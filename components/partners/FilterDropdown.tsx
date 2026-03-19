@@ -68,7 +68,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
       <div className="flex items-center space-x-2">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 ${
+          className={`flex items-center space-x-2 px-3 py-2 rounded-md border border-gray-300 transition-all duration-200 ${
             selectedCategories && selectedCategories?.length > 0
               ? `w-auto`
               : `w-full`
@@ -76,14 +76,14 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
           type="button"
         >
           <FiFilter className="text-gray-600" />
-          <span className="font-medium font-online-ordering">Filter</span>
+          <span className="font-medium font-subheading-oo">Filter</span>{" "}
           {selectedCategories && selectedCategories.length > 0 && (
             <span
               className="ml-2 bg-primary text-white text-xs px-2 py-0.5 rounded-full"
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                 )
                   ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                   : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -109,7 +109,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-gray-900 font-online-ordering">
+                <h3 className="font-medium text-gray-900 font-subheading-oo">
                 Filters
               </h3>
               <button
@@ -138,7 +138,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                       accent-primary
                       "
                     />
-                    <span className="ml-3 text-gray-700 font-medium transition-colors">
+                    <span className="ml-3 text-gray-700 font-medium transition-colors font-body-oo">
                       {option.label}
                     </span>
                   </div>

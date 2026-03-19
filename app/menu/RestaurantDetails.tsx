@@ -40,6 +40,7 @@ import { HiMenu } from "react-icons/hi";
 import { MdMenuBook } from "react-icons/md";
 import Loading from "./loading";
 import RecentOrders from "@/components/partners/RecentOrders";
+import { OrderTypeData } from "@/store/orderType";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
@@ -72,10 +73,8 @@ RestaurantDetailsProps) {
     ItemOptionsEnum[] | null
   >(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
   const [categoryType, setCategoryType] = useState<ItemOptionsEnum[] | null>(
-    null
+    null,
   );
   const [showFilter, setShowFilter] = useState<boolean>(false);
   const { setRestaurantData } = RestaurantStore();
@@ -94,9 +93,8 @@ RestaurantDetailsProps) {
   const [showButton, setShowButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const { setSignInOpen, setIsSignUpOpen } = useSidebarStore();
-
-  const [isSticky, setIsSticky] = useState(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
   // const IntialCategory = categories;
 
   const isDelivery = restaurant.deliveryConfig.provideDelivery;
@@ -105,16 +103,18 @@ RestaurantDetailsProps) {
 
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const mobileCategoryBarRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
   const searchInputRef = useRef<HTMLInputElement>(null);
-
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isSticky, setIsSticky] = useState(false);
+  const { setSignInOpen, setIsSignUpOpen } = useSidebarStore();
+  const { setTempOrderType, tempOrderType, setPendingOrderType } =
+    OrderTypeData();
   const toggleFilter = () => {
     setShowFilter(!showFilter);
   };
-
-  const filterRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const filterRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
@@ -137,7 +137,7 @@ RestaurantDetailsProps) {
         "",
         `${window.location.pathname}${
           newSearchParams.toString() ? "?" + newSearchParams.toString() : ""
-        }`
+        }`,
       );
     }
   }, [searchParams]);
@@ -163,6 +163,26 @@ RestaurantDetailsProps) {
       setIsSignUpOpen(true);
     }
   }, [isLoggedIn, searchParams]);
+
+  useEffect(() => {
+    const type = searchParams.get("type");
+    if (!type) return;
+
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.delete("type");
+    const queryString = newSearchParams.toString();
+    const cleanUrl = `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+
+    if (type === "delivery") {
+      setPendingOrderType(OrderType.Delivery);
+      setTempOrderType(OrderType.Delivery);
+    } else if (type === "pickup") {
+      setPendingOrderType(OrderType.Pickup);
+      setTempOrderType(OrderType.Pickup);
+    }
+
+    window.history.replaceState(null, "", cleanUrl);
+  }, [searchParams]);
 
   // Fetching cart count and cart details
   useEffect(() => {
@@ -199,7 +219,7 @@ RestaurantDetailsProps) {
         if (groupedCart) {
           // Check if we have a free item
           const currentFreeItem = extractFreeDiscountItemDetails(
-            groupedCart.discountString ?? ""
+            groupedCart.discountString ?? "",
           );
 
           // Set cart count including free item if it exists
@@ -304,7 +324,7 @@ RestaurantDetailsProps) {
 
       if (prevCategories.includes(option)) {
         const updatedCategories = prevCategories.filter(
-          (category) => category !== option
+          (category) => category !== option,
         );
         setCategoryType(updatedCategories.length ? updatedCategories : null);
         return updatedCategories.length ? updatedCategories : null;
@@ -390,7 +410,7 @@ RestaurantDetailsProps) {
     let categoriesVisited = new Set<string>();
     if (typeof window !== "undefined") {
       categoriesVisited = new Set(
-        JSON.parse(sessionStorage.getItem("categoriesVisited") || "[]")
+        JSON.parse(sessionStorage.getItem("categoriesVisited") || "[]"),
       );
     }
 
@@ -403,13 +423,13 @@ RestaurantDetailsProps) {
     const observerCallback: IntersectionObserverCallback = (entries) => {
       // Find the first intersecting entry with the highest intersection ratio
       const intersectingEntries = entries.filter(
-        (entry) => entry.isIntersecting
+        (entry) => entry.isIntersecting,
       );
 
       if (intersectingEntries.length > 0) {
         // Sort by intersection ratio (highest first)
         intersectingEntries.sort(
-          (a, b) => b.intersectionRatio - a.intersectionRatio
+          (a, b) => b.intersectionRatio - a.intersectionRatio,
         );
         const entry = intersectingEntries[0];
 
@@ -422,7 +442,7 @@ RestaurantDetailsProps) {
             categoriesVisited.add(categoryId);
             sessionStorage.setItem(
               "categoriesVisited",
-              JSON.stringify([...categoriesVisited])
+              JSON.stringify([...categoriesVisited]),
             );
 
             const userHash = getOrCreateUserHash();
@@ -450,9 +470,9 @@ RestaurantDetailsProps) {
               // Re-check if mobileCategoryBarRef is still valid after timeout
               if (mobileCategoryBarRef.current) {
                 const categoryButton = Array.from(
-                  mobileCategoryBarRef.current.querySelectorAll("button")
+                  mobileCategoryBarRef.current.querySelectorAll("button"),
                 ).find(
-                  (btn) => btn.getAttribute("data-category-id") === categoryId
+                  (btn) => btn.getAttribute("data-category-id") === categoryId,
                 );
 
                 if (categoryButton) {
@@ -471,7 +491,7 @@ RestaurantDetailsProps) {
 
     const observer = new IntersectionObserver(
       observerCallback,
-      observerOptions
+      observerOptions,
     );
 
     // Make sure all category refs have proper data attributes
@@ -551,7 +571,7 @@ RestaurantDetailsProps) {
   const scrollToCategory = (
     categoryId: string,
     categoryName: string,
-    e: React.MouseEvent
+    e: React.MouseEvent,
   ) => {
     e.preventDefault();
     const element = categoryRefs.current[categoryId];
@@ -605,7 +625,6 @@ RestaurantDetailsProps) {
     }
   }, [filteredCategories]);
 
-  // Detect when the category bar becomes sticky
   useEffect(() => {
     const handleScroll = () => {
       if (mobileCategoryBarRef.current) {
@@ -614,11 +633,11 @@ RestaurantDetailsProps) {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     handleScroll(); // Check initial state
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -628,18 +647,20 @@ RestaurantDetailsProps) {
   }
 
   return (
-    <div className="w-full min-h-screen">
-      <main className="h-auto bg-white py-4 z-40">
+    <div className="w-full flex flex-col flex-1">
+      <main className="h-auto bg-white py-3 z-20 shrink-0">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
           <div>
-            <h2 className="md:text-3xl text-2xl mb-1 font-online-ordering">
-              <span className=" font-online-ordering ">{restaurant.name}</span>
+            <h2 className="md:text-3xl text-2xl mb-1 font-heading-oo">
+              <span className="font-heading-oo font-semibold">
+                {restaurant.name}
+              </span>
             </h2>
-            <div className="text-sm sm:text-base font-online-ordering">
+            <div className="text-sm sm:text-base font-body-oo font-normal">
               <p>{restaurant.address?.addressLine1}</p>
             </div>
           </div>
-          <div className="flex space-x-4 mt-2 md:mt-0">
+          <div className="flex w-full md:w-auto mt-2 md:mt-0">
             <OrderOptions
               isDelivery={isDelivery}
               isPickUp={isPickUp}
@@ -649,15 +670,15 @@ RestaurantDetailsProps) {
         </div>
       </main>
 
-      <div className="flex flex-col bg-white w-full mx-auto relative">
+      <div className="flex flex-col bg-white w-full mx-auto relative flex-1">
         {/* Categories at top, Sticky */}
         <div
           ref={mobileCategoryBarRef}
-          className="w-full bg-white font-online-ordering sticky top-0 border-t z-10 mb-4 py-2 border-b border-b-gray-100 shadow-md"
+          className="w-full bg-white font-subheading-oo sticky top-0 border-t z-20 mb-4 py-2 border-b border-b-gray-100 shadow-md"
         >
           <div className="bg-white w-full mobile-category-bar max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
             <div className="relative flex items-center mb-2 md:mb-5 pt-2 w-full gap-1">
-              {isSticky && (
+              {isSticky && !loading && (
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="lg:hidden py-2 pr-2 rounded-md text-gray-600 hover:bg-gray-100 flex-shrink-0"
@@ -666,19 +687,19 @@ RestaurantDetailsProps) {
                   <HiMenu size={24} />
                 </button>
               )}
-              
+
               <div className="relative flex items-center flex-1">
                 <FiSearch className="absolute left-4 text-gray-400" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search menu items..."
-                  className="w-full pl-10 pr-4 py-2 rounded-[40px] border border-gray-300 focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none"
                   // value={searchQuery}
                   onChange={handleSearch}
                 />
               </div>
-              
+
               {restaurant.restaurantConfigs.showItemFilters !== false && (
                 <FilterDropdown
                   selectedCategories={selectedCategories}
@@ -689,14 +710,14 @@ RestaurantDetailsProps) {
               {shouldShow && !isMobile && cartCountInfo > 0 ? (
                 <Link href={`/menu/cart`} passHref>
                   <button
-                    className={`bg-white font-online-ordering border border-primaryColor ml-2 px-6 py-2  rounded-full flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
+                    className={`bg-primary font-body-oo px-6 py-2 rounded-md flex items-center justify-center text-base z-40 space-x-2 whitespace-nowrap`}
                     style={{
                       color: isContrastOkay(
-                        "#ffffff",
-                        Env.NEXT_PUBLIC_PRIMARY_COLOR
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                       )
-                        ? Env.NEXT_PUBLIC_PRIMARY_COLOR
-                        : "#000000",
+                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        : Env.NEXT_PUBLIC_TEXT_COLOR,
                     }}
                   >
                     <FaCartShopping size={18} className="mr-2" />
@@ -740,7 +761,11 @@ RestaurantDetailsProps) {
                       <button
                         key={category._id}
                         data-category-id={category._id}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full text-start hover:bg-gray-300 transition-all duration-200 whitespace-nowrap`}
+                        className={`flex-shrink-0 px-4 py-2 rounded-md font-body-oo text-start transition-all duration-200 whitespace-nowrap ${
+                          activeCategory === category._id
+                            ? ""
+                            : "hover:bg-gray-300"
+                        }`}
                         style={{
                           backgroundColor:
                             activeCategory === category._id
@@ -750,11 +775,22 @@ RestaurantDetailsProps) {
                             activeCategory === category._id
                               ? isContrastOkay(
                                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                                 )
                                 ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                                 : Env.NEXT_PUBLIC_TEXT_COLOR
                               : "black",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (activeCategory !== category._id) {
+                            e.currentTarget.style.backgroundColor = "#d1d5db"; // gray-300
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (activeCategory !== category._id) {
+                            e.currentTarget.style.backgroundColor =
+                              "transparent";
+                          }
                         }}
                         onClick={(e) =>
                           scrollToCategory(category._id, category.name, e)
@@ -772,23 +808,40 @@ RestaurantDetailsProps) {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center bg-white my-40 w-[95vw] space-x-2">
-            <span className="sr-only">Loading...</span>
-            {[0, 1, 2, 3].map((index) => (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-full bg-primary animate-bounce-flash opacity-40`}
-                style={{
-                  animationDelay: `${index * 0.3}s`,
-                  animationDuration: "1.2s",
-                }}
-              ></div>
+          <div className="w-full max-w-8xl mx-auto px-6 md:px-20 lg:px-28 py-4">
+            {/* Shimmer loading for menu items */}
+            {[1, 2].map((categoryIndex) => (
+              <div key={categoryIndex} className="mb-8">
+                {/* Category title shimmer */}
+                <div className="h-7 w-48 rounded-md mb-4 shimmer" />
+
+                {/* Items grid shimmer */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3, 4, 5, 6].map((itemIndex) => (
+                    <div
+                      key={itemIndex}
+                      className="flex gap-3 p-3 border border-gray-100 rounded-lg"
+                    >
+                      {/* Image shimmer */}
+                      <div className="w-24 h-24 rounded-md flex-shrink-0 shimmer" />
+
+                      {/* Content shimmer */}
+                      <div className="flex-1 space-y-2">
+                        <div className="h-5 w-3/4 rounded shimmer" />
+                        <div className="h-4 w-full rounded shimmer" />
+                        <div className="h-4 w-2/3 rounded shimmer" />
+                        <div className="h-5 w-16 rounded shimmer mt-2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="flex items-start w-full font-online-ordering">
+          <div className="flex items-start w-full">
             {/* Main Content */}
-            <div className="w-full max-w-8xl mx-auto xl:overflow-y-auto overflow-scroll px-6 md:px-20 lg:px-28">
+            <div className="w-full max-w-8xl mx-auto xl:overflow-y-auto px-6 md:px-20 lg:px-28">
               {!searchQuery && <RecentOrders />}
               {!searchQuery && <PromoCodes />}
               {!searchQuery && (
@@ -797,13 +850,14 @@ RestaurantDetailsProps) {
                   loyaltyOffers={loyaltyOffers}
                 />
               )}
-              <div className="space-y-10  mb-2 md:mb-0 ">
+
+              <div className="space-y-10  mb-2 md:mb-0 lg:mt-5">
                 {filteredCategories && filteredCategories.length === 0 ? (
                   <div className="py-4 h-[40rem]">
                     {!searchQuery && !categoryType ? (
                       // No search query and no filters - show store message
                       <>
-                        <h1 className="md:text-4xl text-2xl font-bold">
+                        <h1 className="md:text-4xl text-2xl font-medium">
                           Restaurant is not taking any orders for today
                         </h1>
 
@@ -815,7 +869,7 @@ RestaurantDetailsProps) {
                           className={`flex bg-black text-white items-center mt-2 space-x-2 px-3 py-2 rounded-[40px] border border-gray-300 transition-all duration-200 `}
                           type="button"
                         >
-                          <span className="font-medium font-online-ordering">
+                          <span className="font-medium font-subheading-oo">
                             Schedule Order
                           </span>
                         </button>
@@ -823,10 +877,10 @@ RestaurantDetailsProps) {
                     ) : (
                       // Has search query or filters - show no results found
                       <>
-                        <h1 className="md:text-4xl text-2xl font-bold">
+                        <h1 className="md:text-4xl text-2xl font-medium font-subheading-oo">
                           No result found
                         </h1>
-                        <p className="md:text-lg text-base">
+                        <p className="md:text-lg  font-subheading-oo text-base">
                           {`Sorry, we couldn't find any available item. Please refine your search or try changing your filters.`}
                         </p>
                       </>
@@ -857,50 +911,59 @@ RestaurantDetailsProps) {
         )}
       </div>
 
-       {loading || isMenuOpen ? null : (
-        <div
-          className={`${
-            cartCountInfo > 0 ? "bottom-[4.5rem]" : "bottom-[1.5rem]"
-          } sticky  pb-2 pointer-events-none z-40 flex justify-end`}
-        >
-          <button
-            onClick={() => {
-              setIsCategoriesPopupOpen(!isCategoriesPopupOpen);
-            }}
-            className={`font-online-ordering flex-col text-white px-3 py-3 rounded-full flex items-center text-base mr-6 w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}
-            style={{
-              color: isContrastOkay(
-                Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                Env.NEXT_PUBLIC_BACKGROUND_COLOR
-              )
-                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                : Env.NEXT_PUBLIC_TEXT_COLOR,
-            }}
+      {loading || isMenuOpen ? null : (
+        <div className="sticky bottom-0 mt-auto pointer-events-none z-40 w-full md:hidden">
+          {cartCountInfo > 0 && (
+            <div className="h-10 w-full bg-gradient-to-t from-white to-transparent" />
+          )}
+          <div
+            className={`pb-4 flex flex-row items-stretch justify-end px-4 gap-3 md:justify-center w-full ${
+              cartCountInfo > 0 ? "bg-white" : "bg-transparent"
+            }`}
           >
-            <MdMenuBook size={18} />
-            <span className="text-sm">Menu</span>
-          </button>
+            {cartCountInfo > 0 && <FloatingCartButton count={cartCountInfo} />}
+            <button
+              onClick={() => {
+                setIsCategoriesPopupOpen(!isCategoriesPopupOpen);
+              }}
+              className={`font-subheading-oo flex-col text-white px-3 py-2 rounded-md flex items-center justify-center text-sm w-fit z-40 shadow-lg bg-primary md:hidden pointer-events-auto`}
+              style={{
+                color: isContrastOkay(
+                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                )
+                  ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  : Env.NEXT_PUBLIC_TEXT_COLOR,
+              }}
+            >
+              <MdMenuBook size={20} className="mb-0.5" />
+              <span>Menu</span>
+            </button>
+          </div>
         </div>
       )}
-      {cartCountInfo > 0 ? <FloatingCartButton count={cartCountInfo} /> : null}
       <AnimatePresence>
         {isMobile && isCategoriesPopupOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center z-40 p-4"
+            onClick={() => setIsCategoriesPopupOpen(false)}
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center z-40 p-0"
           >
             <motion.div
               variants={fadeIn("up", "tween", 0, 0.3)}
               initial="hidden"
               animate="show"
               exit="hidden"
-              className="relative bg-bgGray rounded-[20px] shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[70vh]"
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-bgGray rounded-t-md shadow-xl w-full max-w-3xl overflow-auto scrollbar-hide flex flex-col max-h-[70vh]"
             >
               <>
-                <div className="flex items-center justify-between font-online-ordering py-2 px-3 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Categories ({filteredCategories?.length || 0})</h2>
+                <div className="flex items-center justify-between font-subheading-oo py-4 px-3 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold">
+                    Categories ({filteredCategories?.length || 0})
+                  </h2>
                   <button
                     onClick={() => setIsCategoriesPopupOpen(false)}
                     className="text-gray-500 hover:text-gray-700"
@@ -909,14 +972,14 @@ RestaurantDetailsProps) {
                   </button>
                 </div>
 
-                <div className="overflow-y-scroll pb-3">
+                <div className="overflow-y-scroll  pb-3">
                   <div className="space-y-2">
                     {filteredCategories &&
                       filteredCategories.map((category) => (
                         <button
                           key={category._id}
                           data-category-id={category._id}
-                          className={`w-full text-left py-1.5 px-3 text-sm rounded-lg hover:bg-gray-100 font-online-ordering`}
+                          className={`w-full text-left py-1.5 px-4 text-sm rounded-lg hover:bg-gray-100 font-body-oo font-medium`}
                           style={{
                             color:
                               activeCategory === category._id

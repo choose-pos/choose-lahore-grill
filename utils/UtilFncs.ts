@@ -25,10 +25,11 @@ export const extractFreeDiscountItemDetails = (
   message: string
 ): { name: string; price: string } | null => {
   // Regex for the first type of message: "You got Mango Smoothie worth $4.75 for free"
-  const pattern1 = /^You got (.+) worth \$(\d+\.\d{1,2}) for free$/;
+  const pattern1 = /^You got (.+) worth \$([\d,]+(?:\.\d{1,2})?) for free$/;
 
   // Regex for the second type of message: "You just redeemed a free Mango Smoothie worth 4.75$"
-  const pattern2 = /^You just redeemed a free (.+) worth \$(\d+\.\d{1,2})$/;
+  const pattern2 =
+    /^You just redeemed a free (.+) worth \$([\d,]+(?:\.\d{1,2})?)$/;
 
   let match = message.match(pattern1);
   if (match) {
