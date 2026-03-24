@@ -300,17 +300,14 @@ const Navbar: React.FC<INavProps> = ({
 
           {/* Menu Button and Order Now grouped together */}
           <div className="flex items-center gap-4">
-            {/* <Link href="/menu" aria-label="Order Now Link">
+            <Link href="/menu" aria-label="Order Now Link">
               <button
                 aria-label="Order Now"
-                className={`md:px-6 px-4 py-1.5 md:py-2 text-base md:text-lg md:h-12 md:w-[180px] text-[20px] bg-primaryColor font-rubik font-medium  border rounded-[10px] text-white transition-opacity duration-500 ${
-                  isButtonVisible ? "opacity-100" : "opacity-100"
-                }`}
-                // style={{ visibility: isButtonVisible ? "visible" : "hidden" }}
+                className={`hidden lg:block md:px-6 px-4 py-2 md:h-12  md:w-[180px] text-[20px] bg-bg3 font-rubik font-medium  border rounded-[10px] text-bg1 transition-opacity duration-500`}
               >
                 ORDER NOW
               </button>
-            </Link> */}
+            </Link>
             <div
               className="text-3xl cursor-pointer z-50 block lg:hidden"
               onClick={toggleMenu}
@@ -414,7 +411,7 @@ const Navbar: React.FC<INavProps> = ({
         </div>
       </div>
       <div ref={observerTargetRef} style={{ height: "1px" }} />
-       {(showBottomButton || isOpen) && (
+      {(showBottomButton || isOpen) && (
         <div className="fixed bottom-0 left-0 right-0 z-[60] lg:hidden bg-white px-4 py-3">
           <Button text="Order Now" url="/menu" fullWidth={true} />
         </div>
