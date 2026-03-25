@@ -203,7 +203,7 @@ const CheckoutStripeForm = forwardRef<
     return (
       <form onSubmit={handleSubmit}>
         <h2 className="mb-4 font-subheading-oo font-semibold text-xl capitalize">
-          Payment Details Payment Details
+          Payment Details
         </h2>
         {cartData.length > 0 && <PaymentElement />}
         <button ref={ref} type="submit" className="hidden sr-only">
