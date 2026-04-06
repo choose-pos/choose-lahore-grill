@@ -327,41 +327,43 @@ const RenderContent: React.FC<RenderContentProps> = ({
 
                         {isSelected &&
                           group.allowMultiSelctSingleModsInGroup && (
-                            <div className="flex items-center gap-1 ml-auto mt-2 bg-white">
-                              <button
-                                onClick={() =>
-                                  handleModifierQuantityChange(
-                                    group.id,
-                                    modifier.id,
-                                    -1,
-                                  )
-                                }
-                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
-                                disabled={currentQuantity <= 1}
-                              >
-                                <IoMdRemove size={16} />
-                              </button>
+                            <div className="flex justify-end ">
+                              <div className="flex items-center gap-1 bg-white">
+                                <button
+                                  onClick={() =>
+                                    handleModifierQuantityChange(
+                                      group.id,
+                                      modifier.id,
+                                      -1,
+                                    )
+                                  }
+                                  className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                                  disabled={currentQuantity <= 1}
+                                >
+                                  <IoMdRemove size={16} />
+                                </button>
 
-                              <span className="mx-[1px] min-w-[20px] text-base text-center">
-                                {currentQuantity}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleModifierQuantityChange(
-                                    group.id,
-                                    modifier.id,
-                                    1,
-                                  )
-                                }
-                                disabled={
-                                  !group.isMaxSelctSingleModsInGroupUnlimited &&
-                                  currentQuantity >=
-                                    group.maxSelctSingleModsInGroup
-                                }
-                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
-                              >
-                                <IoMdAdd size={16} />
-                              </button>
+                                <span className="mx-[1px] min-w-[20px] text-base text-center">
+                                  {currentQuantity}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    handleModifierQuantityChange(
+                                      group.id,
+                                      modifier.id,
+                                      1,
+                                    )
+                                  }
+                                  disabled={
+                                    !group.isMaxSelctSingleModsInGroupUnlimited &&
+                                    currentQuantity >=
+                                      group.maxSelctSingleModsInGroup
+                                  }
+                                  className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
+                                >
+                                  <IoMdAdd size={16} />
+                                </button>
+                              </div>
                             </div>
                           )}
                       </div>
@@ -413,7 +415,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
 
                         {isSelected &&
                           group.allowMultiSelctSingleModsInGroup && (
-                            <div className="flex items-center gap-1 ml-2 bg-white">
+                            <div className="flex items-center gap-1 ml-auto bg-white">
                               <button
                                 onClick={() =>
                                   handleModifierQuantityChange(
