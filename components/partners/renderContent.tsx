@@ -29,12 +29,12 @@ interface RenderContentProps {
   handleModifierChange: (
     groupId: string,
     modifierId: string,
-    isMultiSelect: boolean
+    isMultiSelect: boolean,
   ) => void;
   handleModifierQuantityChange: (
     groupId: string,
     modifierId: string,
-    delta: number
+    delta: number,
   ) => void;
   clearModifierSelection: (groupId: string) => void;
   getModifierQuantity: (groupId: string, modifierId: string) => number;
@@ -85,7 +85,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
     needsReadMore && !isExpanded && categoryItem.desc
       ? `${categoryItem?.desc.substring(
           0,
-          isMobile ? MAX_PREVIEW_LENGTH : MAX_PREVIEW_LENGTH_DESKTOP
+          isMobile ? MAX_PREVIEW_LENGTH : MAX_PREVIEW_LENGTH_DESKTOP,
         )}...`
       : categoryItem.desc;
 
@@ -110,7 +110,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
                 option.status === true &&
                 option.type !== ItemOptionsEnum.IsSpicy &&
                 option.type !== ItemOptionsEnum.UpSellItem &&
-                option.type !== ItemOptionsEnum.IsVegan
+                option.type !== ItemOptionsEnum.IsVegan,
             )
             .map((option) => {
               if (option.type === ItemOptionsEnum.PopularItem) {
@@ -154,7 +154,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
                   {categoryItem.options.some(
                     (option) =>
                       option.type === ItemOptionsEnum.IsSpicy &&
-                      option.status === true
+                      option.status === true,
                   ) && (
                     <Image
                       src={spicyImage || "/placeholder.svg"}
@@ -166,7 +166,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
                   {categoryItem.options.some(
                     (option) =>
                       option.type === ItemOptionsEnum.IsVegan &&
-                      option.status === true
+                      option.status === true,
                   ) && (
                     <Image
                       src={Leaf || "/placeholder.svg"}
@@ -257,11 +257,11 @@ const RenderContent: React.FC<RenderContentProps> = ({
             <div className="space-y-2 font-subheading-oo px-6 sm:px-8 bg-white py-4">
               {group.modifiers.map((modifier, modifierIndex) => {
                 const isSelected = selectedModifiers[group.id]?.some(
-                  (s) => s.id === modifier.id
+                  (s) => s.id === modifier.id,
                 );
                 const currentQuantity = getModifierQuantity(
                   group.id,
-                  modifier.id
+                  modifier.id,
                 );
                 const isDisabled =
                   group.maxSelections === 1
@@ -273,95 +273,184 @@ const RenderContent: React.FC<RenderContentProps> = ({
                 return (
                   <React.Fragment key={modifierIndex}>
                     <div
-                      className={`flex items-center justify-between p-1 rounded-lg transition-all duration-200 ${
+                      className={`p-1 rounded-lg transition-all duration-200 ${
                         isDisabled ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
-                      <div className="flex items-center flex-grow gap-1.5 sm:gap-2">
-                        <input
-                          type={
-                            group.maxSelections === 1 ? "radio" : "checkbox"
-                          }
-                          id={`modifier-${groupIndex}-${modifierIndex}`}
-                          name={`group-${groupIndex}`}
-                          checked={isSelected}
-                          onChange={(e) => {
-                            e.stopPropagation();
+                      {/* Mobile Layout */}
+                      <div className="md:hidden">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type={
+                                group.maxSelections === 1 ? "radio" : "checkbox"
+                              }
+                              id={`modifier-${groupIndex}-${modifierIndex}`}
+                              name={`group-${groupIndex}`}
+                              checked={isSelected}
+                              onChange={(e) => {
+                                e.stopPropagation();
 
-                            handleModifierChange(
-                              group.id,
-                              modifier.id,
-                              group.multiSelect
-                            );
-                          }}
-                          className="accent-primary focus:ring-primary border-gray-300 w-3.5 h-3.5 sm:w-4 sm:h-4 cursor-pointer"
-                          disabled={isDisabled}
-                        />
-                        <div className="flex flex-col">
-                          <label
-                            htmlFor={`modifier-${groupIndex}-${modifierIndex}`}
-                            className="flex items-center gap-1 cursor-pointer"
-                          >
-                            <span className="text-base md:text-lg font-body-oo font-normal">
-                              {modifier.name}
-                            </span>
+                                handleModifierChange(
+                                  group.id,
+                                  modifier.id,
+                                  group.multiSelect,
+                                );
+                              }}
+                              className="accent-primary focus:ring-primary border-gray-300 w-3.5 h-3.5 cursor-pointer"
+                              disabled={isDisabled}
+                            />
+                            <label
+                              htmlFor={`modifier-${groupIndex}-${modifierIndex}`}
+                              className="cursor-pointer"
+                            >
+                              <span className="text-base font-body-oo font-normal">
+                                {modifier.name}
+                              </span>
+                            </label>
+                          </div>
+
+                          <div className="flex items-center">
                             {group.pricingType ===
                             PriceTypeEnum.IndividualPrice ? (
-                              <span className="text-xs sm:text-sm ml-2 font-body-oo font-medium">
+                              <span className="text-xs font-body-oo font-medium">
                                 +${modifier.price.toFixed(2)}
                               </span>
                             ) : group.pricingType ===
                               PriceTypeEnum.SamePrice ? (
-                              <span className="text-xs sm:text-sm ml-2 font-body-oo font-medium">
+                              <span className="text-xs font-body-oo font-medium">
                                 +${group.price?.toFixed(2)}
                               </span>
                             ) : null}
-                            {/* {modifier.price > 0 && (
-                              <span className="text-xs sm:text-sm ml-2 font-medium">
-                                +${modifier.price.toFixed(2)}
-                              </span>
-                            )} */}
-                          </label>
+                          </div>
                         </div>
+
+                        {isSelected &&
+                          group.allowMultiSelctSingleModsInGroup && (
+                            <div className="flex items-center gap-1 ml-auto mt-2 bg-white">
+                              <button
+                                onClick={() =>
+                                  handleModifierQuantityChange(
+                                    group.id,
+                                    modifier.id,
+                                    -1,
+                                  )
+                                }
+                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                                disabled={currentQuantity <= 1}
+                              >
+                                <IoMdRemove size={16} />
+                              </button>
+
+                              <span className="mx-[1px] min-w-[20px] text-base text-center">
+                                {currentQuantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handleModifierQuantityChange(
+                                    group.id,
+                                    modifier.id,
+                                    1,
+                                  )
+                                }
+                                disabled={
+                                  !group.isMaxSelctSingleModsInGroupUnlimited &&
+                                  currentQuantity >=
+                                    group.maxSelctSingleModsInGroup
+                                }
+                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
+                              >
+                                <IoMdAdd size={16} />
+                              </button>
+                            </div>
+                          )}
                       </div>
 
-                      {isSelected && group.allowMultiSelctSingleModsInGroup && (
-                        <div className="flex items-center gap-1 ml-1 sm:ml-2 bg-white">
-                          <button
-                            onClick={() =>
-                              handleModifierQuantityChange(
-                                group.id,
-                                modifier.id,
-                                -1
-                              )
+                      {/* Desktop Layout */}
+                      <div className="hidden md:flex items-center justify-between">
+                        <div className="flex items-center flex-grow gap-2">
+                          <input
+                            type={
+                              group.maxSelections === 1 ? "radio" : "checkbox"
                             }
-                            className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
-                            disabled={currentQuantity <= 1}
-                          >
-                            <IoMdRemove size={16} />
-                          </button>
+                            id={`modifier-desktop-${groupIndex}-${modifierIndex}`}
+                            name={`group-desktop-${groupIndex}`}
+                            checked={isSelected}
+                            onChange={(e) => {
+                              e.stopPropagation();
 
-                          <span className="mx-[1px] min-w-[20px] text-base text-center">
-                            {currentQuantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleModifierQuantityChange(
+                              handleModifierChange(
                                 group.id,
                                 modifier.id,
-                                1
-                              )
-                            }
-                            disabled={
-                              !group.isMaxSelctSingleModsInGroupUnlimited &&
-                              currentQuantity >= group.maxSelctSingleModsInGroup
-                            }
-                            className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
-                          >
-                            <IoMdAdd size={16} />
-                          </button>
+                                group.multiSelect,
+                              );
+                            }}
+                            className="accent-primary focus:ring-primary border-gray-300 w-4 h-4 cursor-pointer"
+                            disabled={isDisabled}
+                          />
+                          <div className="flex flex-col">
+                            <label
+                              htmlFor={`modifier-desktop-${groupIndex}-${modifierIndex}`}
+                              className="flex items-center gap-1 cursor-pointer"
+                            >
+                              <span className="text-lg font-body-oo font-normal">
+                                {modifier.name}
+                              </span>
+                              {group.pricingType ===
+                              PriceTypeEnum.IndividualPrice ? (
+                                <span className="text-sm ml-2 font-body-oo font-medium">
+                                  +${modifier.price.toFixed(2)}
+                                </span>
+                              ) : group.pricingType ===
+                                PriceTypeEnum.SamePrice ? (
+                                <span className="text-sm ml-2 font-body-oo font-medium">
+                                  +${group.price?.toFixed(2)}
+                                </span>
+                              ) : null}
+                            </label>
+                          </div>
                         </div>
-                      )}
+
+                        {isSelected &&
+                          group.allowMultiSelctSingleModsInGroup && (
+                            <div className="flex items-center gap-1 ml-2 bg-white">
+                              <button
+                                onClick={() =>
+                                  handleModifierQuantityChange(
+                                    group.id,
+                                    modifier.id,
+                                    -1,
+                                  )
+                                }
+                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                                disabled={currentQuantity <= 1}
+                              >
+                                <IoMdRemove size={16} />
+                              </button>
+
+                              <span className="mx-[1px] min-w-[20px] text-base text-center">
+                                {currentQuantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handleModifierQuantityChange(
+                                    group.id,
+                                    modifier.id,
+                                    1,
+                                  )
+                                }
+                                disabled={
+                                  !group.isMaxSelctSingleModsInGroupUnlimited &&
+                                  currentQuantity >=
+                                    group.maxSelctSingleModsInGroup
+                                }
+                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
+                              >
+                                <IoMdAdd size={16} />
+                              </button>
+                            </div>
+                          )}
+                      </div>
                     </div>
                     {modifierIndex < group.modifiers.length - 1 && (
                       <hr className="border border-t border-gray-100 my-1" />
@@ -445,7 +534,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                Env.NEXT_PUBLIC_BACKGROUND_COLOR,
               )
                 ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                 : Env.NEXT_PUBLIC_TEXT_COLOR,

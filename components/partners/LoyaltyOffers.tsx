@@ -223,7 +223,7 @@ const LoyaltyOffers = ({ loyaltyRule, loyaltyOffers }: ICartOffersProps) => {
                                           src={offer.image}
                                           alt={offer.name}
                                           fill
-                                          className={`object-cover object-center w-full h-full rounded-lg`}
+                                          className={`object-cover object-center w-full h-full rounded-md`}
                                         />
                                       </div>
                                     )}
