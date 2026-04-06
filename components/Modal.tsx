@@ -1009,7 +1009,7 @@ const Modal: React.FC<{
                           className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
                         <div
-                          className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors duration-200 pointer-events-none ${
+                          className={`w-5 h-5  border flex items-center justify-center transition-colors duration-200 pointer-events-none ${
                             tempDeliveryTime === time
                               ? "border-primary"
                               : "border-gray-300 peer-hover:border-gray-400"
@@ -1044,7 +1044,7 @@ const Modal: React.FC<{
             </div>
 
             <button
-              className={`w-full p-2 rounded-md text-md mt-2 font-subheading-oo font-semibold transition-all duration-200 ${
+              className={`w-full p-2 rounded-md text-md mt-2 font-heading-oo font-semibold transition-all duration-200 ${
                 tempDeliveryDay && tempDeliveryTime
                   ? "bg-primary hover:bg-primary-dark shadow-lg"
                   : "bg-gray-300 cursor-not-allowed"
