@@ -56,7 +56,7 @@ const RestaurantLayout = ({ children }: LayoutProps) => {
       }
     };
     fetchInitialCustomer();
-  }, [setMeCustomerData]);
+  }, [setMeCustomerData, pathname]);
 
   // FIXED: Optimised useEffect
   useEffect(() => {
