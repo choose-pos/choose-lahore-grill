@@ -14,8 +14,8 @@ import {
 } from "./TabBar";
 // import { useRouter } from "next/router";
 import { CustomerNew } from "@/store/meCustomer";
-import { useRouter } from "next/navigation";
-// import { IoMdArrowBack } from 'react-icons/io';
+import { useRouter, useSearchParams } from "next/navigation";// import { IoMdArrowBack } from 'react-icons/io';
+import GiftCardPurchasePage from "../giftCard/GiftCardPurchasePage";
 
 interface AccountDetailsProps {
   customerData: CustomerNew | null;
@@ -26,12 +26,56 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
   const [customerBalance, setCustomerBalance] = useState<number>(0);
   const [offers, setOffers] = useState<RestaurantRedeemOffers | null>(null);
   const [pointsRequire, setPointsRequire] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("Rewards");
   const [programName, setProgramName] = useState<string>("points");
   const [programDesc, setProgramDesc] = useState<string>(
     "Earn more points with every purchase!"
   );
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+   const [activeTab, setActiveTab] = useState<string>(
+    tabParam === "giftcards" ? "Gift Card" : "Rewards",
+  );
   const router = useRouter();
+  
+  useEffect(() => {
+    if (tabParam === "giftcards") {
+      setActiveTab("Gift Card");
+    }
+    if (tabParam) {
+      router.replace("/menu/my-account", { scroll: false });
+    }
+  }, [tabParam]);
+
+    // Fetch stripe account ID and fee config for gift card tab
+  const [stripeId, setStripeId] = useState<string>("");
+  const [processingConfig, setProcessingConfig] = useState<{
+    feePercent: number | null;
+    maxFeeAmount: number | null;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchGiftCardConfig = async () => {
+      try {
+        const [stripeRes, restaurantRes] = await Promise.all([
+          sdk.getStripeAccountId(),
+          sdk.GetCustomerRestaurantDetails(),
+        ]);
+        setStripeId(stripeRes.getStripeAccountId);
+        const r = restaurantRes.getCustomerRestaurantDetails;
+        setProcessingConfig(
+          r?.processingConfig
+            ? {
+                feePercent: r.processingConfig.feePercent ?? null,
+                maxFeeAmount: r.processingConfig.maxFeeAmount ?? null,
+              }
+            : null,
+        );
+      } catch (error) {
+        console.error("Error fetching gift card config:", error);
+      }
+    };
+    fetchGiftCardConfig();
+  }, []);
 
   useEffect(() => {
     const fetchRules = async () => {
@@ -161,6 +205,19 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
         return <ProfileContent customerData={customerData} />;
       case "Orders":
         return <OrdersContent />;
+        case "Gift Card": {
+        if (!stripeId)
+          return <p className="text-center py-10 font-body-oo">Loading...</p>;
+        return (
+          <div>
+            <GiftCardPurchasePage
+              stripeId={stripeId}
+              processingConfig={processingConfig}
+              isAccountView={true}
+            />
+          </div>
+        );
+      }
       default:
         return null;
     }
@@ -181,7 +238,11 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
           <p className="ml-2 text-base sm:text-lg font-body-oo">Menu</p>
         </div>
         <div className="flex flex-col md:flex-row items-start xl:px-10 w-full  font-body-oo">
-          <StickyTabbar onTabChange={handleTabChange} />
+           <StickyTabbar
+            onTabChange={handleTabChange}
+            showGiftCards={restaurantData.giftCardEnabled !== false}
+            initialTab={activeTab}
+          />
 
           <div className="w-full">
             <div className="w-full flex flex-col justify-between">

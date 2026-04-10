@@ -21,7 +21,6 @@ mutation CreateOrder($createOrder: CreateOrderInput!) {
     orderId
   }
 }
-
 query fetchCustomerOrders($lastThreeOrders: Boolean) {
   fetchCustomerOrders(lastThreeOrders: $lastThreeOrders) {
     _id
@@ -31,30 +30,34 @@ query fetchCustomerOrders($lastThreeOrders: Boolean) {
     status
     systemRemark
     totalAmount
-    appliedDiscount{
+    appliedDiscount {
       discountType
       discountAmount
-      loyaltyData{
-        redeemItem{
+      loyaltyData {
+        redeemItem {
           itemName
           itemPrice
           itemId
         }
         redeemType
-        redeemDiscount{
+        redeemDiscount {
           discountValue
           discountType
           uptoAmount
         }
         loyaltyPointsRedeemed
       }
-      promoData{
+      promoData {
         discountType
         code
         discountItemId
         discountItemName
         uptoAmount
       }
+    }
+    appliedGiftCard {
+      giftCardCode
+      amountUsed
     }
     items {
       qty
@@ -83,7 +86,6 @@ query fetchCustomerOrders($lastThreeOrders: Boolean) {
     canBeReOrdered
   }
 }
-
 
 query fetchOrderById($id: ID!) {
   fetchCustomerOrderById(orderId: $id) {
@@ -138,6 +140,10 @@ query fetchOrderById($id: ID!) {
         discountItemName
         uptoAmount
       }
+    }
+    appliedGiftCard {
+      giftCardCode
+      amountUsed
     }
     createdAt
     pickUpDateAndTime
@@ -204,6 +210,7 @@ query CreateCheckoutPaymentIntent {
   createCheckoutPaymentIntent {
     cs
     id
+    isFreeOrder
   }
 }
 

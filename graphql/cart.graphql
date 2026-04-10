@@ -104,6 +104,8 @@ query fetchCartDetails {
     discountString
     discountItemImage
     discountCode
+    giftCardCode
+    giftCardDiscountAmount
     loyaltyType
     loyaltyRedeemPoints
     pickUpDateAndTime

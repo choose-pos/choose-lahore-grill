@@ -112,13 +112,15 @@ export default async function PromoPage({ params }: PromoPageProps) {
   let cmsData: any = null;
   let promoNavItems: any = null;
   let showNotFound = false;
+  let giftCardEnabledData: any = false;
 
   try {
     // First, always fetch restaurant data, CMS data, and nav items for navbar/footer
-    [restaurantData, cmsData, promoNavItems] = await Promise.all([
+    [restaurantData, cmsData, promoNavItems, giftCardEnabledData] = await Promise.all([
       sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
       sdk.GetCmsDetails({}, { cookie: cookieVal }),
       sdk.getCmsPromoNavItems({}, { cookie: cookieVal }),
+      sdk.getGiftCardEnabled({}, { cookie: cookieVal }),
     ]);
 
     // Then try to fetch promo data
@@ -157,6 +159,9 @@ export default async function PromoPage({ params }: PromoPageProps) {
 
         const promoNavItemsData: any[] =
           promoNavItems?.getCmsPromoNavItems || [];
+        
+        const giftCardEnabled =
+        giftCardEnabledData?.getGiftCardEnabled || false;
 
         const navItems: { name: string; link: string }[] = [
           { name: "Home", link: "/" },
@@ -237,6 +242,7 @@ export default async function PromoPage({ params }: PromoPageProps) {
                 logo={brandingLogo ?? ""}
                 email={email}
                 phone={phone}
+                giftCardEnabled={giftCardEnabled ?? false}
                 offerNavTitles={promoNavItemsData.map((e) => {
                   return {
                     title: e.navTitle,
@@ -329,6 +335,7 @@ export default async function PromoPage({ params }: PromoPageProps) {
     return (
       <div className="flex flex-col min-h-screen bg-bgColor overflow-hidden">
         <Navbar
+          giftCardEnabled={false}
           navItems={navItems}
           email={email}
           phone={phone}

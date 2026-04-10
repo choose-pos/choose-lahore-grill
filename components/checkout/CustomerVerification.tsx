@@ -10,9 +10,10 @@ import { isContrastOkay } from "@/utils/isContrastOkay";
 import { TAmounts } from "@/utils/types";
 import { extractErrorMessage, formatUSAPhoneNumber } from "@/utils/UtilFncs";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import StarIcon from "../common/StarIcon";
+import React, { useEffect, useState, useRef } from "react";
 import { FiInfo } from "react-icons/fi";
+import StarIcon from "../common/StarIcon";
+import { motion, AnimatePresence } from "framer-motion";
 
 const CustomerVerification = ({
   isOtpVerified,
@@ -21,6 +22,14 @@ const CustomerVerification = ({
   amounts,
   loyaltyRule,
   refreshData,
+  onPromoCodeRemoved,
+  onProceedBtn,
+  proceedLoading,
+  proceedBtnText,
+  hideHeading,
+  onVerified,
+  verifyMode = "order",
+  afterVerifiedContent,
 }: {
   isOtpVerified: boolean;
   setIsOtpVerified: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,6 +37,21 @@ const CustomerVerification = ({
   amounts: TAmounts | null;
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   refreshData: () => void;
+  onPromoCodeRemoved?: (msg: string) => void;
+  onProceedBtn?: () => void;
+  proceedLoading?: boolean;
+  proceedBtnText?: string;
+  hideHeading?: boolean;
+  onVerified?: (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    otp: string;
+    customerId?: string | null;
+  }) => void;
+  verifyMode?: "order" | "giftcard";
+  afterVerifiedContent?: React.ReactNode;
 }) => {
   const [formData, setFormData] = useState({
     phone: "",
@@ -40,6 +64,18 @@ const CustomerVerification = ({
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(0);
   const [promoCodeMessage, setPromoCodeMessage] = useState("");
+  const proceedBtnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOtpVerified && typeof window !== "undefined" && window.innerWidth < 640) {
+      setTimeout(() => {
+        proceedBtnRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 150);
+    }
+  }, [isOtpVerified]);
 
   const { setToastData } = ToastStore();
   const { setCustomerData, customerData, signUpToggle, setSignUpToggle } =
@@ -84,6 +120,32 @@ const CustomerVerification = ({
       }
 
       try {
+        if (verifyMode === "giftcard") {
+          const res = await fetchWithAuth(() =>
+            sdk.VerifyGiftCardOtp({
+              phone: formData.phone.trim(),
+              otp: formData.otp.trim(),
+            }),
+          );
+          const result = res.verifyGiftCardOtp;
+          if (result?.verified) {
+            setToastData({ type: "success", message: "Phone verified" });
+            setIsOtpVerified(true);
+            onVerified?.({
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              email: formData.email,
+              phone: formData.phone,
+              otp: formData.otp,
+              customerId: result.customerId ?? null,
+            });
+            setError("");
+          } else {
+            setError("Invalid OTP. Please check your code.");
+          }
+          return;
+        }
+
         const res = await fetchWithAuth(() =>
           sdk.verifyOTPGuestOrder({
             verify: {
@@ -128,11 +190,11 @@ const CustomerVerification = ({
           if (res.verifyOTPGuestOrder.promoCodeMessage) {
             setPromo(null);
             setPromoCodeMessage(res.verifyOTPGuestOrder.promoCodeMessage);
-            setToastData({
-              message: res.verifyOTPGuestOrder.promoCodeMessage,
-              type: "error",
-            });
+            if (onPromoCodeRemoved) {
+              onPromoCodeRemoved(res.verifyOTPGuestOrder.promoCodeMessage);
+            }
             refreshData();
+            return;
           } else {
             setPromoCodeMessage("");
           }
@@ -143,6 +205,13 @@ const CustomerVerification = ({
           });
 
           setIsOtpVerified(true);
+          onVerified?.({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            otp: formData.otp,
+          });
           setError("");
         }
       } catch (err) {
@@ -211,7 +280,7 @@ const CustomerVerification = ({
             lastName: formData.lastName,
             accountPreferences,
           },
-        })
+        }),
       );
       if (response.sendOTPGuestOrder) {
         setShowOtp(true);
@@ -242,12 +311,19 @@ const CustomerVerification = ({
       onSubmit={(e) => e.preventDefault()}
     >
       {/* <h2 className="mb-4 font-online-ordering text-xl capitalize">
-        Guest Details
+        Guest Detailsfe
       </h2> */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="font-subheading-oo font-semibold text-xl capitalize">
-          Guest Details
-        </h2>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          {!hideHeading && (
+            <h2 className="font-subheading-oo font-semibold text-xl capitalize">
+              Guest Details
+            </h2>
+          )}
+          <p className="text-sm font-body-oo text-gray-500 mt-1">
+            Please provide the details to place the order.
+          </p>
+        </div>
         {showOtp && (
           <button
             type="button"
@@ -256,7 +332,7 @@ const CustomerVerification = ({
               setShowOtp(false);
               setFormData((prev) => ({ ...prev, otp: "" }));
             }}
-            className="text-black hover:underline text-sm font-body-oo font-medium"
+            className="text-black hover:underline text-sm font-body-oo font-medium ml-4 shrink-0"
           >
             Edit
           </button>
@@ -337,6 +413,7 @@ const CustomerVerification = ({
             placeholder="alex@example.com"
           />
         </div>
+        {verifyMode === "order" && (
         <p className="text-xs font-body-oo text-gray-500">
           {`By verifying your OTP, you agree to receive promotional and transactional emails and SMS from ${restaurantData?.name} and our technology partner Choose, and accept our`}{" "}
           <Link
@@ -356,6 +433,7 @@ const CustomerVerification = ({
           </Link>
           {`. You can opt out of promotional communications at any time from your profile.`}
         </p>
+        )}
 
         {showOtp ? (
           <div className="space-y-4">
@@ -390,9 +468,16 @@ const CustomerVerification = ({
                 </div>
               )}
             </div>
-            {isOtpVerified && customerData?.otp && (
-              <p className="text-green-600 font-body-oo text-sm">
-                OTP verified! You may now proceed to place your order.
+            {isOtpVerified && customerData?.otp && verifyMode === "order" && (
+              <div className="flex flex-col gap-3 mt-4">
+                <p className="text-green-600 font-body-oo text-sm">
+                  OTP verified! You may now proceed to place your order.
+                </p>
+              </div>
+            )}
+            {isOtpVerified && verifyMode === "giftcard" && (
+              <p className="text-green-600 font-body-oo text-sm mt-2">
+                OTP verified! You may now proceed to complete the payment.
               </p>
             )}
             {error && (
@@ -408,7 +493,7 @@ const CustomerVerification = ({
           <button
             type="submit"
             onClick={generateOtp}
-            className="w-full md:w-[40%] bg-primary font-subheading-oo font-semibold text-white !text-base py-2 px-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary capitalize"
+            className="w-full bg-primary font-subheading-oo font-semibold text-white !text-base py-2 px-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary capitalize"
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -422,37 +507,44 @@ const CustomerVerification = ({
           </button>
         )}
 
-        {showOtp && existingCustomer && (
-          <div className="rounded-lg p-3 mb-4 relative bg-green-100">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-black"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-800 font-body-oo">
-                  Great news! {`We've`} found an existing account for{" "}
-                  {formatUSAPhoneNumber(existingCustomer.phone)}, we will credit{" "}
-                  <span className="font-semibold">
-                    {Math.round(amounts?.netAmt ?? 0) * 10} {loyaltyRule?.name}
-                  </span>{" "}
-                  to your loyalty wallet for this order.
-                </p>
+        {verifyMode === "order" &&
+          showOtp &&
+          existingCustomer &&
+          !cartDetails?.giftCardCode &&
+          Math.round(Math.round(amounts?.netAmt ?? 0) * 10) > 0 && (
+            <div className="rounded-lg p-3 mb-4 relative bg-green-100">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-black"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-green-800 font-body-oo">
+                    Great news! {`We've`} found an existing account for{" "}
+                    {formatUSAPhoneNumber(existingCustomer.phone)}, we will
+                    credit{" "}
+                    <span className="font-semibold">
+                      {Math.round(amounts?.netAmt ?? 0) * 10}{" "}
+                      {loyaltyRule?.name}
+                    </span>{" "}
+                    to your loyalty wallet for this order.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {showOtp &&
+        {verifyMode === "order" &&
+          showOtp &&
           isOtpVerified &&
           !existingCustomer &&
           !!cartDetails?.discountString &&
@@ -467,7 +559,7 @@ const CustomerVerification = ({
           )}
 
         {/* Stay in touch section */}
-        {!existingCustomer && !hasPromo && (
+        {verifyMode === "order" && !existingCustomer && !hasPromo && (
           <>
             <hr className="my-4" />
             <div>
@@ -528,7 +620,7 @@ const CustomerVerification = ({
                 </p>
               )} */}
 
-                {!signUpToggle && !hasPromo && loyaltyRule && (
+              {!signUpToggle && !hasPromo && loyaltyRule && (
                 <div className="mt-2 flex gap-2 bg-primary/10 border items-center border-primary/30 rounded-md px-3 py-2">
                   <p className="text-sm font-body-oo text-gray-800">
                     You&apos;ll miss out on{" "}
@@ -544,6 +636,38 @@ const CustomerVerification = ({
             </div>
           </>
         )}
+
+        {/* Permanent Proceed Button */}
+        <AnimatePresence>
+          {onProceedBtn && isOtpVerified && (
+            <motion.div
+              className="mt-4 pb-2"
+              ref={proceedBtnRef}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              {afterVerifiedContent}
+              <button
+                type="button"
+                disabled={proceedLoading}
+                onClick={onProceedBtn}
+                className="w-full bg-primary font-subheading-oo font-semibold text-white !text-base py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary capitalize disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                style={{
+                  color: isContrastOkay(
+                    Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                    Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                  )
+                    ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                    : Env.NEXT_PUBLIC_TEXT_COLOR,
+                }}
+              >
+                {proceedLoading ? "Processing..." : (proceedBtnText || "Place Order")}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </form>
   );

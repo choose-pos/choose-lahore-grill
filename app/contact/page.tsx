@@ -139,6 +139,27 @@ async function getRestaurtCmsData() {
   }
 }
 
+async function getGiftCardEnabledData() {
+  const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+
+  try {
+    const [giftCardEnabled] = await Promise.all([
+      sdk.getGiftCardEnabled(
+        {},
+        {
+          cookie: cookieVal,
+        }
+      ),
+    ]);
+
+    return giftCardEnabled.getGiftCardEnabled;
+  } catch (error) {
+    console.error("Failed to fetch gift card enabled data:", error);
+    return null;
+  }
+}
+
+
 async function getOfferLinks() {
   try {
     const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
@@ -151,10 +172,11 @@ async function getOfferLinks() {
 }
 
 export default async function OurStoryPage() {
-  const [partyData, restaurantData, cmsData] = await Promise.all([
+  const [partyData, restaurantData, cmsData, giftCardEnabled] = await Promise.all([
     getOurStoryData(),
     getRestaurantData(),
     getRestaurtCmsData(),
+    getGiftCardEnabledData(),
   ]);
 
   const offerNavItems = await getOfferLinks();
@@ -188,6 +210,7 @@ export default async function OurStoryPage() {
 
   return (
     <PartyClient
+      giftCardEnabled= {giftCardEnabled ?? false}
       navItems={navItems}
       partyPageData={partyData}
       restaurantData={restaurantData}

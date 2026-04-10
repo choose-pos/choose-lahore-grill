@@ -5,7 +5,6 @@ import { FaCopy, FaCreditCard } from "react-icons/fa";
 interface CustomerGiftCards {
   _id: string;
   code: string;
-  expiryDate: Date;
   isActive: boolean;
   usedBy?:
     | {
@@ -248,9 +247,6 @@ const GiftCard = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
-                    Expiry Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
                     Used By
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider font-subheading-oo">
@@ -284,9 +280,6 @@ const GiftCard = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(card.expiryDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {card.usedBy ? `${card.usedBy.firstName}` : "Not used"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold font-subheading-oo">
@@ -295,7 +288,7 @@ const GiftCard = () => {
                           onClick={() => copyToClipboard(card.code)}
                           className="text-primary focus:outline-none focus:underline"
                         >
-                          <FaCopy className="inline mr-1 font-body-oo" /> Copy Code
+                          <FaCopy className="inline mr-1" /> Copy Code
                         </button>
                       )}
                     </td>

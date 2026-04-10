@@ -116,6 +116,13 @@ export type AmountDetailsInput = {
   tipPercent?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type ApplyDiscountCodeResult = {
+  __typename?: 'ApplyDiscountCodeResult';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+  type?: Maybe<Scalars['String']['output']>;
+};
+
 export type Availability = {
   __typename?: 'Availability';
   _id: Scalars['ID']['output'];
@@ -175,6 +182,8 @@ export type Cart = {
   discountCode?: Maybe<Scalars['String']['output']>;
   discountItemImage?: Maybe<Scalars['String']['output']>;
   discountString?: Maybe<Scalars['String']['output']>;
+  giftCardCode?: Maybe<Scalars['String']['output']>;
+  giftCardDiscountAmount?: Maybe<Scalars['Float']['output']>;
   isTimingAsap: Scalars['Boolean']['output'];
   items: Array<CartItem>;
   itemsHash: Scalars['String']['output'];
@@ -688,14 +697,19 @@ export enum Day {
 export type Delivery = {
   __typename?: 'Delivery';
   _id: Scalars['ID']['output'];
+  canceledAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  chooseDeliveryFee?: Maybe<Scalars['Float']['output']>;
   courier?: Maybe<Courier>;
   createdAt: Scalars['DateTimeISO']['output'];
   currency: Scalars['String']['output'];
   deliveryId: Scalars['String']['output'];
+  deliveryPartnerFee?: Maybe<Scalars['Float']['output']>;
   dropoff: Dropoff;
   fee: Scalars['Float']['output'];
+  isRetry?: Maybe<Scalars['Boolean']['output']>;
   order?: Maybe<Order>;
   pickup: Pickup;
+  previousDeliveryId?: Maybe<Scalars['String']['output']>;
   quoteId: Scalars['String']['output'];
   restaurant: Restaurant;
   status: DeliveryStatusEnum;
@@ -781,6 +795,8 @@ export type DiscountData = {
 
 export type DiscountInput = {
   discountType: OrderDiscountType;
+  giftCardAmount?: InputMaybe<Scalars['Float']['input']>;
+  giftCardCode?: InputMaybe<Scalars['String']['input']>;
   loyaltyInput?: InputMaybe<LoyaltyInput>;
   promoCode?: InputMaybe<Scalars['String']['input']>;
 };
@@ -867,6 +883,67 @@ export type FulfillmentConfig = {
   largeOrderExtraTime?: Maybe<Scalars['Float']['output']>;
   largeOrderTreshold?: Maybe<Scalars['Float']['output']>;
   prepTime?: Maybe<Scalars['Float']['output']>;
+};
+
+export type GetMyGiftCardsResult = {
+  __typename?: 'GetMyGiftCardsResult';
+  _id: Scalars['String']['output'];
+  amount: Scalars['Float']['output'];
+  code: Scalars['String']['output'];
+  createdAt: Scalars['DateTimeISO']['output'];
+  design: GiftCardDesign;
+  expiryDate?: Maybe<Scalars['DateTimeISO']['output']>;
+  isActive: Scalars['Boolean']['output'];
+  note?: Maybe<Scalars['String']['output']>;
+  recipientInfo: GiftCardPersonInfo;
+  remainingAmount: Scalars['Float']['output'];
+  sendToSelf: Scalars['Boolean']['output'];
+  senderInfo: GiftCardPersonInfo;
+};
+
+/** Available gift card design themes */
+export enum GiftCardDesign {
+  GiftCard = 'GiftCard',
+  HappyBirthday = 'HappyBirthday',
+  HappyHolidays = 'HappyHolidays',
+  ThankYou = 'ThankYou'
+}
+
+export type GiftCardOtpVerifyResult = {
+  __typename?: 'GiftCardOtpVerifyResult';
+  customerId?: Maybe<Scalars['String']['output']>;
+  firstName?: Maybe<Scalars['String']['output']>;
+  lastName?: Maybe<Scalars['String']['output']>;
+  verified: Scalars['Boolean']['output'];
+};
+
+export type GiftCardPersonInfo = {
+  __typename?: 'GiftCardPersonInfo';
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
+};
+
+export type GiftCardPurchaseIntentResponse = {
+  __typename?: 'GiftCardPurchaseIntentResponse';
+  clientSecret: Scalars['String']['output'];
+  paymentIntentId: Scalars['String']['output'];
+  stripeAccountId: Scalars['String']['output'];
+};
+
+export type GiftCardRedeemData = {
+  __typename?: 'GiftCardRedeemData';
+  amountUsed: Scalars['Float']['output'];
+  giftCardCode: Scalars['String']['output'];
+};
+
+export type GiftCardValidationResult = {
+  __typename?: 'GiftCardValidationResult';
+  amount?: Maybe<Scalars['Float']['output']>;
+  appliedDiscount?: Maybe<Scalars['Float']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  remainingAmount?: Maybe<Scalars['Float']['output']>;
+  valid: Scalars['Boolean']['output'];
 };
 
 export type GuestConversionAutomation = {
@@ -1090,6 +1167,7 @@ export type LoyaltyPointsTransaction = {
   _id: Scalars['ID']['output'];
   createdAt: Scalars['DateTimeISO']['output'];
   customer?: Maybe<Customer>;
+  giftCard?: Maybe<Scalars['String']['output']>;
   order?: Maybe<Order>;
   points: Scalars['Float']['output'];
   restaurant?: Maybe<Restaurant>;
@@ -1291,22 +1369,28 @@ export type ModifierInfoResponse = {
 export type Mutation = {
   __typename?: 'Mutation';
   addToCart: Scalars['String']['output'];
+  applyDiscountCode: ApplyDiscountCodeResult;
   clearCart: Scalars['Boolean']['output'];
   cmsContactUs: Scalars['Boolean']['output'];
+  createGiftCardPurchaseIntent: GiftCardPurchaseIntentResponse;
   createOrder: OrderPlacedInfo;
   createOrderWithoutPayment: OrderPlacedInfo;
   decreaseItemQty: Scalars['Boolean']['output'];
   deleteCartItem: Scalars['Boolean']['output'];
   handleOrderCreationFailure: Scalars['Boolean']['output'];
   increaseItemQty: Scalars['Boolean']['output'];
+  removeGiftCardFromCart: Scalars['Boolean']['output'];
   reorderItemsToCart: ReorderOrderResponse;
+  sendGiftCardOtp: Scalars['Boolean']['output'];
   submitChooseOrderingFeedback: ChooseOrderingReviewFeedBack;
   submitRestaurantFeedback: RestaurantOrderingFeedBack;
   updateCartDetails: Scalars['Boolean']['output'];
   updateCartItem: Scalars['Boolean']['output'];
   updateCustomerDetails: Customer;
+  validateGiftCardCode: GiftCardValidationResult;
   validateLoyaltyRedemptionOnCart: Scalars['Boolean']['output'];
   validatePromoCode: PromoCode;
+  verifyGiftCardOtp: GiftCardOtpVerifyResult;
 };
 
 
@@ -1315,8 +1399,18 @@ export type MutationAddToCartArgs = {
 };
 
 
+export type MutationApplyDiscountCodeArgs = {
+  code: Scalars['String']['input'];
+};
+
+
 export type MutationCmsContactUsArgs = {
   input: CmsContactInput;
+};
+
+
+export type MutationCreateGiftCardPurchaseIntentArgs = {
+  input: PurchaseGiftCardInput;
 };
 
 
@@ -1356,6 +1450,11 @@ export type MutationReorderItemsToCartArgs = {
 };
 
 
+export type MutationSendGiftCardOtpArgs = {
+  phone: Scalars['String']['input'];
+};
+
+
 export type MutationSubmitChooseOrderingFeedbackArgs = {
   input: ChooseOrderingFeedBackInput;
 };
@@ -1381,6 +1480,11 @@ export type MutationUpdateCustomerDetailsArgs = {
 };
 
 
+export type MutationValidateGiftCardCodeArgs = {
+  code: Scalars['String']['input'];
+};
+
+
 export type MutationValidateLoyaltyRedemptionOnCartArgs = {
   input: LoyaltyInput;
 };
@@ -1388,6 +1492,12 @@ export type MutationValidateLoyaltyRedemptionOnCartArgs = {
 
 export type MutationValidatePromoCodeArgs = {
   code: Scalars['String']['input'];
+};
+
+
+export type MutationVerifyGiftCardOtpArgs = {
+  otp: Scalars['String']['input'];
+  phone: Scalars['String']['input'];
 };
 
 export type OnlineOrderTimingConfig = {
@@ -1409,7 +1519,9 @@ export type Order = {
   __typename?: 'Order';
   LoyaltyEarned?: Maybe<Scalars['Float']['output']>;
   _id: Scalars['ID']['output'];
+  addOnDeliveryFee?: Maybe<Scalars['Float']['output']>;
   appliedDiscount?: Maybe<DiscountData>;
+  appliedGiftCard?: Maybe<GiftCardRedeemData>;
   campaignDetails: CampaignDetails;
   campaignTarget: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTimeISO']['output'];
@@ -1419,7 +1531,9 @@ export type Order = {
   deliveryAddress?: Maybe<AddressInfo>;
   deliveryAmount?: Maybe<Scalars['Float']['output']>;
   deliveryDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
+  deliveryFeeDifference?: Maybe<Scalars['Float']['output']>;
   deliveryPartnerType?: Maybe<DeliveryPartnerTypeEnum>;
+  deliveryRetries?: Maybe<Array<Scalars['JSONObject']['output']>>;
   deliveryTip?: Maybe<Scalars['Float']['output']>;
   delivery_events: Array<DeliveryEvent>;
   grossAmount: Scalars['Float']['output'];
@@ -1441,6 +1555,7 @@ export type Order = {
   refundLoyalty: Scalars['Float']['output'];
   restaurant: Restaurant;
   restaurantTip?: Maybe<Scalars['Float']['output']>;
+  sendWelcomeEmail?: Maybe<Scalars['Boolean']['output']>;
   specialRemark?: Maybe<Scalars['String']['output']>;
   status: OrderStatus;
   stripeFees?: Maybe<Scalars['Float']['output']>;
@@ -1518,7 +1633,9 @@ export type OrderWithTotals = {
   __typename?: 'OrderWithTotals';
   LoyaltyEarned?: Maybe<Scalars['Float']['output']>;
   _id: Scalars['ID']['output'];
+  addOnDeliveryFee?: Maybe<Scalars['Float']['output']>;
   appliedDiscount?: Maybe<DiscountData>;
+  appliedGiftCard?: Maybe<GiftCardRedeemData>;
   campaignDetails: CampaignDetails;
   campaignTarget: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTimeISO']['output'];
@@ -1529,7 +1646,9 @@ export type OrderWithTotals = {
   deliveryAddress?: Maybe<AddressInfo>;
   deliveryAmount?: Maybe<Scalars['Float']['output']>;
   deliveryDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
+  deliveryFeeDifference?: Maybe<Scalars['Float']['output']>;
   deliveryPartnerType?: Maybe<DeliveryPartnerTypeEnum>;
+  deliveryRetries?: Maybe<Array<Scalars['JSONObject']['output']>>;
   deliveryTip?: Maybe<Scalars['Float']['output']>;
   delivery_events: Array<DeliveryEvent>;
   discountAmount: Scalars['Float']['output'];
@@ -1556,6 +1675,7 @@ export type OrderWithTotals = {
   restaurant: Restaurant;
   restaurantInfo: RestaurantReceiptInfo;
   restaurantTip?: Maybe<Scalars['Float']['output']>;
+  sendWelcomeEmail?: Maybe<Scalars['Boolean']['output']>;
   specialRemark?: Maybe<Scalars['String']['output']>;
   status: OrderStatus;
   stripeFees?: Maybe<Scalars['Float']['output']>;
@@ -1571,6 +1691,24 @@ export type OrderWithTotals = {
   updatedAt: Scalars['DateTimeISO']['output'];
   utmDetails: UtmDetails;
   visitorHash?: Maybe<Scalars['String']['output']>;
+};
+
+export type OwnedGiftCardResult = {
+  __typename?: 'OwnedGiftCardResult';
+  _id: Scalars['String']['output'];
+  amount: Scalars['Float']['output'];
+  code: Scalars['String']['output'];
+  createdAt: Scalars['DateTimeISO']['output'];
+  design: GiftCardDesign;
+  expiryDate?: Maybe<Scalars['DateTimeISO']['output']>;
+  isActive: Scalars['Boolean']['output'];
+  loyaltyPointsEarned?: Maybe<Scalars['Float']['output']>;
+  note?: Maybe<Scalars['String']['output']>;
+  recipientInfo: GiftCardPersonInfo;
+  remainingAmount?: Maybe<Scalars['Float']['output']>;
+  scheduledSendAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  sendToSelf: Scalars['Boolean']['output'];
+  status: Scalars['String']['output'];
 };
 
 export type PaymentConfigUpdatedBy = {
@@ -1591,8 +1729,9 @@ export type PaymentIntent = {
 
 export type PaymentIntentResponse = {
   __typename?: 'PaymentIntentResponse';
-  cs: Scalars['String']['output'];
-  id: Scalars['String']['output'];
+  cs?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  isFreeOrder?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export enum PaymentIntentStatusEnum {
@@ -1656,6 +1795,7 @@ export type PopulatedOrder = {
   __typename?: 'PopulatedOrder';
   _id: Scalars['String']['output'];
   appliedDiscount?: Maybe<DiscountData>;
+  appliedGiftCard?: Maybe<GiftCardRedeemData>;
   canBeReOrdered: Scalars['Boolean']['output'];
   createdAt: Scalars['DateTimeISO']['output'];
   customerInfo: CustomerReceiptInfo;
@@ -1797,6 +1937,45 @@ export type PromoNavItem = {
   navTitle: Scalars['String']['output'];
 };
 
+export type PublicGiftCardResult = {
+  __typename?: 'PublicGiftCardResult';
+  _id: Scalars['String']['output'];
+  amount: Scalars['Float']['output'];
+  code: Scalars['String']['output'];
+  createdAt: Scalars['DateTimeISO']['output'];
+  customerPaidAmount: Scalars['Float']['output'];
+  design: GiftCardDesign;
+  expiryDate?: Maybe<Scalars['DateTimeISO']['output']>;
+  isActive: Scalars['Boolean']['output'];
+  loyaltyPointsEarned?: Maybe<Scalars['Float']['output']>;
+  note?: Maybe<Scalars['String']['output']>;
+  recipientInfo: GiftCardPersonInfo;
+  remainingAmount: Scalars['Float']['output'];
+  restaurantId?: Maybe<Scalars['String']['output']>;
+  scheduledSendAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  sendToSelf: Scalars['Boolean']['output'];
+  senderInfo?: Maybe<GiftCardPersonInfo>;
+  status: Scalars['String']['output'];
+};
+
+export type PurchaseGiftCardInput = {
+  amount: Scalars['Float']['input'];
+  design: GiftCardDesign;
+  note?: InputMaybe<Scalars['String']['input']>;
+  recipientEmail: Scalars['String']['input'];
+  recipientFirstName: Scalars['String']['input'];
+  recipientLastName: Scalars['String']['input'];
+  recipientPhone?: InputMaybe<Scalars['String']['input']>;
+  scheduledSendAt?: InputMaybe<Scalars['DateTimeISO']['input']>;
+  sendToSelf: Scalars['Boolean']['input'];
+  senderEmail?: InputMaybe<Scalars['String']['input']>;
+  senderFirstName?: InputMaybe<Scalars['String']['input']>;
+  senderLastName?: InputMaybe<Scalars['String']['input']>;
+  senderOtp?: InputMaybe<Scalars['String']['input']>;
+  senderPhone?: InputMaybe<Scalars['String']['input']>;
+  visitorHash?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   calculateFinalAmount: Scalars['Float']['output'];
@@ -1819,6 +1998,7 @@ export type Query = {
   fetchProcessingFee: Scalars['Float']['output'];
   fetchRestaurantRedeemOffers: RestaurantRedeemOffers;
   fetchVisiblePromoCodes: Array<PromoCode>;
+  getAllOwnedGiftCards: Array<OwnedGiftCardResult>;
   getCmsDetails?: Maybe<CmsRestaurant>;
   getCmsPromoNavItems: Array<PromoNavItem>;
   getCmsPromoPopUp?: Maybe<CmsPromoPopup>;
@@ -1827,6 +2007,9 @@ export type Query = {
   getCustomerCategoriesAndItems: Array<CategoryItem>;
   getCustomerItem?: Maybe<ItemWithModifiersResponse>;
   getCustomerRestaurantDetails: Restaurant;
+  getGiftCardByCode: PublicGiftCardResult;
+  getGiftCardEnabled: Scalars['Boolean']['output'];
+  getMyGiftCards: Array<GetMyGiftCardsResult>;
   getPaymentStatus?: Maybe<Scalars['String']['output']>;
   getPlaceDetails?: Maybe<PlaceDetail>;
   getPlacesList: Array<Places>;
@@ -1883,6 +2066,11 @@ export type QueryGetCustomerCategoriesAndItemsArgs = {
 
 export type QueryGetCustomerItemArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type QueryGetGiftCardByCodeArgs = {
+  paymentIntent: Scalars['String']['input'];
 };
 
 
@@ -1971,6 +2159,7 @@ export type Restaurant = {
   email: Scalars['String']['output'];
   foodType?: Maybe<Array<FoodType>>;
   fulfillmentConfig?: Maybe<FulfillmentConfig>;
+  giftCardEnabled?: Maybe<Scalars['Boolean']['output']>;
   integrations: Array<IntegrationInfo>;
   loyaltyConfig?: Maybe<LoyaltyConfig>;
   meatType?: Maybe<MeatType>;
@@ -2404,7 +2593,7 @@ export type CalculateFinalAmountQuery = { __typename?: 'Query', calculateFinalAm
 export type FetchCartDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FetchCartDetailsQuery = { __typename?: 'Query', fetchCartDetails: { __typename?: 'Cart', _id: string, orderType?: OrderType | null, discountString?: string | null, discountItemImage?: string | null, discountCode?: string | null, loyaltyType?: LoyaltyRedeemType | null, loyaltyRedeemPoints?: number | null, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, customerDetails: { __typename?: 'CustomerDetails', firstName?: string | null }, delivery?: { __typename?: 'AddressInfo', _id: string, addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', type?: string | null, coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, amounts: { __typename?: 'AmountDetails', subTotalAmount?: number | null, discountAmount?: number | null, discountPercent?: number | null, discountUpto?: number | null, tipPercent: number } } };
+export type FetchCartDetailsQuery = { __typename?: 'Query', fetchCartDetails: { __typename?: 'Cart', _id: string, orderType?: OrderType | null, discountString?: string | null, discountItemImage?: string | null, discountCode?: string | null, giftCardCode?: string | null, giftCardDiscountAmount?: number | null, loyaltyType?: LoyaltyRedeemType | null, loyaltyRedeemPoints?: number | null, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, customerDetails: { __typename?: 'CustomerDetails', firstName?: string | null }, delivery?: { __typename?: 'AddressInfo', _id: string, addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', type?: string | null, coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, amounts: { __typename?: 'AmountDetails', subTotalAmount?: number | null, discountAmount?: number | null, discountPercent?: number | null, discountUpto?: number | null, tipPercent: number } } };
 
 export type FetchCartCountQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2419,7 +2608,7 @@ export type GetCmsDetailsQuery = { __typename?: 'Query', getCmsDetails?: { __typ
 export type GetCmsRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCmsRestaurantDetailsQuery = { __typename?: 'Query', getCmsRestaurantDetails?: { __typename?: 'Restaurant', _id: string, name: string, brandingLogo?: string | null, email: string, phone: string, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', displayName: string } | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null, googleMapsLink?: string | null } | null } | null };
+export type GetCmsRestaurantDetailsQuery = { __typename?: 'Query', getCmsRestaurantDetails?: { __typename?: 'Restaurant', _id: string, name: string, brandingLogo?: string | null, giftCardEnabled?: boolean | null, email: string, phone: string, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', displayName: string } | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null, googleMapsLink?: string | null } | null } | null };
 
 export type CmsContactUsMutationVariables = Exact<{
   input: CmsContactInput;
@@ -2428,6 +2617,52 @@ export type CmsContactUsMutationVariables = Exact<{
 
 export type CmsContactUsMutation = { __typename?: 'Mutation', cmsContactUs: boolean };
 
+export type SendGiftCardOtpMutationVariables = Exact<{
+  phone: Scalars['String']['input'];
+}>;
+
+
+export type SendGiftCardOtpMutation = { __typename?: 'Mutation', sendGiftCardOtp: boolean };
+
+export type VerifyGiftCardOtpMutationVariables = Exact<{
+  phone: Scalars['String']['input'];
+  otp: Scalars['String']['input'];
+}>;
+
+
+export type VerifyGiftCardOtpMutation = { __typename?: 'Mutation', verifyGiftCardOtp: { __typename?: 'GiftCardOtpVerifyResult', verified: boolean, customerId?: string | null, firstName?: string | null, lastName?: string | null } };
+
+export type CreateGiftCardPurchaseIntentMutationVariables = Exact<{
+  input: PurchaseGiftCardInput;
+}>;
+
+
+export type CreateGiftCardPurchaseIntentMutation = { __typename?: 'Mutation', createGiftCardPurchaseIntent: { __typename?: 'GiftCardPurchaseIntentResponse', clientSecret: string, paymentIntentId: string, stripeAccountId: string } };
+
+export type ValidateGiftCardCodeMutationVariables = Exact<{
+  code: Scalars['String']['input'];
+}>;
+
+
+export type ValidateGiftCardCodeMutation = { __typename?: 'Mutation', validateGiftCardCode: { __typename?: 'GiftCardValidationResult', valid: boolean, amount?: number | null, remainingAmount?: number | null, appliedDiscount?: number | null, message?: string | null } };
+
+export type ApplyDiscountCodeMutationVariables = Exact<{
+  code: Scalars['String']['input'];
+}>;
+
+
+export type ApplyDiscountCodeMutation = { __typename?: 'Mutation', applyDiscountCode: { __typename?: 'ApplyDiscountCodeResult', success: boolean, message?: string | null, type?: string | null } };
+
+export type RemoveGiftCardFromCartMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RemoveGiftCardFromCartMutation = { __typename?: 'Mutation', removeGiftCardFromCart: boolean };
+
+export type GetMyGiftCardsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMyGiftCardsQuery = { __typename?: 'Query', getMyGiftCards: Array<{ __typename?: 'GetMyGiftCardsResult', _id: string, code: string, amount: number, remainingAmount: number, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, createdAt: any, isActive: boolean, senderInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string }, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } }> };
+
 export type ValidatePromoCodeMutationVariables = Exact<{
   code: Scalars['String']['input'];
 }>;
@@ -2435,10 +2670,22 @@ export type ValidatePromoCodeMutationVariables = Exact<{
 
 export type ValidatePromoCodeMutation = { __typename?: 'Mutation', validatePromoCode: { __typename?: 'PromoCode', _id: string, code: string, discountValue?: number | null, promoCodeDiscountType: PromoDiscountType, startDate: any, uptoAmount?: number | null, endDate: any, discountItem?: { __typename?: 'Item', name: string, price: number, image?: string | null } | null } };
 
+export type GetAllOwnedGiftCardsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllOwnedGiftCardsQuery = { __typename?: 'Query', getAllOwnedGiftCards: Array<{ __typename?: 'OwnedGiftCardResult', _id: string, code: string, amount: number, remainingAmount?: number | null, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, scheduledSendAt?: any | null, createdAt: any, isActive: boolean, status: string, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } }> };
+
 export type FetchVisiblePromoCodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type FetchVisiblePromoCodesQuery = { __typename?: 'Query', fetchVisiblePromoCodes: Array<{ __typename?: 'PromoCode', _id: string, code: string, description?: string | null, isActive: boolean, minCartValue?: number | null, promoCodeDiscountType: PromoDiscountType, discountValue?: number | null, couponUsageType: CouponUsageType, uptoAmount?: number | null, discountItem?: { __typename?: 'Item', name: string, desc?: string | null, price: number, priceOptions: Array<{ __typename?: 'PriceOptions', menuType: MenuTypeEnum, price: number }> } | null }> };
+
+export type GetGiftCardByCodeQueryVariables = Exact<{
+  paymentIntent: Scalars['String']['input'];
+}>;
+
+
+export type GetGiftCardByCodeQuery = { __typename?: 'Query', getGiftCardByCode: { __typename?: 'PublicGiftCardResult', _id: string, code: string, amount: number, remainingAmount: number, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, scheduledSendAt?: any | null, createdAt: any, isActive: boolean, status: string, customerPaidAmount: number, restaurantId?: string | null, loyaltyPointsEarned?: number | null, senderInfo?: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } | null, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } } };
 
 export type AllPlacesQueryVariables = Exact<{
   input: Scalars['String']['input'];
@@ -2502,19 +2749,19 @@ export type FetchCustomerOrdersQueryVariables = Exact<{
 }>;
 
 
-export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, canBeReOrdered: boolean, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemName: string, itemRemarks?: string | null, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgName: string, pricingType: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
+export type FetchCustomerOrdersQuery = { __typename?: 'Query', fetchCustomerOrders: Array<{ __typename?: 'PopulatedOrder', _id: string, createdAt: any, orderType?: string | null, orderId: string, status?: string | null, systemRemark: string, totalAmount: number, canBeReOrdered: boolean, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', redeemType: LoyaltyRedeemType, loyaltyPointsRedeemed: number, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountValue?: number | null, discountType: string, uptoAmount?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', discountType: PromoDiscountType, code: string, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, appliedGiftCard?: { __typename?: 'GiftCardRedeemData', giftCardCode: string, amountUsed: number } | null, items: Array<{ __typename?: 'PopulatedOrderItem', qty: number, itemPrice: number, itemName: string, itemRemarks?: string | null, modifierGroups: Array<{ __typename?: 'PopulatedOrderModifierGroup', mgName: string, pricingType: string, price?: number | null, selectedModifiers: Array<{ __typename?: 'PopulatedOrderModifier', modifierName: string, modifierPrice: number, qty: number }> }> }> }> };
 
 export type FetchOrderByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, pricingType: PriceTypeEnum, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
+export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, appliedGiftCard?: { __typename?: 'GiftCardRedeemData', giftCardCode: string, amountUsed: number } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, pricingType: PriceTypeEnum, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
 
 export type CreateCheckoutPaymentIntentQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreateCheckoutPaymentIntentQuery = { __typename?: 'Query', createCheckoutPaymentIntent: { __typename?: 'PaymentIntentResponse', cs: string, id: string } };
+export type CreateCheckoutPaymentIntentQuery = { __typename?: 'Query', createCheckoutPaymentIntent: { __typename?: 'PaymentIntentResponse', cs?: string | null, id?: string | null, isFreeOrder?: boolean | null } };
 
 export type ValidateDeliveryQueryVariables = Exact<{
   input: ValidateDeliveryInput;
@@ -2614,7 +2861,12 @@ export type GetCmsPromoPopUpQuery = { __typename?: 'Query', getCmsPromoPopUp?: {
 export type GetCustomerRestaurantDetailsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null, showItemFilters?: boolean | null } | null, processingConfig?: { __typename?: 'ProcessingConfig', feePercent?: number | null, maxFeeAmount?: number | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null, googleMapsLink?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
+export type GetCustomerRestaurantDetailsQuery = { __typename?: 'Query', getCustomerRestaurantDetails: { __typename?: 'Restaurant', name: string, _id: string, brandingLogo?: string | null, giftCardEnabled?: boolean | null, website?: string | null, category?: Array<RestaurantCategory> | null, beverageCategory?: Array<BeverageCategory> | null, foodType?: Array<FoodType> | null, dineInCapacity?: number | null, type?: RestaurantType | null, meatType?: MeatType | null, restaurantConfigs?: { __typename?: 'RestaurantConfigs', pickup?: boolean | null, allowTips?: boolean | null, onlineOrdering?: boolean | null, scheduleOrders?: boolean | null, showItemFilters?: boolean | null } | null, processingConfig?: { __typename?: 'ProcessingConfig', feePercent?: number | null, maxFeeAmount?: number | null } | null, fulfillmentConfig?: { __typename?: 'FulfillmentConfig', prepTime?: number | null, deliveryTime?: number | null, largeOrderTreshold?: number | null, largeOrderExtraTime?: number | null } | null, deliveryConfig?: { __typename?: 'DeliveryConfig', provideDelivery?: boolean | null, deliveryZone?: Array<{ __typename?: 'DeliveryZone', minimumOrderValue?: number | null, _id: string, provider?: string | null, costCovered?: number | null, radius?: number | null }> | null } | null, timezone?: { __typename?: 'TimezoneData', timezoneName: string } | null, onlineOrderTimingConfig?: { __typename?: 'OnlineOrderTimingConfig', startAfterMinutes?: number | null, endBeforeMinutes?: number | null } | null, address?: { __typename?: 'AddressInfo', addressLine1: string, addressLine2?: string | null, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string, stateId: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, socialInfo?: { __typename?: 'SocialInfo', facebook?: string | null, instagram?: string | null, googleMapsLink?: string | null } | null, availability?: Array<{ __typename?: 'Availability', day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, taxRates?: Array<{ __typename?: 'TaxRateInfo', name: string, _id: string, salesTax: number }> | null } };
+
+export type GetGiftCardEnabledQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetGiftCardEnabledQuery = { __typename?: 'Query', getGiftCardEnabled: boolean };
 
 export type GetCustomerCategoriesAndItemsQueryVariables = Exact<{
   ItemOptionSelected?: InputMaybe<Array<ItemOptionsEnum> | ItemOptionsEnum>;
@@ -2794,6 +3046,8 @@ export const FetchCartDetailsDocument = gql`
     discountString
     discountItemImage
     discountCode
+    giftCardCode
+    giftCardDiscountAmount
     loyaltyType
     loyaltyRedeemPoints
     pickUpDateAndTime
@@ -2917,6 +3171,7 @@ export const GetCmsRestaurantDetailsDocument = gql`
     _id
     name
     brandingLogo
+    giftCardEnabled
     address {
       addressLine1
       addressLine2
@@ -2956,6 +3211,81 @@ export const CmsContactUsDocument = gql`
   cmsContactUs(input: $input)
 }
     `;
+export const SendGiftCardOtpDocument = gql`
+    mutation SendGiftCardOtp($phone: String!) {
+  sendGiftCardOtp(phone: $phone)
+}
+    `;
+export const VerifyGiftCardOtpDocument = gql`
+    mutation VerifyGiftCardOtp($phone: String!, $otp: String!) {
+  verifyGiftCardOtp(phone: $phone, otp: $otp) {
+    verified
+    customerId
+    firstName
+    lastName
+  }
+}
+    `;
+export const CreateGiftCardPurchaseIntentDocument = gql`
+    mutation CreateGiftCardPurchaseIntent($input: PurchaseGiftCardInput!) {
+  createGiftCardPurchaseIntent(input: $input) {
+    clientSecret
+    paymentIntentId
+    stripeAccountId
+  }
+}
+    `;
+export const ValidateGiftCardCodeDocument = gql`
+    mutation ValidateGiftCardCode($code: String!) {
+  validateGiftCardCode(code: $code) {
+    valid
+    amount
+    remainingAmount
+    appliedDiscount
+    message
+  }
+}
+    `;
+export const ApplyDiscountCodeDocument = gql`
+    mutation ApplyDiscountCode($code: String!) {
+  applyDiscountCode(code: $code) {
+    success
+    message
+    type
+  }
+}
+    `;
+export const RemoveGiftCardFromCartDocument = gql`
+    mutation RemoveGiftCardFromCart {
+  removeGiftCardFromCart
+}
+    `;
+export const GetMyGiftCardsDocument = gql`
+    query GetMyGiftCards {
+  getMyGiftCards {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    sendToSelf
+    note
+    expiryDate
+    createdAt
+    isActive
+    senderInfo {
+      firstName
+      lastName
+      email
+    }
+    recipientInfo {
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
 export const ValidatePromoCodeDocument = gql`
     mutation ValidatePromoCode($code: String!) {
   validatePromoCode(code: $code) {
@@ -2971,6 +3301,29 @@ export const ValidatePromoCodeDocument = gql`
       price
       image
     }
+  }
+}
+    `;
+export const GetAllOwnedGiftCardsDocument = gql`
+    query GetAllOwnedGiftCards {
+  getAllOwnedGiftCards {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    recipientInfo {
+      firstName
+      lastName
+      email
+    }
+    sendToSelf
+    note
+    expiryDate
+    scheduledSendAt
+    createdAt
+    isActive
+    status
   }
 }
     `;
@@ -2994,6 +3347,37 @@ export const FetchVisiblePromoCodesDocument = gql`
         menuType
         price
       }
+    }
+  }
+}
+    `;
+export const GetGiftCardByCodeDocument = gql`
+    query getGiftCardByCode($paymentIntent: String!) {
+  getGiftCardByCode(paymentIntent: $paymentIntent) {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    sendToSelf
+    note
+    expiryDate
+    scheduledSendAt
+    createdAt
+    isActive
+    status
+    customerPaidAmount
+    restaurantId
+    loyaltyPointsEarned
+    senderInfo {
+      firstName
+      lastName
+      email
+    }
+    recipientInfo {
+      firstName
+      lastName
+      email
     }
   }
 }
@@ -3132,6 +3516,10 @@ export const FetchCustomerOrdersDocument = gql`
         uptoAmount
       }
     }
+    appliedGiftCard {
+      giftCardCode
+      amountUsed
+    }
     items {
       qty
       itemPrice
@@ -3207,6 +3595,10 @@ export const FetchOrderByIdDocument = gql`
         uptoAmount
       }
     }
+    appliedGiftCard {
+      giftCardCode
+      amountUsed
+    }
     createdAt
     pickUpDateAndTime
     deliveryDateAndTime
@@ -3272,6 +3664,7 @@ export const CreateCheckoutPaymentIntentDocument = gql`
   createCheckoutPaymentIntent {
     cs
     id
+    isFreeOrder
   }
 }
     `;
@@ -3465,6 +3858,7 @@ export const GetCustomerRestaurantDetailsDocument = gql`
       }
     }
     brandingLogo
+    giftCardEnabled
     website
     socialInfo {
       facebook
@@ -3491,6 +3885,11 @@ export const GetCustomerRestaurantDetailsDocument = gql`
       salesTax
     }
   }
+}
+    `;
+export const GetGiftCardEnabledDocument = gql`
+    query getGiftCardEnabled {
+  getGiftCardEnabled
 }
     `;
 export const GetCustomerCategoriesAndItemsDocument = gql`
@@ -3707,11 +4106,38 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     cmsContactUs(variables: CmsContactUsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CmsContactUsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CmsContactUsMutation>(CmsContactUsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'cmsContactUs', 'mutation', variables);
     },
+    SendGiftCardOtp(variables: SendGiftCardOtpMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SendGiftCardOtpMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SendGiftCardOtpMutation>(SendGiftCardOtpDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SendGiftCardOtp', 'mutation', variables);
+    },
+    VerifyGiftCardOtp(variables: VerifyGiftCardOtpMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<VerifyGiftCardOtpMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<VerifyGiftCardOtpMutation>(VerifyGiftCardOtpDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'VerifyGiftCardOtp', 'mutation', variables);
+    },
+    CreateGiftCardPurchaseIntent(variables: CreateGiftCardPurchaseIntentMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CreateGiftCardPurchaseIntentMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CreateGiftCardPurchaseIntentMutation>(CreateGiftCardPurchaseIntentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CreateGiftCardPurchaseIntent', 'mutation', variables);
+    },
+    ValidateGiftCardCode(variables: ValidateGiftCardCodeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ValidateGiftCardCodeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ValidateGiftCardCodeMutation>(ValidateGiftCardCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ValidateGiftCardCode', 'mutation', variables);
+    },
+    ApplyDiscountCode(variables: ApplyDiscountCodeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ApplyDiscountCodeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ApplyDiscountCodeMutation>(ApplyDiscountCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ApplyDiscountCode', 'mutation', variables);
+    },
+    RemoveGiftCardFromCart(variables?: RemoveGiftCardFromCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<RemoveGiftCardFromCartMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RemoveGiftCardFromCartMutation>(RemoveGiftCardFromCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RemoveGiftCardFromCart', 'mutation', variables);
+    },
+    GetMyGiftCards(variables?: GetMyGiftCardsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetMyGiftCardsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetMyGiftCardsQuery>(GetMyGiftCardsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetMyGiftCards', 'query', variables);
+    },
     ValidatePromoCode(variables: ValidatePromoCodeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ValidatePromoCodeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ValidatePromoCodeMutation>(ValidatePromoCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ValidatePromoCode', 'mutation', variables);
     },
+    GetAllOwnedGiftCards(variables?: GetAllOwnedGiftCardsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetAllOwnedGiftCardsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAllOwnedGiftCardsQuery>(GetAllOwnedGiftCardsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetAllOwnedGiftCards', 'query', variables);
+    },
     fetchVisiblePromoCodes(variables?: FetchVisiblePromoCodesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FetchVisiblePromoCodesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FetchVisiblePromoCodesQuery>(FetchVisiblePromoCodesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'fetchVisiblePromoCodes', 'query', variables);
+    },
+    getGiftCardByCode(variables: GetGiftCardByCodeQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetGiftCardByCodeQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetGiftCardByCodeQuery>(GetGiftCardByCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getGiftCardByCode', 'query', variables);
     },
     AllPlaces(variables: AllPlacesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AllPlacesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<AllPlacesQuery>(AllPlacesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllPlaces', 'query', variables);
@@ -3796,6 +4222,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetCustomerRestaurantDetails(variables?: GetCustomerRestaurantDetailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCustomerRestaurantDetailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCustomerRestaurantDetailsQuery>(GetCustomerRestaurantDetailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetCustomerRestaurantDetails', 'query', variables);
+    },
+    getGiftCardEnabled(variables?: GetGiftCardEnabledQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetGiftCardEnabledQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetGiftCardEnabledQuery>(GetGiftCardEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getGiftCardEnabled', 'query', variables);
     },
     getCustomerCategoriesAndItems(variables?: GetCustomerCategoriesAndItemsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetCustomerCategoriesAndItemsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCustomerCategoriesAndItemsQuery>(GetCustomerCategoriesAndItemsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCustomerCategoriesAndItems', 'query', variables);

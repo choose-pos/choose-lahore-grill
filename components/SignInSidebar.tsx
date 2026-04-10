@@ -16,6 +16,7 @@ import { isContrastOkay } from "@/utils/isContrastOkay";
 import { getYear } from "date-fns";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { IoArrowBack, IoClose } from "react-icons/io5";
 import { DatePicker } from "./ui/date-picker";
 
@@ -53,7 +54,8 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
   const [programName, setProgramName] = useState<string | null>(null);
   const { setToastData } = ToastStore();
   const { setMeCustomerData } = meCustomerStore();
-  const { setIsSignUpOpen, isSignUpOpen } = useSidebarStore();
+  const { setIsSignUpOpen, isSignUpOpen, redirectAfterAuth, setRedirectAfterAuth } = useSidebarStore();
+  const router = useRouter();
 
   useEffect(() => {
     if (isOpen) {
@@ -202,6 +204,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
     setIsSignUpOpen(false);
     setShowOtpPage(false);
     setIsResendClicked(false);
+    setRedirectAfterAuth(null);
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
@@ -238,9 +241,13 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
           if (res) {
             setMeCustomerData(res);
           }
-          // setTimeout(() => {
-          //   location.reload();
-          // }, 200);
+          if (redirectAfterAuth) {
+            const url = redirectAfterAuth;
+            setRedirectAfterAuth(null);
+            router.push(url);
+          } else {
+            location.reload();
+          }
         }
       } else if (signInOtpId) {
         const data = await sdk.customerLoginVerification({
@@ -255,9 +262,22 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
             type: "success",
             message: "Signed in Successfully",
           });
-          setTimeout(() => {
-            location.reload();
-          }, 200);
+          const res = await getMeCustomer();
+          if (res) {
+            setMeCustomerData(res);
+            
+          }
+          if (redirectAfterAuth) {
+            const url = redirectAfterAuth;
+            setRedirectAfterAuth(null);
+            setTimeout(() => {
+              router.push(url);
+            }, 200);
+          } else {
+            setTimeout(() => {
+              location.reload();
+            }, 200);
+          }
         }
       }
     } catch (error) {
@@ -639,7 +659,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
               style={{
                 color: isContrastOkay(
                   Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                  Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                 )
                   ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                   : Env.NEXT_PUBLIC_TEXT_COLOR,

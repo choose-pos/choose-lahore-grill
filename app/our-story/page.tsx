@@ -238,13 +238,20 @@ async function getOfferLinks() {
 }
 
 export default async function OurStoryPage() {
-  const [ourStoryData, restaurantData, cmsData] = await Promise.all([
+  const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+  const [
+    ourStoryData,
+    restaurantData,
+    cmsData,
+    offerNavItems,
+    giftCardEnabled,
+  ] = await Promise.all([
     getOurStoryData(),
     getRestaurantData(),
     getRestaurtCmsData(),
+    getOfferLinks(),
+    sdk.getGiftCardEnabled({}, { cookie: cookieVal }),
   ]);
-
-  const offerNavItems = await getOfferLinks();
 
   if (!restaurantData || !ourStoryData) {
     return <div>Loading...</div>;
@@ -278,6 +285,7 @@ export default async function OurStoryPage() {
       ourStoryPageData={ourStoryData}
       restaurantData={restaurantData}
       navItems={navItems}
+      giftCardEnabled={giftCardEnabled?.getGiftCardEnabled ?? false}
       offerNavTitles={offerNavItems?.map((e) => {
         return {
           title: e.navTitle,

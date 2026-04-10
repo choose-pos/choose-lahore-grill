@@ -21,6 +21,19 @@ export const extractErrorMessage = (error: any): string => {
   }
 };
 
+export const formatGiftCardCode = (c: string) => {
+  let maskedCode = c;
+  const parts = c.split("-");
+  if (parts.length === 2) {
+    const prefix = parts[0];
+    const suffix = parts[1];
+    const visiblePart = suffix.substring(0, 2);
+    const maskedPart = "X".repeat(suffix.length - 2);
+    maskedCode = `${prefix}-${visiblePart}${maskedPart}`;
+  }
+  return maskedCode;
+};
+
 export const extractFreeDiscountItemDetails = (
   message: string
 ): { name: string; price: string } | null => {

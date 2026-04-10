@@ -28,6 +28,8 @@ export const refreshCartDetails =
           pickUpDateAndTime: data.fetchCartDetails.pickUpDateAndTime,
           deliveryDateAndTime: data.fetchCartDetails.deliveryDateAndTime,
           discountString: data.fetchCartDetails.discountString,
+          discountCode: data.fetchCartDetails.discountCode ?? "",
+          giftCardCode: data.fetchCartDetails.giftCardCode ?? null,
           loyaltyType: data.fetchCartDetails.loyaltyType,
           loyaltyRedeemPoints: data.fetchCartDetails.loyaltyRedeemPoints,
           discountItemImage: data.fetchCartDetails.discountItemImage,

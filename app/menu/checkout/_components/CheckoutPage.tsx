@@ -139,6 +139,8 @@ const CheckoutPage = ({
             deliveryDateAndTime: cartStore.deliveryDateAndTime,
             discountString: cartStore.discountString,
             discountItemImage: cartStore.discountItemImage ?? null,
+            giftCardCode: cartStore.giftCardCode ?? null,
+            giftCardDiscountAmount: cartStore.giftCardDiscountAmount ?? null,
           };
           setCartDetails(groupedCart);
 
@@ -210,10 +212,17 @@ const CheckoutPage = ({
       tipAmt: 0,
       platformFeeAmt: 0,
       deliveryFeeAmt: null,
+      giftCardAmt: 0,
     };
 
     finalAmts.subTotalAmt = cartAmts.subTotalAmount ?? 0;
-    finalAmts.discAmt = cartAmts.discountAmount ?? 0;
+
+    // Check if gift card is applied - if so, discount should be 0
+    const hasGiftCard = !!(
+      cartDetails?.giftCardCode && cartDetails?.giftCardDiscountAmount
+    );
+
+    finalAmts.discAmt = hasGiftCard ? 0 : (cartAmts.discountAmount ?? 0);
     finalAmts.netAmt = parseFloat(
       (finalAmts.subTotalAmt - finalAmts.discAmt).toFixed(2)
     );
@@ -234,19 +243,80 @@ const CheckoutPage = ({
       feePercent = processingConfig.feePercent;
       maxFeeAmount = processingConfig.maxFeeAmount ?? null;
     }
-    // Calculate fee
-    let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
 
-    // Cap to max amount if specified
-    if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
-      calculatedPlatformFee = maxFeeAmount;
+    // For gift card orders, calculate platform fees AFTER gift card deduction
+    if (hasGiftCard) {
+      // Calculate total without platform fees first
+      const totalWithoutPlatformFee =
+        finalAmts.netAmt +
+        finalAmts.taxAmt +
+        finalAmts.tipAmt +
+        (finalAmts.deliveryFeeAmt ?? 0);
+
+      // Git card amount capped at totalWithoutPlatformFee
+      finalAmts.giftCardAmt = parseFloat(
+        Math.min(
+          cartDetails.giftCardDiscountAmount ?? 0,
+          totalWithoutPlatformFee,
+        ).toFixed(2),
+      );
+
+      // Remaining after gift card (before platform fee)
+      const remainingAmount = parseFloat(
+        (totalWithoutPlatformFee - finalAmts.giftCardAmt).toFixed(2),
+      );
+
+      if (remainingAmount > 0) {
+        // Platform fee on SUBTOTAL (item total), not on remaining
+        let calculatedPlatformFee = (feePercent / 100) * finalAmts.subTotalAmt;
+        if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
+          calculatedPlatformFee = maxFeeAmount;
+        }
+        const stripeCharge = parseFloat(
+          (remainingAmount + calculatedPlatformFee).toFixed(2),
+        );
+        // Waive platform fee if fee >= stripe charge (all money goes to restaurant)
+        if (calculatedPlatformFee >= stripeCharge) {
+          finalAmts.platformFeeAmt = 0;
+        } else {
+          finalAmts.platformFeeAmt = parseFloat(
+            calculatedPlatformFee.toFixed(2),
+          );
+        }
+      } else {
+        // Full coverage — no platform fee
+        finalAmts.platformFeeAmt = 0;
+      }
+    } else {
+      // No gift card — calculate platform fees on net amount (original logic unchanged)
+      let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
+      if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
+        calculatedPlatformFee = maxFeeAmount;
+      }
+      finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
+      finalAmts.giftCardAmt = 0;
     }
 
-    finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
     finalAmts.deliveryFeeAmt = deliveryFee;
 
     setAmounts(finalAmts);
-  }, [restaurantData, cartDetails, deliveryFee, processingConfig,freeItemInCart]);
+
+    // Total before gift card is subtracted
+    const calculatedTotal =
+      finalAmts.netAmt +
+      finalAmts.taxAmt +
+      finalAmts.tipAmt +
+      finalAmts.platformFeeAmt +
+      (finalAmts.deliveryFeeAmt ?? 0);
+    setTotalAmount(calculatedTotal);
+  }, [
+    restaurantData,
+    cartDetails,
+    deliveryFee,
+    processingConfig,
+    freeItemInCart,
+    setTotalAmount,
+  ]);
 
     useEffect(() => {
     const observer = new IntersectionObserver(

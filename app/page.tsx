@@ -39,6 +39,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ),
   ]);
 
+
+
   if (!cmsData?.getCmsDetails) {
     return {
       title: "Best Restaurant in Your Area",
@@ -86,10 +88,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+
+
 export default async function Home() {
   const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
 
-  const [cmsData, restaurantData] = await Promise.all([
+  const [cmsData, restaurantData, giftCardEnabled] = await Promise.all([
     sdk.GetCmsDetails(
       {},
       {
@@ -102,7 +106,15 @@ export default async function Home() {
         cookie: cookieVal,
       }
     ),
+    sdk.getGiftCardEnabled(
+      {},
+      {
+        cookie: cookieVal,
+      }
+    ),
   ]);
+
+  const giftCardEnabledData = giftCardEnabled?.getGiftCardEnabled ?? false;
 
   async function getOfferLinks() {
     try {
@@ -300,6 +312,7 @@ export default async function Home() {
       <div className="flex flex-col min-h-screen overflow-hidden">
         {/* TODO: Need to fix the import for this component */}
         <Navbar
+          giftCardEnabled={giftCardEnabledData ?? false}
           email={email}
           phone={phone}
           navItems={navItems}

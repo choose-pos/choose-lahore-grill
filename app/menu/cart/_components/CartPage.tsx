@@ -1,4 +1,5 @@
 "use client";
+import CustomerVerification from "@/components/checkout/CustomerVerification";
 import ItemEditScreen from "@/components/cart/ItemEditScreen";
 import { Env } from "@/env";
 import {
@@ -22,8 +23,12 @@ import {
   RestaurantRedeemOffers,
   TAmounts,
 } from "@/utils/types";
-import { extractErrorMessage, extractFreeDiscountItemDetails } from "@/utils/UtilFncs";
-import { AnimatePresence } from "framer-motion";
+import {
+  extractErrorMessage,
+  extractFreeDiscountItemDetails,
+} from "@/utils/UtilFncs";
+import { AnimatePresence, motion } from "framer-motion";
+import { fadeIn } from "@/utils/motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CartBreakdown from "./CartBreakdown";
@@ -74,7 +79,7 @@ const CartPage = ({
     setTotalAmount,
     setFreeItemImage,
   } = useCartStore();
-  const { setMeCustomerData } = meCustomerStore();
+  const { meCustomerData, setMeCustomerData } = meCustomerStore();
 
   // States
   const [stateChange, setStateChange] = useState<boolean>(false);
@@ -83,14 +88,16 @@ const CartPage = ({
   const [editingItem, setEditingItem] = useState<GroupedCartItem | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isCartLoading, setIsCartLoading] = useState<boolean>(true);
+  const [isOtpVerified, setIsOtpVerified] = useState<boolean>(false);
+  const [placeOrderError, setPlaceOrderError] = useState<string>();
   const { customerData } = CustomerDataStore();
   const { setToastData } = ToastStore();
   const { specialRemarks } = useCartStore();
   const totalRef = useRef<HTMLDivElement>(null);
   const [isTotalVisible, setIsTotalVisible] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [promoRemovedMsg, setPromoRemovedMsg] = useState<string | null>(null);
 
-
-  
   useEffect(() => {
     const el = totalRef.current;
     if (!el) return;
@@ -137,9 +144,15 @@ const CartPage = ({
   }, [restaurantInfo, setRestaurantData]);
 
   useEffect(() => {
+    // If user changes or removes promo code, reset their otp verified status
+    // so they are prompted to verify guest details again
+    setIsOtpVerified(false);
+  }, [cartDetails?.discountCode, cartDetails?.discountString]);
+
+  useEffect(() => {
     // Fetching cart details and setting in store
     const fetchCartDets = async () => {
-       setIsCartLoading(true);
+      setIsCartLoading(true);
       try {
         const [
           cartCountReq,
@@ -158,7 +171,6 @@ const CartPage = ({
         if (!checkDeliveryAvailable.checkDeliveryAvailable) {
           replace(`/menu?delivery=${true}`);
         }
-
         let cartCount = cartCountReq.fetchCartCount;
         let cartStore = cartStoreReq.fetchCartDetails;
         const cartItems = cartItemsReq.groupedCart;
@@ -207,6 +219,8 @@ const CartPage = ({
             deliveryDateAndTime: cartStore.deliveryDateAndTime,
             discountString: cartStore.discountString,
             discountCode: cartStore.discountCode ?? "",
+            giftCardCode: cartStore.giftCardCode ?? null,
+            giftCardDiscountAmount: cartStore.giftCardDiscountAmount ?? null,
             loyaltyRedeemPoints: cartStore.loyaltyRedeemPoints ?? 0,
             loyaltyType: cartStore.loyaltyType ?? LoyaltyRedeemType.Discount,
             discountItemImage: cartStore.discountItemImage ?? null,
@@ -215,7 +229,7 @@ const CartPage = ({
 
           // Check if we have a free item
           const freeItemObj = extractFreeDiscountItemDetails(
-            groupedCart.discountString ?? ""
+            groupedCart.discountString ?? "",
           );
 
           setFreeItemInCart(freeItemObj);
@@ -277,19 +291,26 @@ const CartPage = ({
       tipAmt: 0,
       platformFeeAmt: 0,
       deliveryFeeAmt: null,
+      giftCardAmt: 0,
     };
 
     finalAmts.subTotalAmt = cartAmts.subTotalAmount ?? 0;
-     finalAmts.discAmt = cartAmts.discountAmount ?? 0;
+
+    // Check if gift card is applied - if so, discount should be 0
+    const hasGiftCard = !!(
+      cartDetails?.giftCardCode && cartDetails?.giftCardDiscountAmount
+    );
+
+    finalAmts.discAmt = hasGiftCard ? 0 : (cartAmts.discountAmount ?? 0);
     finalAmts.netAmt = parseFloat(
-      (finalAmts.subTotalAmt - finalAmts.discAmt).toFixed(2)
+      (finalAmts.subTotalAmt - finalAmts.discAmt).toFixed(2),
     );
     finalAmts.taxAmt = parseFloat(
-      ((taxPercent / 100) * finalAmts.netAmt).toFixed(2)
+      ((taxPercent / 100) * finalAmts.netAmt).toFixed(2),
     );
-     const tipP = (cartAmts.tipPercent ?? 0) / 100;
-    finalAmts.tipAmt = parseFloat((tipP * finalAmts.subTotalAmt).toFixed(2));
+    const tipP = (cartAmts.tipPercent ?? 0) / 100;
 
+    finalAmts.tipAmt = parseFloat((tipP * finalAmts.subTotalAmt).toFixed(2));
     // Calculate processing fee with restaurant-specific or global config (same logic as backend)
     let feePercent = 0;
     let maxFeeAmount: number | null = null;
@@ -304,23 +325,84 @@ const CartPage = ({
       maxFeeAmount = processingConfig.maxFeeAmount ?? null;
     }
 
-    // Calculate fee
-    let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
+    if (hasGiftCard) {
+      // Calculate total without platform fees first
+      const totalWithoutPlatformFee =
+        finalAmts.netAmt +
+        finalAmts.taxAmt +
+        finalAmts.tipAmt +
+        (finalAmts.deliveryFeeAmt ?? 0);
 
-    // Cap to max amount if specified
-    if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
-      calculatedPlatformFee = maxFeeAmount;
+      // Git card amount capped at totalWithoutPlatformFee
+      finalAmts.giftCardAmt = parseFloat(
+        Math.min(
+          cartDetails.giftCardDiscountAmount ?? 0,
+          totalWithoutPlatformFee,
+        ).toFixed(2),
+      );
+
+      // Remaining after gift card (before platform fee)
+      const remainingAmount = parseFloat(
+        (totalWithoutPlatformFee - finalAmts.giftCardAmt).toFixed(2),
+      );
+
+      if (remainingAmount > 0) {
+        // Platform fee on SUBTOTAL (item total), not on remaining
+        let calculatedPlatformFee = (feePercent / 100) * finalAmts.subTotalAmt;
+        if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
+          calculatedPlatformFee = maxFeeAmount;
+        }
+        const stripeCharge = parseFloat(
+          (remainingAmount + calculatedPlatformFee).toFixed(2),
+        );
+        // Waive platform fee if fee >= stripe charge (all money goes to restaurant)
+        if (calculatedPlatformFee >= stripeCharge) {
+          finalAmts.platformFeeAmt = 0;
+        } else {
+          finalAmts.platformFeeAmt = parseFloat(
+            calculatedPlatformFee.toFixed(2),
+          );
+        }
+      } else {
+        // Full coverage — no platform fee
+        finalAmts.platformFeeAmt = 0;
+      }
+    } else {
+      // No gift card — calculate platform fees on net amount (original logic unchanged)
+      let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
+      if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
+        calculatedPlatformFee = maxFeeAmount;
+      }
+      finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
+      finalAmts.giftCardAmt = 0;
     }
-    finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
+
     finalAmts.deliveryFeeAmt = deliveryFee;
 
     setAmounts(finalAmts);
-  }, [restaurantData, cartDetails, deliveryFee, processingConfig, freeItemInCart]);
+
+    // Total before gift card is subtracted
+    const calculatedTotal =
+      finalAmts.netAmt +
+      finalAmts.taxAmt +
+      finalAmts.tipAmt +
+      finalAmts.platformFeeAmt +
+      (finalAmts.deliveryFeeAmt ?? 0);
+    setTotalAmount(calculatedTotal);
+  }, [
+    restaurantData,
+    cartDetails,
+    deliveryFee,
+    processingConfig,
+    freeItemInCart,
+    setTotalAmount,
+  ]);
 
   const handleProceedToCheckout = async () => {
     if (!amounts) return;
     setActionLoading(true);
-    // Calculate total amount
+
+    // Total before gift card deduction
     const total =
       amounts.subTotalAmt -
       amounts.discAmt +
@@ -329,38 +411,48 @@ const CartPage = ({
       amounts.platformFeeAmt +
       (amounts.deliveryFeeAmt ?? 0);
 
-    if (total === 0) {
+    // Amount the user actually needs to pay after gift card deduction
+    const amountToPay = parseFloat(
+      Math.max(0, total - (amounts?.giftCardAmt ?? 0)).toFixed(2),
+    );
+
+    if (amountToPay === 0) {
       try {
         const input: CreateOrderWihoutPaymentInput = {
-          discount: cartDetails?.discountCode
+          discount: cartDetails?.giftCardCode
             ? {
-                discountType: OrderDiscountType.Promo,
-                promoCode: cartDetails.discountCode,
+                discountType: OrderDiscountType.Giftcard,
+                giftCardCode: cartDetails.giftCardCode,
+                giftCardAmount: cartDetails.giftCardDiscountAmount ?? undefined,
               }
-            : cartDetails?.loyaltyRedeemPoints
+            : cartDetails?.discountCode
               ? {
-                  discountType: OrderDiscountType.Loyalty,
-                  loyaltyInput: {
-                    loyaltyPointsRedeemed: cartDetails.loyaltyRedeemPoints,
-                    redeemType:
-                      cartDetails.loyaltyType || LoyaltyRedeemType.Discount,
-                  },
+                  discountType: OrderDiscountType.Promo,
+                  promoCode: cartDetails.discountCode,
                 }
-              : null,
-          guestCustomerDetails:
-            !customerData && customerData ? customerData : null,
+              : cartDetails?.loyaltyRedeemPoints
+                ? {
+                    discountType: OrderDiscountType.Loyalty,
+                    loyaltyInput: {
+                      loyaltyPointsRedeemed: cartDetails.loyaltyRedeemPoints,
+                      redeemType:
+                        cartDetails.loyaltyType || LoyaltyRedeemType.Discount,
+                    },
+                  }
+                : null,
+          guestCustomerDetails: customerData ?? null,
           specialRemark: specialRemarks || null,
         };
 
         const response = await fetchWithAuth(() =>
           sdk.createOrderWithoutPayment({
             createOrder: input,
-          })
+          }),
         );
 
         if (response.createOrderWithoutPayment?.success) {
           replace(
-            `/menu/redirect/free-order?orderId=${response.createOrderWithoutPayment.orderId}`
+            `/menu/redirect/free-order?orderId=${response.createOrderWithoutPayment.orderId}`,
           );
         }
       } catch (error) {
@@ -376,6 +468,20 @@ const CartPage = ({
     }
   };
 
+  const handleCloseGuestModal = async () => {
+    setShowGuestModal(false);
+
+    try {
+      // Reset OTP verification so user must verify again
+      setIsOtpVerified(false);
+
+      // Refresh cart data to reflect removal
+      setStateChange((prev) => !prev);
+    } catch (error) {
+      console.log("Error removing offer on modal close:", error);
+    }
+  };
+
   const total =
     (amounts?.subTotalAmt ?? 0) -
     (amounts?.discAmt ?? 0) +
@@ -383,6 +489,11 @@ const CartPage = ({
     (amounts?.tipAmt ?? 0) +
     (amounts?.platformFeeAmt ?? 0) +
     (amounts?.deliveryFeeAmt ?? 0);
+
+  // The amount the user actually needs to pay after gift card deduction
+  const amountToPay = parseFloat(
+    Math.max(0, total - (amounts?.giftCardAmt ?? 0)).toFixed(2),
+  );
 
   return (
     <div className="w-full h-full min-h-screen bg-white flex flex-col justify-between items-center">
@@ -454,11 +565,17 @@ const CartPage = ({
               directly instead of third-party delivery apps
             </p>
             <button
-              // onClick={() => {
-              //   push("/menu/checkout");
-              // }}
-              disabled={actionLoading || isCartLoading}
-              onClick={handleProceedToCheckout}
+              disabled={
+                actionLoading ||
+                isCartLoading
+              }
+              onClick={() => {
+                if (amountToPay === 0 && !meCustomerData && !isOtpVerified) {
+                  setShowGuestModal(true);
+                } else {
+                  handleProceedToCheckout();
+                }
+              }}
               className="w-full bg-primary py-2 rounded-md hover:bg-opacity-90 transition-all duration-200 font-subheading-oo font-semibold disabled:opacity-50"
               style={{
                 color: isContrastOkay(
@@ -473,9 +590,11 @@ const CartPage = ({
                 ? "Loading cart..."
                 : actionLoading
                   ? "Processing..."
-                  : total === 0
+                  : (amountToPay === 0 && !meCustomerData && !isOtpVerified)
                     ? "Place Order"
-                    : "Continue to Payment"}
+                    : amountToPay === 0
+                      ? "Place Order"
+                      : "Continue to Payment"}
             </button>
           </div>
           <br />
@@ -487,7 +606,7 @@ const CartPage = ({
         <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t z-20">
           <div className="flex justify-between items-center mb-1 font-subheading-oo font-semibold">
             <span className="text-base ">Order Total</span>
-            <span className="text-base ">${total.toFixed(2)}</span>
+            <span className="text-base ">${amountToPay.toFixed(2)}</span>
           </div>
           <p className="text-xs text-green-700 font-subheading-oo font-semibold mb-3">
             You&apos;re saving up to $
@@ -495,8 +614,17 @@ const CartPage = ({
             directly instead of third-party delivery apps
           </p>
           <button
-            disabled={actionLoading || isCartLoading}
-            onClick={handleProceedToCheckout}
+            disabled={
+              actionLoading ||
+              isCartLoading
+            }
+            onClick={() => {
+              if (amountToPay === 0 && !meCustomerData && !isOtpVerified) {
+                setShowGuestModal(true);
+              } else {
+                handleProceedToCheckout();
+              }
+            }}
             className="w-full bg-primary py-2 rounded-md hover:bg-opacity-90 transition-all duration-200 font-subheading-oo font-semibold disabled:opacity-50"
             style={{
               color: isContrastOkay(
@@ -511,9 +639,11 @@ const CartPage = ({
               ? "Loading cart..."
               : actionLoading
                 ? "Processing..."
-                : total === 0
+                : (amountToPay === 0 && !meCustomerData && !isOtpVerified)
                   ? "Place Order"
-                  : "Continue to Payment"}
+                  : amountToPay === 0
+                    ? "Place Order"
+                    : "Continue to Payment"}
           </button>
         </div>
       )}
@@ -526,6 +656,134 @@ const CartPage = ({
             onClose={() => setIsEditing(false)}
             refreshData={() => setStateChange((prev) => !prev)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Guest Modal */}
+      <AnimatePresence>
+        {showGuestModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 sm:p-4"
+            onClick={handleCloseGuestModal}
+          >
+            <motion.div
+              variants={fadeIn("up", "tween", 0, 0.25)}
+              initial="hidden"
+              animate="show"
+              exit="hidden"
+              className="bg-white w-full sm:max-w-xl rounded-t-md sm:rounded-md max-h-[90vh] overflow-y-auto shadow-xl flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center p-4 border-b shrink-0">
+                <h2 className="font-subheading-oo font-semibold text-xl capitalize">
+                  Guest Details
+                </h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCloseGuestModal}
+                    className="hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                    aria-label="Close modal"
+                  >
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div className="px-6 pb-6 sm:pb-6 pt-4 overflow-y-auto">
+                <CustomerVerification
+                  hideHeading
+                  isOtpVerified={isOtpVerified}
+                  setIsOtpVerified={setIsOtpVerified}
+                  setPlaceOrderError={setPlaceOrderError}
+                  amounts={amounts}
+                  loyaltyRule={loyaltyRule}
+                  refreshData={() => setStateChange((prev) => !prev)}
+                  onPromoCodeRemoved={(msg) => {
+                    setShowGuestModal(false);
+                    setTimeout(() => {
+                      setPromoRemovedMsg(msg);
+                      setIsOtpVerified(false);
+                    }, 500);
+                  }}
+                  onProceedBtn={async () => {
+                    await handleProceedToCheckout();
+                  }}
+                  proceedLoading={actionLoading}
+                  proceedBtnText={amountToPay === 0 ? "Place Order" : "Continue to Payment"}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Promo Removed Notice Modal */}
+      <AnimatePresence>
+        {promoRemovedMsg && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+            onClick={() => setPromoRemovedMsg(null)}
+          >
+            <motion.div
+              variants={fadeIn("up", "tween", 0, 0.25)}
+              initial="hidden"
+              animate="show"
+              exit="hidden"
+              className="bg-white w-full sm:max-w-md rounded-md shadow-xl flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center p-5 border-b shrink-0">
+                <h3 className="text-xl font-semibold text-gray-900 font-subheading-oo">
+                  Offer Not Applicable
+                </h3>
+                <button
+                  onClick={() => setPromoRemovedMsg(null)}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                  aria-label="Close modal"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-700 font-body-oo text-base leading-relaxed">
+                  {promoRemovedMsg}
+                </p>
+                <div className="mt-8 flex justify-end">
+                  <button
+                    onClick={() => setPromoRemovedMsg(null)}
+                    className="bg-primary text-white font-subheading-oo font-semibold py-2 px-6 rounded-md hover:bg-opacity-90 transition-all cursor-pointer"
+                    style={{
+                      color: isContrastOkay(
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                      )
+                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        : Env.NEXT_PUBLIC_TEXT_COLOR,
+                    }}
+                  >
+                    Okay
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

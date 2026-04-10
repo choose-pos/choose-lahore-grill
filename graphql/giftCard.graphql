@@ -1,8 +1,70 @@
-# mutation createGiftCard($input: CreateGiftCardInput!) {
-#   createGiftCard(input: $input) {
-#     code
-#   }
-# }
+mutation SendGiftCardOtp($phone: String!) {
+  sendGiftCardOtp(phone: $phone)
+}
+
+mutation VerifyGiftCardOtp($phone: String!, $otp: String!) {
+  verifyGiftCardOtp(phone: $phone, otp: $otp) {
+    verified
+    customerId
+    firstName
+    lastName
+  }
+}
+
+mutation CreateGiftCardPurchaseIntent($input: PurchaseGiftCardInput!) {
+  createGiftCardPurchaseIntent(input: $input) {
+    clientSecret
+    paymentIntentId
+    stripeAccountId
+  }
+}
+
+mutation ValidateGiftCardCode($code: String!) {
+  validateGiftCardCode(code: $code) {
+    valid
+    amount
+    remainingAmount
+    appliedDiscount
+    message
+  }
+}
+
+mutation ApplyDiscountCode($code: String!) {
+  applyDiscountCode(code: $code) {
+    success
+    message
+    type
+  }
+}
+
+mutation RemoveGiftCardFromCart {
+  removeGiftCardFromCart
+}
+
+query GetMyGiftCards {
+  getMyGiftCards {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    sendToSelf
+    note
+    expiryDate
+    createdAt
+    isActive
+    senderInfo {
+      firstName
+      lastName
+      email
+    }
+    recipientInfo {
+      firstName
+      lastName
+      email
+    }
+  }
+}
 
 mutation ValidatePromoCode($code: String!) {
   validatePromoCode(code: $code) {
@@ -21,36 +83,30 @@ mutation ValidatePromoCode($code: String!) {
   }
 }
 
-# For Gift Cards
-# mutation ValidateGiftCard($code: String!) {
-#   validateGiftCard(code: $code) {
-#     _id
-#     code
-#     amount
-#     expiryDate
-#     isActive
-#   }
-# }
+query GetAllOwnedGiftCards {
+  getAllOwnedGiftCards {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    recipientInfo {
+      firstName
+      lastName
+      email
+    }
+    sendToSelf
+    note
+    expiryDate
+    scheduledSendAt
+    createdAt
+    isActive
+    status
+  }
+}
 
-# query fetchCustomerGiftCards {
-#   fetchCustomerGiftCards {
-#     _id
-#     code
-#     expiryDate
-#     isActive
-#     usedBy {
-#       firstName
-#       lastName
-#       email
-#     }
-#     usedAt
-#     updatedAt
-#   }
-# }
-
-
-query fetchVisiblePromoCodes{
-  fetchVisiblePromoCodes{
+query fetchVisiblePromoCodes {
+  fetchVisiblePromoCodes {
     _id
     code
     description
@@ -60,17 +116,44 @@ query fetchVisiblePromoCodes{
     discountValue
     couponUsageType
     uptoAmount
-    discountItem{
+    discountItem {
       name
       desc
       price
-      priceOptions{
+      priceOptions {
         menuType
         price
       }
-      
     }
-    
   }
 }
 
+query getGiftCardByCode($paymentIntent: String!) {
+  getGiftCardByCode(paymentIntent: $paymentIntent) {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    sendToSelf
+    note
+    expiryDate
+    scheduledSendAt
+    createdAt
+    isActive
+    status
+    customerPaidAmount
+    restaurantId
+    loyaltyPointsEarned
+    senderInfo {
+      firstName
+      lastName
+      email
+    }
+    recipientInfo {
+      firstName
+      lastName
+      email
+    }
+  }
+}

@@ -107,6 +107,7 @@ query GetCmsRestaurantDetails {
     _id
     name
     brandingLogo
+    giftCardEnabled
     address {
       addressLine1
       addressLine2

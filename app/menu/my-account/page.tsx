@@ -105,6 +105,7 @@ async function getRestaurantDetails() {
         name: tx.name,
         salesTax: tx.salesTax,
       })),
+      giftCardEnabled: Restaurant.giftCardEnabled ?? true,
     } as CustomerRestaurant;
   } catch (err) {
     console.error("Failed to fetch restaurant details:", err);
@@ -118,6 +119,14 @@ export default async function AcctPage({
   searchParams: Promise<{ [key: string]: string }>;
 }) {
   const queryParams = await searchParams;
+    // Check if user is logged in, redirect to /menu if not
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("choose_ordering_at")?.value;
+
+  if (!accessToken) {
+    redirect("/menu");
+  }
+
   const header = await headers();
 
   const userAgent = header.get("user-agent") || "";
@@ -180,6 +189,11 @@ export default async function AcctPage({
 
   if (!restaurant) {
     return <InActiveMenu />;
+  }
+
+  const tab = queryParams?.tab;
+  if (tab === "giftcards" && restaurant.giftCardEnabled === false) {
+    redirect("/menu");
   }
 
   return <MyAccountPage restaurant={restaurant} />;

@@ -11,7 +11,7 @@ import { isContrastOkay } from "@/utils/isContrastOkay";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import { HiMenu, HiX } from "react-icons/hi";
 import { MdAccountCircle } from "react-icons/md";
@@ -22,6 +22,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import Button from "./common/Button";
 import FloatingCartButton from "@/components/cart/FloatingCartButton";
+import { cookieKeys } from "@/constants";
 
 interface NavbarProps {
   myaccount: boolean;
@@ -44,6 +45,10 @@ const staggerItem = {
 
 const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
   const [isOffersOpen, setIsOffersOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const [isGiftCardEnabled, setIsGiftCardEnabled] = useState(false);
   const [isMobileOffersOpen, setIsMobileOffersOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [offerNavitems, setOfferNavItems] = useState<
@@ -117,6 +122,17 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
       }
     };
 
+    const fetchGiftCardStatus = async () => {
+      try {
+        const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+        const res = await sdk.getGiftCardEnabled({}, { cookie: cookieVal });
+        setIsGiftCardEnabled(res?.getGiftCardEnabled ?? false);
+      } catch (error) {
+        console.error("Error fetching gift card status:", error);
+      }
+    };
+    fetchGiftCardStatus();
+
     fetchNavItems();
   }, []);
 
@@ -128,7 +144,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
     setIsOpen(!isOpen);
   };
 
-    const toggleOffers = () => {
+  const toggleOffers = () => {
     setIsOffersOpen(!isOffersOpen);
   };
 
@@ -136,7 +152,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
     <header
       className={`${
         pathname === "/menu" ? "" : "sticky top-0"
-      } bg-white z-50 shadow-sm border-b border-b-black/20   font-online-ordering`}
+      } bg-white z-50 shadow-sm border-b border-b-black/20   font-body-oo`}
     >
       <div className="max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
         <div className="flex justify-between items-center h-16 md:h-24">
@@ -168,12 +184,32 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 </p>
               </Link>
             ))}
+            {isGiftCardEnabled && (
+              <Link
+                href={
+                  meCustomerData
+                    ? "/menu/my-account?tab=giftcards"
+                    : "/gift-cards"
+                }
+                passHref
+              >
+                <p className="px-4 py-2 rounded-md text-2xl md:text-lg font-body-oo font-normal text-black hover:text-gray-600">
+                  Gift Card
+                </p>
+              </Link>
+            )}
             {offerNavitems.length > 0 && (
               <div
-                className="relative px-4 py-2 rounded-md text-2xl md:text-lg font-body font-normal"                onClick={toggleOffers}
+                className="relative px-4 py-2 rounded-md text-2xl md:text-lg font-body font-normal"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleOffers();
+                  setIsMoreOpen(false);
+                }}
               >
                 <div
-                  className="flex items-center font-body-oo space-x-1 cursor-pointer hover:text-primaryColor transition-colors duration-200"                  onClick={toggleOffersDropdown}
+                  className="flex items-center font-body-oo space-x-1 cursor-pointer hover:text-primaryColor transition-colors duration-200"
+                  onClick={toggleOffersDropdown}
                 >
                   <span>Promotions</span>
                   <FiChevronDown
@@ -228,7 +264,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               <>
                 <button
                   onClick={handleLogOut}
-                  className="flex items-center space-x-2 font-body text-gray-600 font-body-oo"
+                  className="flex items-center space-x-2 font-body-00 text-gray-600"
                 >
                   <MdAccountCircle size={28} />
                   <span>Log Out</span>
@@ -279,7 +315,9 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               <>
                 {meCustomerData ? (
                   <Link href={`/menu/my-account`} passHref>
-                    <div className="flex items-center font-body-oo space-x-2 text-gray-600 ">                      <MdAccountCircle size={28} />
+                    <div className="flex items-center font-body-oo space-x-2 text-gray-600 ">
+                      {" "}
+                      <MdAccountCircle size={28} />
                       <span>{meCustomerData.firstName}</span>
                     </div>
                   </Link>
@@ -298,7 +336,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                       style={{
                         color: isContrastOkay(
                           Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                          Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                          Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                         )
                           ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                           : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -309,7 +347,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                         style={{
                           color: isContrastOkay(
                             Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                            Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                            Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                           )
                             ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                             : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -320,7 +358,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                         style={{
                           color: isContrastOkay(
                             Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                            Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                            Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                           )
                             ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                             : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -399,7 +437,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               </div>
             </div>
 
-            <nav className="flex-1 flex flex-col items-center font-body-oo justify-center px-4 py-6 space-y-3 overflow-y-auto">
+            <nav className="flex-1 flex flex-col items-center justify-center px-4 py-6 space-y-3 overflow-y-auto">
               {navItems?.map((item) => (
                 <Link key={item.href} href={item.href} passHref>
                   <p
@@ -410,8 +448,24 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                   </p>
                 </Link>
               ))}
+
+              {isGiftCardEnabled && (
+                <Link
+                  href={
+                    meCustomerData
+                      ? "/menu/my-account?tab=giftcards"
+                      : "/gift-cards"
+                  }
+                  onClick={closeMenu}
+                >
+                  <p className="px-4 py-2 rounded-md text-lg sm:text-xl font-medium text-center">
+                    Gift Card
+                  </p>
+                </Link>
+              )}
+
               {offerNavitems && offerNavitems.length > 0 && (
-                <li className="justify-between flex flex-col font-body-oo text-lg items-center font-medium">
+                <li className="justify-between flex flex-col text-lg items-center font-medium">
                   <button
                     onClick={() => setIsMobileOffersOpen(!isMobileOffersOpen)}
                     className="flex items-center justify-center gap-1 px-4 py-2 cursor-pointer w-full  transition-all duration-300"
@@ -438,7 +492,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                           <motion.li
                             key={index}
                             variants={staggerItem}
-                            className="w-full flex font-body-oo justify-center"
+                            className="w-full flex justify-center"
                           >
                             <Link href={offer.link} className="w-full">
                               <span
@@ -457,7 +511,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
               )}
             </nav>
 
-            <div className="px-4 sm:px-8 py-6 font-body-oo mt-auto flex flex-col gap-6">              
+            <div className="px-4 sm:px-8 py-6 font-body-oo mt-auto flex flex-col gap-6">
               {myaccount ? (
                 <>
                   <button
@@ -465,12 +519,11 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                       handleLogOut();
                       closeMenu();
                     }}
-                    className="w-full flex items-center  font-body-oo justify-center space-x-2 text-gray-600 py-3"
+                    className="w-full flex items-center justify-center  font-body-oo space-x-2 text-gray-600 py-3"
                   >
                     <MdAccountCircle size={28} />
                     <span>Log Out</span>
                   </button>
-                  
                 </>
               ) : (
                 <div className="space-y-4">
@@ -495,7 +548,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                       Sign In
                     </button>
                   )}
-                    </div>
+                </div>
               )}
 
               {cartCountInfo > 0 && (

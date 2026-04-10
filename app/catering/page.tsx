@@ -235,7 +235,7 @@ async function getRestaurantData() {
   const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
 
   try {
-    const [cmsData, restaurantData] = await Promise.all([
+    const [cmsData, restaurantData,] = await Promise.all([
       sdk.GetCmsDetails(
         {},
         {
@@ -277,11 +277,32 @@ async function getRestaurtCmsData() {
   }
 }
 
+async function getGiftCardEnabled() {
+  const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+
+  try {
+    const [giftCardEnabled] = await Promise.all([
+      sdk.getGiftCardEnabled(
+        {},
+        {
+          cookie: cookieVal,
+        }
+      ),
+    ]);
+
+    return giftCardEnabled.getGiftCardEnabled;
+  } catch (error) {
+    console.error("Failed to fetch restaurant data:", error);
+    return null;
+  }
+}
+
 export default async function CateringPage() {
-  const [cateringData, restaurantData, cmsData] = await Promise.all([
+  const [cateringData, restaurantData, cmsData, giftCardEnabled] = await Promise.all([
     getCateringData(),
     getRestaurantData(),
     getRestaurtCmsData(),
+    getGiftCardEnabled(),
   ]);
 
   const offerNavItems = await getOfferLinks();
@@ -314,6 +335,7 @@ export default async function CateringPage() {
 
   return (
     <CateringPageClient
+      giftCardEnabled={giftCardEnabled ?? false}
       navItems={navItems}
       cateringPageData={cateringData}
       restaurantData={restaurantData}

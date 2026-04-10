@@ -1,5 +1,6 @@
 import {
   DiscountType,
+  GiftCardDesign,
   OrderDiscountType,
   OrderStatus,
   OrderType,
@@ -43,7 +44,7 @@ import { LoyaltyRedeemType } from "@/generated/graphql";
 
 import { Env } from "@/env";
 import { useCartStore } from "@/store/cart";
-import { CustomerNew } from "@/store/meCustomer";
+import meCustomerStore, { CustomerNew } from "@/store/meCustomer";
 import { convertToRestoTimezone } from "@/utils/formattedTime";
 import { refreshCartCount } from "@/utils/getCartCountData";
 import { isContrastOkay } from "@/utils/isContrastOkay";
@@ -59,16 +60,31 @@ import { DatePicker } from "../ui/date-picker";
 
 interface TabProps {
   onTabChange: (tab: string) => void;
+  showGiftCards?: boolean;
+  initialTab?: string;
 }
 
-export const StickyTabbar: React.FC<TabProps> = ({ onTabChange }) => {
-  const [activeTab, setActiveTab] = useState("Rewards");
+export const StickyTabbar: React.FC<TabProps> = ({
+  onTabChange,
+  showGiftCards = false,
+  initialTab = "Rewards",
+}) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
     onTabChange(tab);
   };
-  const tabs = ["Rewards", "Profile", "Orders"];
+  const tabs = [
+    "Rewards",
+    "Profile",
+    "Orders",
+    ...(showGiftCards ? ["Gift Card"] : []),
+  ];
 
   return (
     <div className="  sticky md:top-24 top-20 left-0 z-10 w-full md:w-auto">
@@ -774,6 +790,10 @@ export type Order = {
       } | null;
     } | null;
   } | null;
+  appliedGiftCard?: {
+    giftCardCode: string;
+    amountUsed: number;
+  } | null;
 };
 
 export interface Modifier {
@@ -849,6 +869,10 @@ export interface OrderById {
       } | null;
     } | null;
   } | null;
+  appliedGiftCard?: {
+    giftCardCode: string;
+    amountUsed: number;
+  } | null;
   items: Items[];
   restaurantInfo: {
     name: string;
@@ -898,8 +922,34 @@ const calculateModifierPrice = (modifier: Modifier): number => {
 //   }
 // };
 
+export type OwnedGiftCard = {
+  _id: string;
+  code: string;
+  amount: number;
+  remainingAmount?: number | null;
+  design: GiftCardDesign;
+  recipientInfo: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  sendToSelf: boolean;
+  note?: string | null;
+  expiryDate?: string | null;
+  scheduledSendAt?: string | null;
+  createdAt: string;
+  isActive: boolean;
+  status: string;
+  loyaltyPointsEarned?: number | null;
+};
+
+type UnifiedOrderItem =
+  | { type: "order"; data: Order; createdAt: Date }
+  | { type: "giftcard"; data: OwnedGiftCard; createdAt: Date };
+
 export const OrdersContent: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [giftCards, setGiftCards] = useState<OwnedGiftCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -907,6 +957,7 @@ export const OrdersContent: React.FC = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const { setToastData } = ToastStore();
   const { restaurantData } = RestaurantStore();
+  const { meCustomerData } = meCustomerStore();
   const router = useRouter();
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -917,8 +968,14 @@ export const OrdersContent: React.FC = () => {
     const fetchOrderHistory = async () => {
       try {
         setIsLoading(true);
-        const res = await fetchWithAuth(() => sdk.fetchCustomerOrders());
-        setOrders(res.fetchCustomerOrders || []);
+        const [ordersRes, giftCardsRes] = await Promise.all([
+          fetchWithAuth(() => sdk.fetchCustomerOrders()),
+          fetchWithAuth(() => sdk.GetAllOwnedGiftCards()).catch(() => ({
+            getAllOwnedGiftCards: [],
+          })),
+        ]);
+        setOrders(ordersRes.fetchCustomerOrders || []);
+        setGiftCards(giftCardsRes.getAllOwnedGiftCards || []);
       } catch (error) {
         setError("Failed to fetch orders. Please try again later.");
       } finally {
@@ -927,6 +984,24 @@ export const OrdersContent: React.FC = () => {
     };
     fetchOrderHistory();
   }, []);
+
+  // Merge orders and gift cards into a unified sorted list
+  const unifiedItems: UnifiedOrderItem[] = [
+    ...orders.map(
+      (o): UnifiedOrderItem => ({
+        type: "order",
+        data: o,
+        createdAt: new Date(o.createdAt),
+      }),
+    ),
+    ...giftCards.map(
+      (g): UnifiedOrderItem => ({
+        type: "giftcard",
+        data: g,
+        createdAt: new Date(g.createdAt),
+      }),
+    ),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   const fetchOrderById = async (orderId: string) => {
     try {
@@ -952,7 +1027,7 @@ export const OrdersContent: React.FC = () => {
     try {
       setModalLoading(true);
       const res = await fetchWithAuth(() =>
-        sdk.reorderItemsToCart({ orderId: orderId })
+        sdk.reorderItemsToCart({ orderId: orderId }),
       );
 
       if (res.reorderItemsToCart?.success) {
@@ -966,7 +1041,6 @@ export const OrdersContent: React.FC = () => {
         router.push("/menu/cart");
       }
     } catch (error) {
-      console.log("Error reordering items:", error);
       setToastData({
         type: "error",
         message: extractErrorMessage(error),
@@ -981,10 +1055,13 @@ export const OrdersContent: React.FC = () => {
   };
 
   // Pagination calculations
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
+  const totalPages = Math.ceil(unifiedItems.length / ordersPerPage);
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const currentUnifiedItems = unifiedItems.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder,
+  );
 
   const changePage = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -1003,7 +1080,7 @@ export const OrdersContent: React.FC = () => {
   };
 
   const PaginationControls = () => {
-    if (orders.length <= ordersPerPage) return null;
+    if (unifiedItems.length <= ordersPerPage) return null;
 
     const pageNumbers = [];
     const maxVisiblePages = 5;
@@ -1121,7 +1198,7 @@ export const OrdersContent: React.FC = () => {
     );
   }
 
-  if (orders.length === 0) {
+  if (unifiedItems.length === 0) {
     return (
       <div className="px-4 sm:px-6 lg:px-12 xl:px-20 flex items-center justify-center h-64">
         <div className="text-center text-gray-600">
@@ -1196,7 +1273,7 @@ export const OrdersContent: React.FC = () => {
                     {convertToRestoTimezone(
                       restaurantData?.timezone?.timezoneName?.split(" ")[0] ??
                         "",
-                      new Date(selectedOrder.createdAt)
+                      new Date(selectedOrder.createdAt),
                     )}
                   </p>
                 </div>
@@ -1214,7 +1291,7 @@ export const OrdersContent: React.FC = () => {
                       selectedOrder.orderType === OrderType.Pickup &&
                         selectedOrder.pickUpDateAndTime
                         ? new Date(selectedOrder.pickUpDateAndTime)
-                        : new Date(selectedOrder.deliveryDateAndTime ?? "")
+                        : new Date(selectedOrder.deliveryDateAndTime ?? ""),
                     )}
                   </p>
                 </div>
@@ -1271,7 +1348,7 @@ export const OrdersContent: React.FC = () => {
                       <span className="col-span-3 text-right">
                         $
                         {selectedOrder.appliedDiscount?.loyaltyData?.redeemItem?.itemPrice?.toFixed(
-                          2
+                          2,
                         )}
                       </span>
                     </div>
@@ -1292,7 +1369,7 @@ export const OrdersContent: React.FC = () => {
                       <span className="col-span-3 text-right">
                         $
                         {selectedOrder.appliedDiscount?.promoData?.discountValue?.toFixed(
-                          2
+                          2,
                         ) || "0.00"}
                       </span>
                     </div>
@@ -1364,7 +1441,7 @@ export const OrdersContent: React.FC = () => {
                   </div>
                 ) : null}
 
-                 {selectedOrder.taxAmount &&
+                {selectedOrder.taxAmount &&
                 (selectedOrder.platformFees !== null ||
                   selectedOrder.platformFees !== undefined) ? (
                   <div className="flex justify-between">
@@ -1405,10 +1482,47 @@ export const OrdersContent: React.FC = () => {
                   </div>
                 ) : null}
 
-                <div className="flex justify-between font-semibold font-subheading-oo text-lg">
-                  <span>Total</span>
-                  <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
-                </div>
+                {selectedOrder.appliedGiftCard?.amountUsed ? (
+                  <>
+                    <div className="flex justify-between font-semibold font-subheading-oo text-lg border-t pt-2">
+                      <span>Subtotal</span>
+                      <span>
+                        $
+                        {(
+                          (selectedOrder.subTotalAmount ?? 0) -
+                          calcDiscountAmt() +
+                          (selectedOrder.taxAmount ?? 0) +
+                          (selectedOrder.platformFees ?? 0) +
+                          (selectedOrder.tipAmount ?? 0) +
+                          (selectedOrder.deliveryAmount ?? 0)
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-green-600">
+                      <span>
+                        Gift Card ({selectedOrder.appliedGiftCard.giftCardCode})
+                      </span>
+                      <span>
+                        -${selectedOrder.appliedGiftCard.amountUsed.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-semibold font-subheading-oo text-lg">
+                      <span>Total</span>
+                      <span>
+                        $
+                        {(
+                          (selectedOrder?.finalAmount ?? 0) -
+                          (selectedOrder?.appliedGiftCard.amountUsed ?? 0)
+                        )?.toFixed(2)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between font-semibold font-subheading-oo text-lg">
+                    <span>Total</span>
+                    <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
+                  </div>
+                )}
 
                 {(selectedOrder?.refundAmount ?? 0) > 0 ? (
                   <div className="flex justify-between text-green-600">
@@ -1439,14 +1553,14 @@ export const OrdersContent: React.FC = () => {
                               selectedOrder.appliedDiscount.promoData
                                 .discountType === PromoDiscountType.FixedAmount
                             ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
-                                2
+                                2,
                               )} off`
                             : selectedOrder.appliedDiscount.promoData
                                   ?.discountValue &&
                                 selectedOrder.appliedDiscount.promoData
                                   .discountType === PromoDiscountType.Percentage
                               ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
-                                  2
+                                  2,
                                 )} off`
                               : selectedOrder.appliedDiscount.promoData
                                   ?.discountItemName &&
@@ -1476,7 +1590,7 @@ export const OrdersContent: React.FC = () => {
                           }{" "}
                           (Value: $
                           {selectedOrder.appliedDiscount.loyaltyData?.redeemItem.itemPrice.toFixed(
-                            2
+                            2,
                           )}
                           )
                         </>
@@ -1492,7 +1606,7 @@ export const OrdersContent: React.FC = () => {
                           <>
                             Discount: $
                             {selectedOrder.appliedDiscount.loyaltyData?.redeemDiscount.discountValue.toFixed(
-                              2
+                              2,
                             )}{" "}
                             off
                           </>
@@ -1515,7 +1629,7 @@ export const OrdersContent: React.FC = () => {
                             </p>
                           )}
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 )}
@@ -1545,13 +1659,150 @@ export const OrdersContent: React.FC = () => {
     <div className="lg:px-12 xl:px-20">
       <div className="w-full">
         <div className="space-y-4 sm:space-y-6 w-full">
-          {currentOrders.map((order, index) => (
-            <div
-              key={index}
-              className="flex flex-col lg:flex-row gap-4 transition-shadow duration-300 relative bg-white border rounded-lg shadow-md border-gray-300 sm:p-6 p-4"
-            >
-              {/* Status Badge - Top Right */}
-              {/* <div
+          {currentUnifiedItems.map((item, index) => {
+            if (item.type === "giftcard") {
+              const gc = item.data;
+              return (
+                <div
+                  key={`gc-${gc._id}`}
+                  className="flex flex-col lg:flex-row gap-4 transition-shadow duration-300 relative bg-white border rounded-lg shadow-md border-gray-300 sm:p-6 p-4"
+                >
+                  {/* Left Column - Gift Card Info */}
+                  <div className="w-full lg:w-1/4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-4 pr-4">
+                    <div className="space-y-2">
+                      <div className="text-base text-gray-600 font-body-oo">
+                        Date:
+                      </div>
+                      <span className="text-base lg:text-lg font-semibold font-subheading-oo">
+                        {new Date(gc.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-base text-gray-600 font-body-oo">
+                        Gift Card Code :
+                      </div>
+                      <span className="text-base lg:text-lg font-semibold font-subheading-oo">
+                        {gc.code}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-base text-gray-600 font-body-oo">
+                        Order Type:
+                      </div>
+                      <span className="text-base lg:text-lg font-semibold font-subheading-oo">
+                        Gift Card
+                      </span>
+                      {gc.scheduledSendAt && (
+                        <p className="text-sm text-gray-500 font-body-oo">
+                          Scheduled:{" "}
+                          {new Date(gc.scheduledSendAt).toLocaleDateString()}
+                        </p>
+                      )}
+                      {gc.expiryDate && (
+                        <p className="text-sm text-gray-500 font-body-oo">
+                          Expires:{" "}
+                          {new Date(gc.expiryDate).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex flex-col pl-0 lg:pl-8 lg:border-l border-gray-200">
+                    <div className="flex-1 mb-4">
+                      <div className="text-base font-semibold text-gray-600 mb-2 font-subheading-oo">
+                        eGift Card Details
+                      </div>
+                      <div className="md:max-h-40 overflow-y-auto rounded-md border border-gray-100">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-1/2 py-3 text-base">
+                                Detail
+                              </TableHead>
+                              <TableHead className="text-right py-3 text-base">
+                                Value
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="py-3 w-1/2">
+                                <span className="text-base font-semibold font-subheading-oo">
+                                  Amount
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-right py-3 text-base">
+                                ${gc.amount.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+
+                            {gc.sendToSelf ? (
+                              <>
+                                {" "}
+                                <TableRow>
+                                  <TableCell className="py-3 w-1/2">
+                                    <span className="text-base font-semibold font-subheading-oo">
+                                      Remaining
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-right py-3 text-base">
+                                    $
+                                    {(gc.remainingAmount ?? gc.amount).toFixed(
+                                      2,
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+
+                            {!gc.sendToSelf && (
+                              <TableRow>
+                                <TableCell className="py-3 w-1/2">
+                                  <span className="text-base font-semibold font-subheading-oo">
+                                    Recipient
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-right py-3 text-base">
+                                  {gc.recipientInfo.firstName}{" "}
+                                  {gc.recipientInfo.lastName}
+                                </TableCell>
+                              </TableRow>
+                            )}
+
+                            {(gc.loyaltyPointsEarned ?? 0) > 0 && (
+                              <TableRow>
+                                <TableCell className="py-3 w-1/2">
+                                  <span className="text-base font-semibold font-subheading-oo">
+                                    Loyalty Points Earned
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-right py-3 text-base text-green-600 font-semibold font-subheading-oo">
+                                  +{gc.loyaltyPointsEarned}
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // Regular order
+            const order = item.data;
+            return (
+              <div
+                key={`order-${order._id}`}
+                className="flex flex-col lg:flex-row gap-4 transition-shadow duration-300 relative bg-white border rounded-lg shadow-md border-gray-300 sm:p-6 p-4"
+              >
+                {/* Status Badge - Top Right */}
+                {/* <div
                 className={`absolute  ${
                   order.status === OrderStatus.Failed &&
                   order.systemRemark !== ""
@@ -1602,7 +1853,11 @@ export const OrdersContent: React.FC = () => {
                     Total Amount:
                   </div>
                   <span className="text-base lg:text-lg font-semibold font-subheading-oo">
-                    ${order.totalAmount?.toFixed(2)}
+                    $
+                    {(
+                      (order.totalAmount ?? 0) -
+                      (order.appliedGiftCard?.amountUsed ?? 0)
+                    ).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -1629,7 +1884,8 @@ export const OrdersContent: React.FC = () => {
                       (order.appliedDiscount?.promoData?.discountItemName
                         ? 1
                         : 0) +
-                      (order.appliedDiscount?.loyaltyData?.redeemItem?.itemName
+                      (order.appliedDiscount?.loyaltyData?.redeemItem
+                        ?.itemName
                         ? 1
                         : 0)}
                     )
@@ -1650,7 +1906,8 @@ export const OrdersContent: React.FC = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {order.appliedDiscount?.promoData?.discountItemName ? (
+                        {order.appliedDiscount?.promoData
+                          ?.discountItemName ? (
                           <TableRow key={0}>
                             <TableCell className="py-3 w-1/2">
                               <span className="text-base font-semibold font-subheading-oo">
@@ -1688,7 +1945,10 @@ export const OrdersContent: React.FC = () => {
                               1
                             </TableCell>
                             <TableCell className="text-right py-3 text-base">
-                                ${(order.appliedDiscount.discountAmount ?? 0).toFixed(2)}
+                              $
+                              {(
+                                order.appliedDiscount.discountAmount ?? 0
+                              ).toFixed(2)}
                             </TableCell>
                           </TableRow>
                         ) : null}
@@ -1709,7 +1969,7 @@ export const OrdersContent: React.FC = () => {
                                 {(
                                   (item.itemPrice +
                                     calculateTotalModifiersPrice(
-                                      item.modifierGroups
+                                      item.modifierGroups,
                                     )) *
                                   item.qty
                                 ).toFixed(2)}
@@ -1731,7 +1991,7 @@ export const OrdersContent: React.FC = () => {
                       style={{
                         color: isContrastOkay(
                           Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                          Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                          Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                         )
                           ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                           : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -1747,7 +2007,7 @@ export const OrdersContent: React.FC = () => {
                     style={{
                       color: isContrastOkay(
                         Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                        Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                       )
                         ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                         : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -1758,11 +2018,163 @@ export const OrdersContent: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       </div>
       <PaginationControls />
       {showModal && <OrderDetailsCardComponent />}
+    </div>
+  );
+};
+
+// GiftCardChecker — check a gift card code's balance and details
+export const PromoCodeChecker: React.FC = () => {
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{
+    valid: boolean;
+    amount?: number | null;
+    remainingAmount?: number | null;
+    message?: string | null;
+  } | null>(null);
+
+  const primaryColor = Env.NEXT_PUBLIC_PRIMARY_COLOR;
+  const btnTextColor = isContrastOkay(primaryColor, "#ffffff")
+    ? "#ffffff"
+    : "#000000";
+
+  const handleCheck = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await sdk.ValidateGiftCardCode({ code: code.trim() });
+      if (!res.validateGiftCardCode.valid) {
+        setError(res.validateGiftCardCode.message ?? "Invalid gift card code");
+      } else {
+        setResult(res.validateGiftCardCode);
+      }
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const usedAmount =
+    result?.amount != null && result?.remainingAmount != null
+      ? result.amount - result.remainingAmount
+      : null;
+
+  const pct =
+    result?.amount && result.amount > 0
+      ? ((result.remainingAmount ?? 0) / result.amount) * 100
+      : 0;
+
+  return (
+    <div className="px-0 sm:px-6 lg:px-12 xl:px-20 py-4 max-w-lg">
+      <h2 className="text-xl font-semibold mb-1 font-subheading-oo">
+        Check Gift Card
+      </h2>
+      <p className="text-sm text-gray-500 mb-6 font-body-oo">
+        Enter a code to see its balance and details.
+      </p>
+
+      <form onSubmit={handleCheck} className="flex gap-2 mb-6">
+        <input
+          type="text"
+          value={code}
+          onChange={(e) => {
+            setCode(e.target.value.toUpperCase());
+            setError(null);
+            setResult(null);
+          }}
+          placeholder="e.g. G-ABCD1234"
+          className="flex-1 rounded-lg border border-gray-200 py-2.5 px-4 text-sm font-body-oo uppercase tracking-widest outline-none focus:ring-2 transition-all"
+          style={{ ["--tw-ring-color" as string]: `${primaryColor}40` }}
+        />
+        <button
+          type="submit"
+          disabled={loading || !code.trim()}
+          className="px-5 py-2.5 rounded-lg text-sm font-semibold font-subheading-oo disabled:opacity-50 transition-opacity hover:opacity-85 whitespace-nowrap"
+          style={{ backgroundColor: primaryColor, color: btnTextColor }}
+        >
+          {loading ? "Checking..." : "Check"}
+        </button>
+      </form>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600 font-body-oo">
+          {error}
+        </div>
+      )}
+
+      {result && (
+        <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="px-5 py-4 bg-gray-900 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 font-body-oo mb-0.5">
+                Gift Card Code
+              </p>
+              <p className="text-base font-bold font-subheading-oo tracking-widest text-white">
+                {code}
+              </p>
+            </div>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 font-semibold font-subheading-oo">
+              Active
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <div className="h-1.5 bg-gray-100">
+            <div
+              className="h-full transition-all duration-500"
+              style={{ width: `${pct}%`, backgroundColor: primaryColor }}
+            />
+          </div>
+
+          {/* Stats */}
+          <div className="p-5 grid grid-cols-2 gap-3 bg-white">
+            <div className="p-3 rounded-xl bg-gray-50 border border-gray-100">
+              <p className="text-xs text-gray-400 font-body-oo mb-1">
+                Card Value
+              </p>
+              <p className="text-xl font-bold font-subheading-oo text-gray-800">
+                ${result.amount?.toFixed(2) ?? "—"}
+              </p>
+            </div>
+            <div
+              className="p-3 rounded-xl border border-gray-100"
+              style={{ backgroundColor: `${primaryColor}0d` }}
+            >
+              <p className="text-xs text-gray-400 font-body-oo mb-1">
+                Remaining
+              </p>
+              <p
+              className="text-xl font-bold font-subheading-oo"
+                style={{ color: primaryColor }}
+              >
+                ${result.remainingAmount?.toFixed(2) ?? "—"}
+              </p>
+            </div>
+            {usedAmount !== null && usedAmount > 0 && (
+              <div className="col-span-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                <p className="text-xs text-gray-400 font-body-oo mb-1">
+                  Amount Used
+                </p>
+                <p className="text-base font-semibold font-subheading-oo text-gray-600">
+                  ${usedAmount.toFixed(2)}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
