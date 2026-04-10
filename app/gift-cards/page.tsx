@@ -115,7 +115,7 @@ export default async function GiftCardsPage() {
     { name: "Banquet Hall", link: "/parties" },
     { name: "Events", link: "/event" },
     // { name: "Reservations", link: "/reservations" },
-    { name: "Contact us", link: "/contact" },
+    // { name: "Contact us", link: "/contact" },
   ];
   const promoNavItemsData: any[] = promoNavItems?.getCmsPromoNavItems || [];
   const giftCardEnabledData: boolean =

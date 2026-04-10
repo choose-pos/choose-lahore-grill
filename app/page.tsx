@@ -261,7 +261,6 @@ export default async function Home() {
     { name: "Banquet Hall", link: "/parties" },
     { name: "Events", link: "/event" },
     // { name: "Reservations", link: "/reservations" },
-    { name: "Contact us", link: "/contact" },
   ];
 
   if (menuSection.show) {
@@ -304,7 +303,7 @@ export default async function Home() {
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(
-              generateRestaurantJsonLd(restaurantData.getCmsRestaurantDetails)
+              generateRestaurantJsonLd(restaurantData.getCmsRestaurantDetails),
             ),
           }}
         />
@@ -346,7 +345,7 @@ export default async function Home() {
               <MenuSection
                 id={`${getCmsSectionIdHash(menuSection.navTitle).replace(
                   "/#",
-                  ""
+                  "",
                 )}-mobile`}
                 items={menuSection.items.map((e) => ({
                   id: e.item._id,
@@ -394,7 +393,7 @@ export default async function Home() {
               <Testimonials
                 id={getCmsSectionIdHash(reviewSection.navTitle).replace(
                   "/#",
-                  ""
+                  "",
                 )}
                 reviews={reviewSection.reviews}
               />

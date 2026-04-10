@@ -285,16 +285,6 @@ const Navbar: React.FC<INavProps> = ({
                       className="absolute right-0 mt-2 bg-primaryColor border border-gray-700 rounded-md shadow-md z-50 w-48 py-2"
                     >
                       <motion.li variants={staggerItem} className="w-full">
-                        <Link href="/gallery">
-                          <span
-                            className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
-                            onClick={() => setShowMoreMobileMenu(false)}
-                          >
-                            Gallery
-                          </span>
-                        </Link>
-                      </motion.li>
-                      <motion.li variants={staggerItem} className="w-full">
                         <Link
                           href={
                             meCustomerData
@@ -307,6 +297,16 @@ const Navbar: React.FC<INavProps> = ({
                             onClick={() => setShowMoreMobileMenu(false)}
                           >
                             Gift Card
+                          </span>
+                        </Link>
+                      </motion.li>
+                      <motion.li variants={staggerItem} className="w-full">
+                        <Link href="/contact">
+                          <span
+                            className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
+                            onClick={() => setShowMoreMobileMenu(false)}
+                          >
+                            Contact Us
                           </span>
                         </Link>
                       </motion.li>

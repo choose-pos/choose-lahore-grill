@@ -323,7 +323,7 @@ export default async function CateringPage() {
     { name: "Banquet Hall", link: "/parties" },
     { name: "Events", link: "/event" },
     // { name: "Reservations", link: "/reservations" },
-    { name: "Contact us", link: "/contact" },
+    // { name: "Contact us", link: "/contact" },
   ];
 
   if (menuSection.show) {
