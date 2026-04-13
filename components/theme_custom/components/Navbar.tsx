@@ -284,22 +284,24 @@ const Navbar: React.FC<INavProps> = ({
                       exit="hidden"
                       className="absolute right-0 mt-2 bg-primaryColor border border-gray-700 rounded-md shadow-md z-50 w-48 py-2"
                     >
-                      <motion.li variants={staggerItem} className="w-full">
-                        <Link
-                          href={
-                            meCustomerData
-                              ? "/menu/my-account?tab=giftcards"
-                              : "/gift-cards"
-                          }
-                        >
-                          <span
-                            className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
-                            onClick={() => setShowMoreMobileMenu(false)}
+                      {giftCardEnabled && (
+                        <motion.li variants={staggerItem} className="w-full">
+                          <Link
+                            href={
+                              meCustomerData
+                                ? "/menu/my-account?tab=giftcards"
+                                : "/gift-cards"
+                            }
                           >
-                            Gift Card
-                          </span>
-                        </Link>
-                      </motion.li>
+                            <span
+                              className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
+                              onClick={() => setShowMoreMobileMenu(false)}
+                            >
+                              Gift Card
+                            </span>
+                          </Link>
+                        </motion.li>
+                      )}
                       <motion.li variants={staggerItem} className="w-full">
                         <Link href="/contact">
                           <span
