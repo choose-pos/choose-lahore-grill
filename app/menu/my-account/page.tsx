@@ -193,7 +193,7 @@ export default async function AcctPage({
 
   const tab = queryParams?.tab;
   if (tab === "giftcards" && restaurant.giftCardEnabled === false) {
-    redirect("/menu");
+    redirect("/menu/my-account");
   }
 
   return <MyAccountPage restaurant={restaurant} />;
