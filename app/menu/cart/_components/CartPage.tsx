@@ -440,7 +440,10 @@ const CartPage = ({
                     },
                   }
                 : null,
-          guestCustomerDetails: customerData ?? null,
+          guestCustomerDetails:
+            meCustomerData === null && customerData !== null
+              ? customerData
+              : null,
           specialRemark: specialRemarks || null,
         };
 
@@ -565,10 +568,7 @@ const CartPage = ({
               directly instead of third-party delivery apps
             </p>
             <button
-              disabled={
-                actionLoading ||
-                isCartLoading
-              }
+              disabled={actionLoading || isCartLoading}
               onClick={() => {
                 if (amountToPay === 0 && !meCustomerData && !isOtpVerified) {
                   setShowGuestModal(true);
@@ -590,7 +590,7 @@ const CartPage = ({
                 ? "Loading cart..."
                 : actionLoading
                   ? "Processing..."
-                  : (amountToPay === 0 && !meCustomerData && !isOtpVerified)
+                  : amountToPay === 0 && !meCustomerData && !isOtpVerified
                     ? "Place Order"
                     : amountToPay === 0
                       ? "Place Order"
@@ -614,10 +614,7 @@ const CartPage = ({
             directly instead of third-party delivery apps
           </p>
           <button
-            disabled={
-              actionLoading ||
-              isCartLoading
-            }
+            disabled={actionLoading || isCartLoading}
             onClick={() => {
               if (amountToPay === 0 && !meCustomerData && !isOtpVerified) {
                 setShowGuestModal(true);
@@ -639,7 +636,7 @@ const CartPage = ({
               ? "Loading cart..."
               : actionLoading
                 ? "Processing..."
-                : (amountToPay === 0 && !meCustomerData && !isOtpVerified)
+                : amountToPay === 0 && !meCustomerData && !isOtpVerified
                   ? "Place Order"
                   : amountToPay === 0
                     ? "Place Order"
@@ -723,7 +720,9 @@ const CartPage = ({
                     await handleProceedToCheckout();
                   }}
                   proceedLoading={actionLoading}
-                  proceedBtnText={amountToPay === 0 ? "Place Order" : "Continue to Payment"}
+                  proceedBtnText={
+                    amountToPay === 0 ? "Place Order" : "Continue to Payment"
+                  }
                 />
               </div>
             </motion.div>
@@ -758,7 +757,19 @@ const CartPage = ({
                   className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
                   aria-label="Close modal"
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
                 </button>
               </div>
               <div className="p-6">
