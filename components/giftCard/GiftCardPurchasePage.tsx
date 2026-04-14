@@ -624,7 +624,7 @@ function GiftCardPurchasePageInner({
       className={
         isAccountView
           ? "py-4 sm:py-0 -mt-10 lg:px-12 xl:px-20 max-w-full"
-          : "max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 pt-10 md:pt-16 lg:pt-28 pb-10 md:pb-16 lg:pb-20"
+          : "max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 pt-10 md:pt-16 lg:pt-20 pb-10 md:pb-16 lg:pb-12"
       }
     >
       {!pathname.includes("my-account") ? (
