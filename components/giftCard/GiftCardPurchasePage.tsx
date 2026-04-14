@@ -624,7 +624,7 @@ function GiftCardPurchasePageInner({
       className={
         isAccountView
           ? "py-4 sm:py-0 -mt-10 lg:px-12 xl:px-20 max-w-full"
-          : "max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-24"
+          : "max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 pt-10 md:pt-16 lg:pt-28 pb-10 md:pb-16 lg:pb-20"
       }
     >
       {!pathname.includes("my-account") ? (
@@ -1094,23 +1094,26 @@ function GiftCardPurchasePageInner({
                             ).getFullYear()}
                             disabledDates={{
                               before: new Date(
-                                new Date().setDate(new Date().getDate() + 1)
+                                new Date().setDate(new Date().getDate() + 1),
                               ),
                               after: new Date(
-                                new Date().setMonth(new Date().getMonth() + 3)
+                                new Date().setMonth(new Date().getMonth() + 3),
                               ),
                             }}
                           />
-                          {formData.scheduledSendAt && !errors.scheduledSendAt && (
-                            <p className="text-gray-600 text-[13px] font-body-oo mt-2">
-                              eGift card will be delivered on{" "}
-                              {new Intl.DateTimeFormat('en-US', {
-                                day: 'numeric',
-                                month: 'long'
-                              }).format(new Date(formData.scheduledSendAt))}{" "}
-                              at 12 am
-                            </p>
-                          )}
+                          {formData.scheduledSendAt &&
+                            !errors.scheduledSendAt && (
+                              <p className="text-gray-600 text-[13px] font-body-oo mt-2">
+                                eGift card will be delivered on{" "}
+                                {new Intl.DateTimeFormat("en-US", {
+                                  day: "numeric",
+                                  month: "long",
+                                }).format(
+                                  new Date(formData.scheduledSendAt),
+                                )}{" "}
+                                at 12 am
+                              </p>
+                            )}
                           {errors.scheduledSendAt && (
                             <p className="text-red-500 text-[13px] font-body-oo mt-1.5">
                               {errors.scheduledSendAt}
