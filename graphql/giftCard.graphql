@@ -102,28 +102,47 @@ query GetAllOwnedGiftCards {
     createdAt
     isActive
     status
+    loyaltyPointsEarned
+    usageHistory {
+      shortOrderId
+      amountUsed
+      orderTotal
+      customerName
+      usedAt
+    }
   }
 }
 
 query fetchVisiblePromoCodes {
   fetchVisiblePromoCodes {
-    _id
-    code
-    description
-    isActive
-    minCartValue
-    promoCodeDiscountType
-    discountValue
-    couponUsageType
-    uptoAmount
-    discountItem {
-      name
-      desc
-      price
-      priceOptions {
-        menuType
+    promoCodes {
+      _id
+      code
+      description
+      isActive
+      minCartValue
+      promoCodeDiscountType
+      discountValue
+      couponUsageType
+      uptoAmount
+      discountItem {
+        name
+        desc
         price
+        priceOptions {
+          menuType
+          price
+        }
       }
+    }
+    giftCards {
+      _id
+      code
+      amount
+      remainingAmount
+      design
+      expiryDate
+      isActive
     }
   }
 }
@@ -150,6 +169,24 @@ query getGiftCardByCode($paymentIntent: String!) {
       lastName
       email
     }
+    recipientInfo {
+      firstName
+      lastName
+      email
+    }
+  }
+}
+
+query GetGiftCardDetailsByCode($code: String!) {
+  getGiftCardDetailsByCode(code: $code) {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    isActive
+    status
+    expiryDate
     recipientInfo {
       firstName
       lastName

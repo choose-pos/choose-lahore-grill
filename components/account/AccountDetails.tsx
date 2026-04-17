@@ -33,13 +33,13 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
    const [activeTab, setActiveTab] = useState<string>(
-    tabParam === "giftcards" ? "Gift Card" : "Rewards",
+    tabParam === "giftcards" ? "eGift Card" : "Rewards",
   );
   const router = useRouter();
   
   useEffect(() => {
     if (tabParam === "giftcards") {
-      setActiveTab("Gift Card");
+      setActiveTab("eGift Card");
     }
     if (tabParam) {
       router.replace("/menu/my-account", { scroll: false });
@@ -205,7 +205,7 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
         return <ProfileContent customerData={customerData} />;
       case "Orders":
         return <OrdersContent />;
-        case "Gift Card": {
+      case "eGift Card": {
         if (!stripeId)
           return <p className="text-center py-10 font-body-oo">Loading...</p>;
         return (

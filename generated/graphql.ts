@@ -637,6 +637,17 @@ export type CustomerDetailsInput = {
   signUp?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type CustomerGiftCardInfo = {
+  __typename?: 'CustomerGiftCardInfo';
+  _id: Scalars['String']['output'];
+  amount: Scalars['Float']['output'];
+  code: Scalars['String']['output'];
+  design: GiftCardDesign;
+  expiryDate?: Maybe<Scalars['DateTimeISO']['output']>;
+  isActive: Scalars['Boolean']['output'];
+  remainingAmount: Scalars['Float']['output'];
+};
+
 export type CustomerLoginVerificationInput = {
   contact: Scalars['String']['input'];
   otp: Scalars['String']['input'];
@@ -904,8 +915,8 @@ export type GetMyGiftCardsResult = {
 /** Available gift card design themes */
 export enum GiftCardDesign {
   GiftCard = 'GiftCard',
+  HappyAnniversary = 'HappyAnniversary',
   HappyBirthday = 'HappyBirthday',
-  HappyHolidays = 'HappyHolidays',
   ThankYou = 'ThankYou'
 }
 
@@ -935,6 +946,15 @@ export type GiftCardRedeemData = {
   __typename?: 'GiftCardRedeemData';
   amountUsed: Scalars['Float']['output'];
   giftCardCode: Scalars['String']['output'];
+};
+
+export type GiftCardUsageEntry = {
+  __typename?: 'GiftCardUsageEntry';
+  amountUsed: Scalars['Float']['output'];
+  customerName?: Maybe<Scalars['String']['output']>;
+  orderTotal?: Maybe<Scalars['Float']['output']>;
+  shortOrderId?: Maybe<Scalars['String']['output']>;
+  usedAt?: Maybe<Scalars['DateTimeISO']['output']>;
 };
 
 export type GiftCardValidationResult = {
@@ -1709,6 +1729,7 @@ export type OwnedGiftCardResult = {
   scheduledSendAt?: Maybe<Scalars['DateTimeISO']['output']>;
   sendToSelf: Scalars['Boolean']['output'];
   status: Scalars['String']['output'];
+  usageHistory: Array<GiftCardUsageEntry>;
 };
 
 export type PaymentConfigUpdatedBy = {
@@ -1997,7 +2018,7 @@ export type Query = {
   fetchLoyaltyPointsTransactions: Array<LoyaltyPointsTransaction>;
   fetchProcessingFee: Scalars['Float']['output'];
   fetchRestaurantRedeemOffers: RestaurantRedeemOffers;
-  fetchVisiblePromoCodes: Array<PromoCode>;
+  fetchVisiblePromoCodes: VisibleOffersResult;
   getAllOwnedGiftCards: Array<OwnedGiftCardResult>;
   getCmsDetails?: Maybe<CmsRestaurant>;
   getCmsPromoNavItems: Array<PromoNavItem>;
@@ -2008,6 +2029,7 @@ export type Query = {
   getCustomerItem?: Maybe<ItemWithModifiersResponse>;
   getCustomerRestaurantDetails: Restaurant;
   getGiftCardByCode: PublicGiftCardResult;
+  getGiftCardDetailsByCode: PublicGiftCardResult;
   getGiftCardEnabled: Scalars['Boolean']['output'];
   getMyGiftCards: Array<GetMyGiftCardsResult>;
   getPaymentStatus?: Maybe<Scalars['String']['output']>;
@@ -2071,6 +2093,11 @@ export type QueryGetCustomerItemArgs = {
 
 export type QueryGetGiftCardByCodeArgs = {
   paymentIntent: Scalars['String']['input'];
+};
+
+
+export type QueryGetGiftCardDetailsByCodeArgs = {
+  code: Scalars['String']['input'];
 };
 
 
@@ -2489,6 +2516,12 @@ export type Visibility = {
   status: StatusEnum;
 };
 
+export type VisibleOffersResult = {
+  __typename?: 'VisibleOffersResult';
+  giftCards: Array<CustomerGiftCardInfo>;
+  promoCodes: Array<PromoCode>;
+};
+
 /** WalkthroughStates type enum  */
 export enum WalkthroughStates {
   Campaign = 'Campaign',
@@ -2673,12 +2706,12 @@ export type ValidatePromoCodeMutation = { __typename?: 'Mutation', validatePromo
 export type GetAllOwnedGiftCardsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllOwnedGiftCardsQuery = { __typename?: 'Query', getAllOwnedGiftCards: Array<{ __typename?: 'OwnedGiftCardResult', _id: string, code: string, amount: number, remainingAmount?: number | null, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, scheduledSendAt?: any | null, createdAt: any, isActive: boolean, status: string, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } }> };
+export type GetAllOwnedGiftCardsQuery = { __typename?: 'Query', getAllOwnedGiftCards: Array<{ __typename?: 'OwnedGiftCardResult', _id: string, code: string, amount: number, remainingAmount?: number | null, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, scheduledSendAt?: any | null, createdAt: any, isActive: boolean, status: string, loyaltyPointsEarned?: number | null, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string }, usageHistory: Array<{ __typename?: 'GiftCardUsageEntry', shortOrderId?: string | null, amountUsed: number, orderTotal?: number | null, customerName?: string | null, usedAt?: any | null }> }> };
 
 export type FetchVisiblePromoCodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FetchVisiblePromoCodesQuery = { __typename?: 'Query', fetchVisiblePromoCodes: Array<{ __typename?: 'PromoCode', _id: string, code: string, description?: string | null, isActive: boolean, minCartValue?: number | null, promoCodeDiscountType: PromoDiscountType, discountValue?: number | null, couponUsageType: CouponUsageType, uptoAmount?: number | null, discountItem?: { __typename?: 'Item', name: string, desc?: string | null, price: number, priceOptions: Array<{ __typename?: 'PriceOptions', menuType: MenuTypeEnum, price: number }> } | null }> };
+export type FetchVisiblePromoCodesQuery = { __typename?: 'Query', fetchVisiblePromoCodes: { __typename?: 'VisibleOffersResult', promoCodes: Array<{ __typename?: 'PromoCode', _id: string, code: string, description?: string | null, isActive: boolean, minCartValue?: number | null, promoCodeDiscountType: PromoDiscountType, discountValue?: number | null, couponUsageType: CouponUsageType, uptoAmount?: number | null, discountItem?: { __typename?: 'Item', name: string, desc?: string | null, price: number, priceOptions: Array<{ __typename?: 'PriceOptions', menuType: MenuTypeEnum, price: number }> } | null }>, giftCards: Array<{ __typename?: 'CustomerGiftCardInfo', _id: string, code: string, amount: number, remainingAmount: number, design: GiftCardDesign, expiryDate?: any | null, isActive: boolean }> } };
 
 export type GetGiftCardByCodeQueryVariables = Exact<{
   paymentIntent: Scalars['String']['input'];
@@ -2686,6 +2719,13 @@ export type GetGiftCardByCodeQueryVariables = Exact<{
 
 
 export type GetGiftCardByCodeQuery = { __typename?: 'Query', getGiftCardByCode: { __typename?: 'PublicGiftCardResult', _id: string, code: string, amount: number, remainingAmount: number, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, scheduledSendAt?: any | null, createdAt: any, isActive: boolean, status: string, customerPaidAmount: number, restaurantId?: string | null, loyaltyPointsEarned?: number | null, senderInfo?: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } | null, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } } };
+
+export type GetGiftCardDetailsByCodeQueryVariables = Exact<{
+  code: Scalars['String']['input'];
+}>;
+
+
+export type GetGiftCardDetailsByCodeQuery = { __typename?: 'Query', getGiftCardDetailsByCode: { __typename?: 'PublicGiftCardResult', _id: string, code: string, amount: number, remainingAmount: number, design: GiftCardDesign, isActive: boolean, status: string, expiryDate?: any | null, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } } };
 
 export type AllPlacesQueryVariables = Exact<{
   input: Scalars['String']['input'];
@@ -3324,29 +3364,48 @@ export const GetAllOwnedGiftCardsDocument = gql`
     createdAt
     isActive
     status
+    loyaltyPointsEarned
+    usageHistory {
+      shortOrderId
+      amountUsed
+      orderTotal
+      customerName
+      usedAt
+    }
   }
 }
     `;
 export const FetchVisiblePromoCodesDocument = gql`
     query fetchVisiblePromoCodes {
   fetchVisiblePromoCodes {
-    _id
-    code
-    description
-    isActive
-    minCartValue
-    promoCodeDiscountType
-    discountValue
-    couponUsageType
-    uptoAmount
-    discountItem {
-      name
-      desc
-      price
-      priceOptions {
-        menuType
+    promoCodes {
+      _id
+      code
+      description
+      isActive
+      minCartValue
+      promoCodeDiscountType
+      discountValue
+      couponUsageType
+      uptoAmount
+      discountItem {
+        name
+        desc
         price
+        priceOptions {
+          menuType
+          price
+        }
       }
+    }
+    giftCards {
+      _id
+      code
+      amount
+      remainingAmount
+      design
+      expiryDate
+      isActive
     }
   }
 }
@@ -3374,6 +3433,25 @@ export const GetGiftCardByCodeDocument = gql`
       lastName
       email
     }
+    recipientInfo {
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
+export const GetGiftCardDetailsByCodeDocument = gql`
+    query GetGiftCardDetailsByCode($code: String!) {
+  getGiftCardDetailsByCode(code: $code) {
+    _id
+    code
+    amount
+    remainingAmount
+    design
+    isActive
+    status
+    expiryDate
     recipientInfo {
       firstName
       lastName
@@ -4138,6 +4216,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getGiftCardByCode(variables: GetGiftCardByCodeQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetGiftCardByCodeQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetGiftCardByCodeQuery>(GetGiftCardByCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getGiftCardByCode', 'query', variables);
+    },
+    GetGiftCardDetailsByCode(variables: GetGiftCardDetailsByCodeQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetGiftCardDetailsByCodeQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetGiftCardDetailsByCodeQuery>(GetGiftCardDetailsByCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetGiftCardDetailsByCode', 'query', variables);
     },
     AllPlaces(variables: AllPlacesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AllPlacesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<AllPlacesQuery>(AllPlacesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllPlaces', 'query', variables);

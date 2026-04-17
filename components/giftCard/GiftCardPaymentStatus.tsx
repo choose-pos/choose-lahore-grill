@@ -369,6 +369,15 @@ const GiftCardPaymentStatus = ({
                 </div>
               )}
 
+               {!localGiftCardData.sendToSelf && (
+              <div className="my-4">
+                <p className="text-gray-500 text-sm">
+                  The recipient will receive a separate email with the gift card
+                  code. This receipt is for your records only.
+                </p>
+              </div>
+            )}
+
             <div className="mt-6 text-center">
               <p className="text-gray-500 text-xs font-subheading-oo">
                 Thank you for your purchase!

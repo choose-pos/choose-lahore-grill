@@ -10,6 +10,7 @@ import discountImg2 from "../../assets/OBJECT.png";
 import { AnimatePresence, motion } from "framer-motion";
 import { fadeIn } from "@/utils/motion";
 
+// Modal Component
 const PromoModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -86,7 +87,7 @@ const PromoModal: React.FC<{
               </code>
               <button
                 onClick={(e) => handleCopy(e, promoData.code || "")}
-                className="p-2 flex items-center gap-2 hover:bg-gray-200 rounded-lg font-body-oo transition-colors"
+                className="p-2 flex items-center font-body-oo gap-2 hover:bg-gray-200 rounded-lg transition-colors"
                 aria-label={
                   copiedCode === promoData.code ? "Copied!" : "Copy code"
                 }
@@ -132,21 +133,21 @@ const PromoCodes: React.FC = () => {
     const fetchFunc = async () => {
       try {
         const fetchPromo = await sdk.fetchVisiblePromoCodes();
-        const promoData: PromoData[] = fetchPromo.fetchVisiblePromoCodes.map(
-          (code) => ({
-            code: code.code,
-            description: code.description,
-            discountItem: {
-              name: code.discountItem?.name,
-              price: code.discountItem?.price,
-            },
-            discountValue: code.discountValue,
-            isActive: code.isActive,
-            minCartValue: code.minCartValue,
-            promoCodeDiscountType: code.promoCodeDiscountType,
-            uptoAmount: code.uptoAmount,
-          }),
-        );
+        const promoData: PromoData[] = (
+          fetchPromo.fetchVisiblePromoCodes?.promoCodes ?? []
+        ).map((code) => ({
+          code: code.code,
+          description: code.description,
+          discountItem: {
+            name: code.discountItem?.name,
+            price: code.discountItem?.price,
+          },
+          discountValue: code.discountValue,
+          isActive: code.isActive,
+          minCartValue: code.minCartValue,
+          promoCodeDiscountType: code.promoCodeDiscountType,
+          uptoAmount: code.uptoAmount,
+        }));
         setPromoCodes(promoData);
       } catch (error) {
         console.log(error);
@@ -313,7 +314,7 @@ const PromoCodes: React.FC = () => {
                         </code>
                         <button
                           onClick={(e) => handleCopy(e, code.code || "")}
-                          className="p-1.5 hover:bg-gray-100 rounded-lg font-body-oo transition-colors"
+                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                           aria-label={
                             copiedCode === code.code ? "Copied!" : "Copy code"
                           }

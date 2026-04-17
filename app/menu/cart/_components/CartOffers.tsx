@@ -9,6 +9,7 @@ import { Env } from "@/env";
 import {
   LoyaltyRedeemType,
   FetchVisiblePromoCodesQuery,
+  GiftCardDesign,
 } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import meCustomerStore from "@/store/meCustomer";
@@ -24,8 +25,8 @@ import { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FiX } from "react-icons/fi";
 import { CiDiscount1 } from "react-icons/ci";
-import PromoCodesModal from "@/components/cart/PromoCodesModal";
 import StarIcon from "@/components/common/StarIcon";
+import PromoCodesModal from "@/components/cart/PromoCodesModal";
 
 interface ICartOffersProps {
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
@@ -55,7 +56,10 @@ const CartOffers = ({
   const [codeError, setCodeError] = useState<string>();
   const [isCodeFocused, setIsCodeFocused] = useState(false);
   const [visiblePromoCodes, setVisiblePromoCodes] = useState<
-    FetchVisiblePromoCodesQuery["fetchVisiblePromoCodes"]
+    FetchVisiblePromoCodesQuery["fetchVisiblePromoCodes"]["promoCodes"]
+  >([]);
+  const [visibleGiftCards, setVisibleGiftCards] = useState<
+    FetchVisiblePromoCodesQuery["fetchVisiblePromoCodes"]["giftCards"]
   >([]);
 
   useEffect(() => {
@@ -74,9 +78,14 @@ const CartOffers = ({
 
   const handleSwapFailed = async () => {
     try {
-      if (cartDetails?.discountCode) {
+      if (cartDetails?.giftCardCode) {
+        // Re-apply the previously active gift card
         await fetchWithAuth(() =>
-          sdk.ValidatePromoCode({ code: cartDetails.discountCode! }),
+          sdk.ApplyDiscountCode({ code: cartDetails.giftCardCode! }),
+        );
+      } else if (cartDetails?.discountCode) {
+        await fetchWithAuth(() =>
+          sdk.ApplyDiscountCode({ code: cartDetails.discountCode! }),
         );
       }
     } finally {
@@ -150,8 +159,14 @@ const CartOffers = ({
   useEffect(() => {
     sdk
       .fetchVisiblePromoCodes()
-      .then((res) => setVisiblePromoCodes(res.fetchVisiblePromoCodes ?? []))
-      .catch(() => setVisiblePromoCodes([]));
+      .then((res) => {
+        setVisiblePromoCodes(res.fetchVisiblePromoCodes?.promoCodes ?? []);
+        setVisibleGiftCards(res.fetchVisiblePromoCodes?.giftCards ?? []);
+      })
+      .catch(() => {
+        setVisiblePromoCodes([]);
+        setVisibleGiftCards([]);
+      });
   }, []);
 
   // Handlers / Functions
@@ -427,7 +442,8 @@ const CartOffers = ({
                     {promoError}
                   </p>
                 )}
-                {visiblePromoCodes.length > 0 && (
+                {(visiblePromoCodes.length > 0 ||
+                  visibleGiftCards.length > 0) && (
                   <button
                     type="button"
                     onClick={() => setShowPromoModal(true)}
@@ -463,15 +479,16 @@ const CartOffers = ({
                 </button>
               </div>
             )}
-            {!isSwappingPromo && visiblePromoCodes.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowPromoModal(true)}
-                className="text-sm text-gray-500 underline mt-2 font-medium hover:opacity-80  font-body-oo transition-opacity"
-              >
-                View All Offers
-              </button>
-            )}
+            {!isSwappingPromo &&
+              (visiblePromoCodes.length > 0 || visibleGiftCards.length > 0) && (
+                <button
+                  type="button"
+                  onClick={() => setShowPromoModal(true)}
+                  className="text-sm text-gray-500 underline mt-2 font-medium hover:opacity-80  font-body-oo transition-opacity"
+                >
+                  View All Offers
+                </button>
+              )}
           </>
         ) : null}
 
@@ -572,7 +589,6 @@ const CartOffers = ({
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-
                 <div className="flex gap-4 mt-4 justify-center">
                   {loyaltyRewards.map((_, index) => (
                     <button
@@ -648,7 +664,8 @@ const CartOffers = ({
                     {promoError}
                   </p>
                 )}
-                {visiblePromoCodes.length > 0 && (
+                {(visiblePromoCodes.length > 0 ||
+                  visibleGiftCards.length > 0) && (
                   <button
                     type="button"
                     onClick={() => setShowPromoModal(true)}
@@ -667,12 +684,17 @@ const CartOffers = ({
           onClose={() => setShowPromoModal(false)}
           onApplied={() => handleSwapSuccess()}
           promoCodes={visiblePromoCodes}
-          appliedCode={cartDetails?.discountCode}
+          giftCards={visibleGiftCards}
+          appliedCode={
+            cartDetails?.discountCode || cartDetails?.giftCardCode || undefined
+          }
           onRemoveExisting={
-            cartDetails?.discountString ? handleSwapStart : undefined
+            cartDetails?.discountString || cartDetails?.giftCardCode
+              ? handleSwapStart
+              : undefined
           }
           onSwapFailed={
-            cartDetails?.discountCode ? handleSwapFailed : undefined
+            cartDetails?.discountString ? handleSwapFailed : undefined
           }
         />
       )}
