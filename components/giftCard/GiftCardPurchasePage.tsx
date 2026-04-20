@@ -819,7 +819,7 @@ function GiftCardPurchasePageInner({
                       <div className="flex justify-between items-start">
                         <p
                           className="text-[12px] sm:text-xl uppercase font-body-oo font-semibold"
-                          style={{ color: `${btnTextColor}99` }}
+                          style={{ color: "#000000" }}
                         >
                           Gift Card
                         </p>
@@ -828,7 +828,7 @@ function GiftCardPurchasePageInner({
                           height="26"
                           viewBox="0 0 24 24"
                           fill="none"
-                          style={{ color: `${btnTextColor}cc` }}
+                          style={{ color: "#000000" }}
                         >
                           <rect
                             x="2"
@@ -861,24 +861,24 @@ function GiftCardPurchasePageInner({
                       <div className="flex w-full">
                         <div
                           className="flex-1 pr-3 sm:pr-6 border-r-[1.5px]"
-                          style={{ borderColor: `${btnTextColor}20` }}
+                          style={{ borderColor: `${primaryColor}20` }}
                         >
                           <p
                             className="text-3xl sm:text-[43px] font-secondary font-bold leading-none mb-1"
-                            style={{ color: btnTextColor }}
+                            style={{ color: "#000000" }}
                           >
                             ${cardDetails.remainingAmount.toFixed(2)}
                           </p>
                           <p
                             className="text-[15px] sm:text-[15px] font-body-oo text-gray-500 mb-2 sm:mb-4"
-                            style={{ color: `${btnTextColor}80` }}
+                            style={{ color: "#000000" }}
                           >
                             Remaining Balance
                           </p>
                           <p
                             className="text-[18px] sm:text-[18px] font-body-oo font-medium break-all"
                             style={{
-                              color: `${btnTextColor}cc`,
+                              color: "#000000",
                             }}
                           >
                             {cardDetails.code}
@@ -888,13 +888,13 @@ function GiftCardPurchasePageInner({
                         <div className="flex-1 pl-3 sm:pl-6 flex flex-col justify-start">
                           <p
                             className="text-3xl sm:text-[43px] font-secondary font-bold leading-none mb-1"
-                            style={{ color: btnTextColor }}
+                            style={{ color: "#000000" }}
                           >
                             ${cardDetails.amount.toFixed(2)}
                           </p>
                           <p
                             className="text-[15px] sm:text-[15px] font-body-oo text-gray-500"
-                            style={{ color: `${btnTextColor}80` }}
+                            style={{ color: "#000000" }}
                           >
                             Amount
                           </p>
