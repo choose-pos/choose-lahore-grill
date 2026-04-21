@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cookieKeys } from "@/constants";
 import { Env } from "@/env";
-import { getCmsSectionId, groupHoursByDays } from "@/utils/theme-utils";
+import { getCmsSectionIdHash, groupHoursByDays } from "@/utils/theme-utils";
 import Footer from "@/components/theme_custom/components/Footer";
 import Navbar from "@/components/theme_custom/components/Navbar";
 import GiftCardPurchasePage from "@/components/giftCard/GiftCardPurchasePage";
@@ -89,6 +89,7 @@ export default async function GiftCardsPage() {
   const [
     stripeId,
     feeConfig,
+    cmsData,
     restaurantData,
     promoNavItems,
     giftCardEnabled,
@@ -96,6 +97,7 @@ export default async function GiftCardsPage() {
   ] = await Promise.all([
     getStripeId(),
     getRestaurantFeeConfig(),
+    sdk.GetCmsDetails({}, { cookie: cookieVal }),
     sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
     sdk.getCmsPromoNavItems({}, { cookie: cookieVal }),
     sdk.getGiftCardEnabled({}, { cookie: cookieVal }),
@@ -103,12 +105,13 @@ export default async function GiftCardsPage() {
   ]);
 
   const rDetails = restaurantData?.getCmsRestaurantDetails;
+  const menuSection = cmsData?.getCmsDetails?.menuSection;
 
   if (rDetails?.giftCardEnabled === false) {
     redirect("/menu");
   }
 
-    const navItems: { name: string; link: string }[] = [
+  const navItems: { name: string; link: string }[] = [
     { name: "Home", link: "/" },
     { name: "Our Story", link: "/our-story" },
     { name: "Catering", link: "/catering" },
@@ -117,6 +120,13 @@ export default async function GiftCardsPage() {
     // { name: "Reservations", link: "/reservations" },
     // { name: "Contact us", link: "/contact" },
   ];
+
+  if (menuSection?.show) {
+    navItems.splice(1, 0, {
+      name: menuSection.navTitle,
+      link: getCmsSectionIdHash(menuSection.navTitle),
+    });
+  }
   const promoNavItemsData: any[] = promoNavItems?.getCmsPromoNavItems || [];
   const giftCardEnabledData: boolean =
     giftCardEnabled?.getGiftCardEnabled || false;

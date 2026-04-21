@@ -47,6 +47,27 @@ const Navbar: React.FC<INavProps> = ({
   const { setNavData } = NavDataStore();
   const { meCustomerData } = meCustomerStore();
   const [showBottomButton, setShowBottomButton] = useState(false);
+  const hasBestSellers = navItems.some((item) => item.name === "Best Sellers");
+  const moveEventsToMore = hasBestSellers;
+  const visibleNavItems = moveEventsToMore
+    ? navItems.filter((item) => item.name !== "Events")
+    : navItems;
+  const moreItems = [
+    ...(moveEventsToMore
+      ? [{ name: "Events", link: "/event" as const }]
+      : []),
+    ...(giftCardEnabled
+      ? [
+          {
+            name: "Gift Card",
+            link: meCustomerData
+              ? "/menu/my-account?tab=giftcards"
+              : "/gift-cards",
+          },
+        ]
+      : []),
+    { name: "Contact Us", link: "/contact" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,7 +129,7 @@ const Navbar: React.FC<INavProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showMoreMenu]);
+  }, [showMoreMenu, showMoreMobileMenu]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -146,7 +167,7 @@ const Navbar: React.FC<INavProps> = ({
 
   useEffect(() => {
     setNavData(navItems);
-  }, []);
+  }, [navItems, setNavData]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -196,7 +217,7 @@ const Navbar: React.FC<INavProps> = ({
           ) : null}
           <div className="h-full hidden lg:block ">
             <ul className="flex text-xl text-gray-300">
-              {navItems.map((item, index) =>
+              {visibleNavItems.map((item, index) =>
                 item.name === "Gallery" ? null : (
                   <li
                     key={index}
@@ -284,34 +305,22 @@ const Navbar: React.FC<INavProps> = ({
                       exit="hidden"
                       className="absolute right-0 mt-2 bg-primaryColor border border-gray-700 rounded-md shadow-md z-50 w-48 py-2"
                     >
-                      {giftCardEnabled && (
-                        <motion.li variants={staggerItem} className="w-full">
-                          <Link
-                            href={
-                              meCustomerData
-                                ? "/menu/my-account?tab=giftcards"
-                                : "/gift-cards"
-                            }
-                          >
+                      {moreItems.map((item) => (
+                        <motion.li
+                          key={item.name}
+                          variants={staggerItem}
+                          className="w-full"
+                        >
+                          <Link href={item.link}>
                             <span
                               className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
                               onClick={() => setShowMoreMobileMenu(false)}
                             >
-                              Gift Card
+                              {item.name}
                             </span>
                           </Link>
                         </motion.li>
-                      )}
-                      <motion.li variants={staggerItem} className="w-full">
-                        <Link href="/contact">
-                          <span
-                            className="block px-4 py-2 text-sm text-gray-300 hover:text-white transition-all"
-                            onClick={() => setShowMoreMobileMenu(false)}
-                          >
-                            Contact Us
-                          </span>
-                        </Link>
-                      </motion.li>
+                      ))}
                     </motion.ul>
                   )}
                 </AnimatePresence>

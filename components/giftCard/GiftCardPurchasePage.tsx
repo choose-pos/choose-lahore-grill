@@ -31,6 +31,9 @@ import HappyBirthdaySvg from "@/assets/Birthday.jpg";
 import HappyAnniversarySvg from "@/assets/Anniversary.jpg";
 import ThankYouSvg from "@/assets/Thankyou.jpg";
 import GiftCard from "@/assets/GiftCard.jpg";
+import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
+import { getOrCreateUserHash, extractUTMParams } from "@/utils/analytics";
+
 
 const PRESET_AMOUNTS = [25, 75, 150];
 
@@ -221,6 +224,7 @@ function GiftCardPurchasePageInner({
     React.SetStateAction<string | undefined>
   >;
 
+  const searchParams = new URLSearchParams(window.location.search);
   // ── Check Balance mode state ──────────────────────────
   const [activeMode, setActiveMode] = useState<"buy" | "check">("buy");
   const [checkCode, setCheckCode] = useState("");
@@ -254,6 +258,26 @@ function GiftCardPurchasePageInner({
         .catch(() => {});
     }
   }, [serverIsLoggedIn]);
+
+  // Analytics: track page_view when user lands on gift card page
+  useEffect(() => {
+    const userHash = getOrCreateUserHash();
+    const pageQuery = Object.fromEntries(searchParams.entries());
+    const utmParams = extractUTMParams(pageQuery);
+
+    sendAnalyticsEvent({
+      restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+      pagePath: window.location.pathname,
+      pageQuery: Object.keys(pageQuery).length > 0 ? pageQuery : null,
+      source: document.referrer || "direct",
+      utm: utmParams,
+      userHash,
+      eventType: "page_view",
+      metadata: {
+        action: "gift_card_page_view",
+      },
+    });
+  }, []);
 
   const faceValue = parseFloat(formData.amount || "0");
   const fees =
@@ -455,6 +479,28 @@ function GiftCardPurchasePageInner({
     }
 
     if (isLoggedIn) {
+      // Analytics: track click on "Pay Now" for logged-in user
+      const userHash = getOrCreateUserHash();
+      const searchParams = new URLSearchParams(window.location.search);
+      const pageQuery = Object.fromEntries(searchParams.entries());
+      const utmParams = extractUTMParams(pageQuery);
+
+      sendAnalyticsEvent({
+        restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+        pagePath: window.location.pathname,
+        pageQuery: Object.keys(pageQuery).length > 0 ? pageQuery : null,
+        source: document.referrer || "direct",
+        utm: utmParams,
+        userHash,
+        eventType: "click",
+        metadata: {
+          action: "gift_card_pay_now_click",
+          amount: formData.amount,
+          design: formData.design,
+          sendToSelf: formData.sendToSelf,
+          isLoggedIn: true,
+        },
+      });
       handlePurchase();
     } else {
       setVerifiedSender(null);
@@ -497,6 +543,31 @@ function GiftCardPurchasePageInner({
     }
 
     if (!stripe || !elements) return;
+
+    // Analytics: track click on "Pay Now" for guest user (after OTP verification)
+    if (!isLoggedIn) {
+      const userHash = getOrCreateUserHash();
+      const searchParams = new URLSearchParams(window.location.search);
+      const pageQuery = Object.fromEntries(searchParams.entries());
+      const utmParams = extractUTMParams(pageQuery);
+
+      sendAnalyticsEvent({
+        restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+        pagePath: window.location.pathname,
+        pageQuery: Object.keys(pageQuery).length > 0 ? pageQuery : null,
+        source: document.referrer || "direct",
+        utm: utmParams,
+        userHash,
+        eventType: "click",
+        metadata: {
+          action: "gift_card_pay_now_click",
+          amount: formData.amount,
+          design: formData.design,
+          sendToSelf: formData.sendToSelf,
+          isLoggedIn: false,
+        },
+      });
+    }
 
     setLoading(true);
     const { error: submitError } = await elements.submit();
@@ -671,7 +742,7 @@ function GiftCardPurchasePageInner({
     <div
       className={
         isAccountView
-          ? "py-4 sm:py-0 -mt-10 lg:px-12 xl:px-20 max-w-full"
+          ? "py-4 sm:py-0 -mt-10 lg:px-8 xl:px-10 max-w-full"
           : "max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 pt-10 md:pt-16 lg:pt-20 pb-10 md:pb-16 lg:pb-12"
       }
     >
@@ -726,8 +797,14 @@ function GiftCardPurchasePageInner({
       </div>
 
       {activeMode === "check" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          <div className="h-full">
+        <div
+          className={`grid grid-cols-1 items-stretch gap-8 ${
+            isAccountView
+              ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)] xl:grid-cols-[minmax(0,0.9fr)_minmax(360px,1.1fr)] lg:gap-6 xl:gap-8"
+              : "lg:grid-cols-2 lg:gap-12"
+          }`}
+        >
+          <div className={`h-full ${isAccountView ? "min-w-0" : ""}`}>
             <SectionCard className="h-full flex flex-col justify-center">
               <SectionHeading>Check Gift Card Balance</SectionHeading>
               <p className="text-sm font-body-oo text-gray-500 mb-5 -mt-1">
@@ -787,7 +864,7 @@ function GiftCardPurchasePageInner({
             </SectionCard>
           </div>
 
-          <div>
+          <div className={isAccountView ? "min-w-0" : ""}>
             <AnimatePresence mode="wait">
               {cardDetails ? (
                 <motion.div
@@ -796,15 +873,21 @@ function GiftCardPurchasePageInner({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-4"
+                  className={`space-y-4 ${isAccountView ? "h-full" : ""}`}
                 >
-                  <div className="relative rounded-2xl overflow-hidden shadow-lg bg-white min-h-[200px] lg:min-h-[260px] max-w-[500px] mx-auto w-full">
+                  <div
+                    className={`relative rounded-2xl overflow-hidden shadow-lg bg-white min-h-[200px] lg:min-h-[260px] w-full ${
+                      isAccountView
+                        ? "max-w-[560px] ml-auto"
+                        : "max-w-[500px] mx-auto"
+                    }`}
+                  >
                     <div
                       className="absolute -top-10 -right-8 w-40 h-40 rounded-full opacity-40"
                       style={{
                         background: `${primaryColor}`,
                         aspectRatio: "1.75 / 1",
-                        opacity: 0.2,
+                        opacity: 0.15,
                       }}
                     />
                     <div
@@ -812,7 +895,7 @@ function GiftCardPurchasePageInner({
                       style={{
                         background: `${primaryColor}`,
                         aspectRatio: "1.75 / 1",
-                        opacity: 0.2,
+                        opacity: 0.15,
                       }}
                     />
                     <div className="absolute inset-0 z-10 p-6 flex flex-col justify-between">
@@ -860,11 +943,15 @@ function GiftCardPurchasePageInner({
                       </div>
                       <div className="flex w-full">
                         <div
-                          className="flex-1 pr-3 sm:pr-6 border-r-[1.5px]"
+                          className="flex-1 min-w-0 pr-3 sm:pr-6 border-r-[1.5px]"
                           style={{ borderColor: `${primaryColor}20` }}
                         >
                           <p
-                            className="text-3xl sm:text-[43px] font-secondary font-bold leading-none mb-1"
+                            className={`font-secondary font-bold leading-none mb-1 ${
+                              isAccountView
+                                ? "text-[38px] xl:text-[43px]"
+                                : "text-3xl sm:text-[43px]"
+                            }`}
                             style={{ color: "#000000" }}
                           >
                             ${cardDetails.remainingAmount.toFixed(2)}
@@ -885,9 +972,13 @@ function GiftCardPurchasePageInner({
                           </p>
                         </div>
 
-                        <div className="flex-1 pl-3 sm:pl-6 flex flex-col justify-start">
+                        <div className="flex-1 min-w-0 pl-3 sm:pl-6 flex flex-col justify-start">
                           <p
-                            className="text-3xl sm:text-[43px] font-secondary font-bold leading-none mb-1"
+                            className={`font-secondary font-bold leading-none mb-1 ${
+                              isAccountView
+                                ? "text-[38px] xl:text-[43px]"
+                                : "text-3xl sm:text-[43px]"
+                            }`}
                             style={{ color: "#000000" }}
                           >
                             ${cardDetails.amount.toFixed(2)}
