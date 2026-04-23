@@ -331,7 +331,12 @@ const CartOffers = ({
                       <div
                         key={index}
                         data-promo-card
-                        className="bg-white border transition-all duration-300 w-full md:h-28 rounded-md -z-10"
+                        className="bg-white border transition-all duration-300 w-full md:h-28 rounded-md -z-10 cursor-pointer hover:bg-gray-50"
+                        onClick={() => {
+                          setCartOpen(false);
+                          setSignInOpen(true);
+                          setIsSignUpOpen(true);
+                        }}
                       >
                         <div className="p-3 md:p-4 h-full flex flex-col justify-center">
                           <div className="flex items-start justify-between">
@@ -357,9 +362,35 @@ const CartOffers = ({
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center justify-end mt-2">
+                              <div
+                                className="flex items-center justify-end mt-2 cursor-pointer"
+                                onClick={() => {
+                                  setCartOpen(false);
+                                  setSignInOpen(true);
+                                  setIsSignUpOpen(true);
+                                }}
+                              >
                                 <p className="text-xs sm:text-sm px-2 py-1 font-body-oo font-semibold text-gray-600">
-                                  Sign Up / Sign In to redeem
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setCartOpen(false);
+                                      setSignInOpen(true);
+                                      setIsSignUpOpen(true);
+                                    }}
+                                  >
+                                    Sign Up
+                                  </span>
+                                  {" / "}
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSignInOpen(true);
+                                    }}
+                                  >
+                                    Sign In
+                                  </span>
+                                  {" to redeem"}
                                 </p>
                               </div>
                             </div>

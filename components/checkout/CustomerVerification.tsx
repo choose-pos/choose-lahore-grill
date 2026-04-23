@@ -64,6 +64,7 @@ const CustomerVerification = ({
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(0);
   const [promoCodeMessage, setPromoCodeMessage] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const proceedBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -266,6 +267,7 @@ const CustomerVerification = ({
     setExistingCustomer(null);
     if (!validateForm()) return;
 
+    setIsSendingOtp(true);
     try {
       const accountPreferences: AccountPreference = {
         email: true,
@@ -302,6 +304,8 @@ const CustomerVerification = ({
         type: "error",
         message: extractErrorMessage(err),
       });
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
@@ -492,8 +496,9 @@ const CustomerVerification = ({
         ) : (
           <button
             type="submit"
+            disabled={isSendingOtp}
             onClick={generateOtp}
-            className="w-full bg-primary font-subheading-oo font-semibold text-white !text-base py-2 px-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary capitalize"
+            className="w-full bg-primary font-subheading-oo font-semibold text-white !text-base py-2 px-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary capitalize disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -503,7 +508,7 @@ const CustomerVerification = ({
                 : Env.NEXT_PUBLIC_TEXT_COLOR,
             }}
           >
-            Send OTP
+            {isSendingOtp ? "Sending..." : "Send OTP"}
           </button>
         )}
 
@@ -663,7 +668,9 @@ const CustomerVerification = ({
                     : Env.NEXT_PUBLIC_TEXT_COLOR,
                 }}
               >
-                {proceedLoading ? "Processing..." : (proceedBtnText || "Place Order")}
+                {proceedLoading
+                  ? "Processing..."
+                  : proceedBtnText || "Place Order"}
               </button>
             </motion.div>
           )}
