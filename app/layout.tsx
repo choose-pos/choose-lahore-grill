@@ -160,14 +160,8 @@ export default function RootLayout({
   }, []);
   return (
     <html lang="en" className={`${rubik.variable} ${bebas.variable}`}>
-    
       <head>
         <link rel="icon" href={process.env.NEXT_PUBLIC_FAVICON_URL} />
-        <script
-  id="iar"
-  src="https://rum.auditzy.com/zhqKxGQK-lahoregrill.com-iar.js"
-  async
-></script>
       </head>
       <body
         className={`${roboto_online_ordering.variable} ${manrope_00.variable} ${sub_manrope_online_oo.variable} ${source_sans_3_oo.variable}`}
