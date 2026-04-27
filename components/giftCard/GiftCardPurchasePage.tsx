@@ -775,7 +775,7 @@ function GiftCardPurchasePageInner({
         <div className="pt-8 md:pt-3"></div>
       )}
       {!isAccountView && !isBuyEnabled ? null : (
-        <div className="font-body-oo mb-4 mt-2 md:mt-0 flex w-full sm:w-auto gap-4 sm:gap-6 pr-2">
+        <div className="font-body-oo mb-4 mt-2 md:mt-0 flex w-full sm:w-auto justify-center md:justify-start gap-0 md:gap-4 lg:gap-6 pr-2">
           {(isAccountView
             ? isBuyEnabled
               ? (["buy", "check", "owned"] as const)
@@ -791,7 +791,7 @@ function GiftCardPurchasePageInner({
                 setCheckCode("");
                 setCheckError("");
               }}
-              className={`pb-2 font-semibold font-subheading-oo text-[14.5px] sm:text-[15px] transition-colors  whitespace-nowrap focus:outline-none border-b-[3px] ${
+              className={`flex-1 md:flex-none pb-2 md:px-0 px-1 text-center md:text-left font-semibold font-subheading-oo text-[13px] min-[430px]:text-[14.5px] sm:text-[15px] transition-colors whitespace-nowrap focus:outline-none border-b-[3px] ${
                 activeMode === mode
                   ? "text-gray-900"
                   : "text-gray-500 hover:text-gray-700 border-transparent"
@@ -1707,7 +1707,7 @@ function GiftCardPurchasePageInner({
                               <span className="font-semibold">
                                 {Math.round(faceValue) * 10} {loyaltyRule.name}
                               </span>{" "}
-                              on this order.
+                              on this purchase.
                             </p>
                           </div>
                         )}
