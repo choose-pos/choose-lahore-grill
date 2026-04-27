@@ -41,30 +41,6 @@ mutation RemoveGiftCardFromCart {
   removeGiftCardFromCart
 }
 
-query GetMyGiftCards {
-  getMyGiftCards {
-    _id
-    code
-    amount
-    remainingAmount
-    design
-    sendToSelf
-    note
-    expiryDate
-    createdAt
-    isActive
-    senderInfo {
-      firstName
-      lastName
-      email
-    }
-    recipientInfo {
-      firstName
-      lastName
-      email
-    }
-  }
-}
 
 mutation ValidatePromoCode($code: String!) {
   validatePromoCode(code: $code) {
@@ -106,8 +82,6 @@ query GetAllOwnedGiftCards {
     usageHistory {
       shortOrderId
       amountUsed
-      orderTotal
-      customerName
       usedAt
     }
   }

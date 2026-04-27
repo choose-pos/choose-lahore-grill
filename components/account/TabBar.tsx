@@ -79,12 +79,7 @@ export const StickyTabbar: React.FC<TabProps> = ({
     setActiveTab(tab);
     onTabChange(tab);
   };
-  const tabs = [
-    "Rewards",
-    "Profile",
-    "Orders",
-    ...(showGiftCards ? ["eGift Card"] : []),
-  ];
+  const tabs = ["Rewards", "Profile", "Orders", "eGift Card"];
 
   return (
     <div className="  sticky md:top-24 top-20 left-0 z-10 w-full md:w-auto">
@@ -135,6 +130,7 @@ export const StickyTabbar: React.FC<TabProps> = ({
               style={
                 activeTab === tab
                   ? {
+                      backgroundColor: Env.NEXT_PUBLIC_PRIMARY_COLOR,
                       color: isContrastOkay(
                         Env.NEXT_PUBLIC_PRIMARY_COLOR,
                         "#ffffff"
@@ -949,8 +945,6 @@ export type OwnedGiftCard = {
   usageHistory: Array<{
     shortOrderId?: string | null;
     amountUsed: number;
-    orderTotal?: number | null;
-    customerName?: string | null;
     usedAt?: string | null;
   }>;
 };
@@ -968,13 +962,9 @@ export const OrdersContent: React.FC = () => {
   const { restaurantData } = RestaurantStore();
   const { meCustomerData } = meCustomerStore();
   const router = useRouter();
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 3;
   const { setSpecialRemarks } = useCartStore();
-  const [activeSubTab, setActiveSubTab] = useState<"orders" | "giftcards">(
-    "orders",
-  );
 
   useEffect(() => {
     const fetchOrderHistory = async () => {
@@ -1005,7 +995,7 @@ export const OrdersContent: React.FC = () => {
     try {
       setModalLoading(true);
       const res = await fetchWithAuth(() =>
-        sdk.fetchOrderById({ id: orderId })
+        sdk.fetchOrderById({ id: orderId }),
       );
       setSelectedOrder(res.fetchCustomerOrderById);
     } catch (error) {
@@ -1655,63 +1645,18 @@ export const OrdersContent: React.FC = () => {
 
   return (
     <div className="lg:px-12 xl:px-20">
-      {/* Sub-tabs for Orders and e-Gift Cards */}
-      <div className="mb-6">
-        <div className="flex gap-2 ">
-          <button
-            onClick={() => {
-              setActiveSubTab("orders");
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 font-semibold font-subheading-oo transition-colors ${
-              activeSubTab === "orders"
-                ? "border-b-2 text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-            style={
-              activeSubTab === "orders"
-                ? { borderColor: Env.NEXT_PUBLIC_PRIMARY_COLOR }
-                : {}
-            }
-          >
-            Orders
-          </button>
-          <button
-            onClick={() => {
-              setActiveSubTab("giftcards");
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 font-semibold font-subheading-oo transition-colors ${
-              activeSubTab === "giftcards"
-                ? "border-b-2 text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-            style={
-              activeSubTab === "giftcards"
-                ? { borderColor: Env.NEXT_PUBLIC_PRIMARY_COLOR }
-                : {}
-            }
-          >
-            eGift Cards
-          </button>
-        </div>
-      </div>
-
-      {/* Render content based on active sub-tab */}
-      {activeSubTab === "orders" ? (
-        <>
-          <div className="w-full">
-            <div className="space-y-4 sm:space-y-6 w-full">
-              {currentUnifiedItems.map((item, index) => {
-                // Regular order
-                const order = item.data;
-                return (
-                  <div
-                    key={`order-${order._id}`}
-                    className="flex flex-col lg:flex-row gap-4 transition-shadow duration-300 relative bg-white border rounded-lg shadow-md border-gray-300 sm:p-6 p-4"
-                  >
-                    {/* Status Badge - Top Right */}
-                    {/* <div
+      <div className="w-full">
+        <div className="space-y-4 sm:space-y-6 w-full">
+          {currentUnifiedItems.map((item, index) => {
+            // Regular order
+            const order = item.data;
+            return (
+              <div
+                key={`order-${order._id}`}
+                className="flex flex-col lg:flex-row gap-4 transition-shadow duration-300 relative bg-white border rounded-lg shadow-md border-gray-300 sm:p-6 p-4"
+              >
+                {/* Status Badge - Top Right */}
+                {/* <div
                 className={`absolute  ${
                   order.status === OrderStatus.Failed &&
                   order.systemRemark !== ""
@@ -1728,53 +1673,53 @@ export const OrdersContent: React.FC = () => {
                 </span>
               </div> */}
 
-                    {/* Left Column - Order Info */}
-                    <div className="w-full lg:w-1/4 grid grid-cols-2  sm:grid-cols-2 lg:grid-cols-1 gap-4 pr-4">
-                      <div className="space-y-2">
-                        <div className="text-base text-gray-600 font-body-oo">
-                          Date:
-                        </div>
-                        <span className="text-base lg:text-lg font-semibold font-subheading-oo">
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="text-base text-gray-600 font-body-oo">
-                          Order Id:
-                        </div>
-                        <span className="text-base lg:text-lg font-semibold font-subheading-oo">
-                          {order.orderId}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="text-base text-gray-600 font-body-oo">
-                          Order Type:
-                        </div>
-                        <span className="text-base lg:text-lg font-semibold font-subheading-oo">
-                          {order.orderType}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="text-base text-gray-600 font-body-oo">
-                          Total Amount:
-                        </div>
-                        <span className="text-base lg:text-lg font-semibold font-subheading-oo">
-                          $
-                          {(
-                            (order.totalAmount ?? 0) -
-                            (order.appliedGiftCard?.amountUsed ?? 0)
-                          ).toFixed(2)}
-                        </span>
-                      </div>
+                {/* Left Column - Order Info */}
+                <div className="w-full lg:w-1/4 grid grid-cols-2  sm:grid-cols-2 lg:grid-cols-1 gap-4 pr-4">
+                  <div className="space-y-2">
+                    <div className="text-base text-gray-600 font-body-oo">
+                      Date:
                     </div>
+                    <span className="text-base lg:text-lg font-semibold font-subheading-oo">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
 
-                    {/* Right Column - Items & Action */}
-                    <div className="flex-1 flex flex-col pl-0 lg:pl-8 lg:border-l border-gray-200">
-                      {/* Failure Reason Display */}
-                      {/* {order.status === OrderStatus.Failed &&
+                  <div className="space-y-2">
+                    <div className="text-base text-gray-600 font-body-oo">
+                      Order Id:
+                    </div>
+                    <span className="text-base lg:text-lg font-semibold font-subheading-oo">
+                      {order.orderId}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="text-base text-gray-600 font-body-oo">
+                      Order Type:
+                    </div>
+                    <span className="text-base lg:text-lg font-semibold font-subheading-oo">
+                      {order.orderType}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="text-base text-gray-600 font-body-oo">
+                      Total Amount:
+                    </div>
+                    <span className="text-base lg:text-lg font-semibold font-subheading-oo">
+                      $
+                      {(
+                        (order.totalAmount ?? 0) -
+                        (order.appliedGiftCard?.amountUsed ?? 0)
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Column - Items & Action */}
+                <div className="flex-1 flex flex-col pl-0 lg:pl-8 lg:border-l border-gray-200">
+                  {/* Failure Reason Display */}
+                  {/* {order.status === OrderStatus.Failed &&
                   order.systemRemark !== "" && (
                     <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
                       <div className="text-sm font-medium text-red-800 mb-1">
@@ -1785,159 +1730,154 @@ export const OrdersContent: React.FC = () => {
                       </div>
                     </div>
                   )} */}
-                      {/* Items Section with Scroll */}
-                      <div className="flex-1 mb-4">
-                        <div className="text-base font-semibold text-gray-600 mb-2 font-subheading-oo">
-                          Items (
-                          {order.items.length +
-                            (order.appliedDiscount?.promoData?.discountItemName
-                              ? 1
-                              : 0) +
-                            (order.appliedDiscount?.loyaltyData?.redeemItem
-                              ?.itemName
-                              ? 1
-                              : 0)}
-                          )
-                        </div>
-                        <div className=" md:max-h-40 overflow-y-auto rounded-md border border-gray-100">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="w-1/2 py-3 text-base">
-                                  Item Name
-                                </TableHead>
-                                <TableHead className="text-center py-3 text-base">
-                                  Qty
-                                </TableHead>
-                                <TableHead className="text-right py-3 text-base">
-                                  Total
-                                </TableHead>
+                  {/* Items Section with Scroll */}
+                  <div className="flex-1 mb-4">
+                    <div className="text-base font-semibold text-gray-600 mb-2 font-subheading-oo">
+                      Items (
+                      {order.items.length +
+                        (order.appliedDiscount?.promoData?.discountItemName
+                          ? 1
+                          : 0) +
+                        (order.appliedDiscount?.loyaltyData?.redeemItem
+                          ?.itemName
+                          ? 1
+                          : 0)}
+                      )
+                    </div>
+                    <div className=" md:max-h-40 overflow-y-auto rounded-md border border-gray-100">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-1/2 py-3 text-base">
+                              Item Name
+                            </TableHead>
+                            <TableHead className="text-center py-3 text-base">
+                              Qty
+                            </TableHead>
+                            <TableHead className="text-right py-3 text-base">
+                              Total
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {order.appliedDiscount?.promoData
+                            ?.discountItemName ? (
+                            <TableRow key={0}>
+                              <TableCell className="py-3 w-1/2">
+                                <span className="text-base font-semibold font-subheading-oo">
+                                  {
+                                    order.appliedDiscount.promoData
+                                      .discountItemName
+                                  }{" "}
+                                  (Promo Item)
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-center py-3 text-base">
+                                1
+                              </TableCell>
+                              <TableCell className="text-right py-3 text-base">
+                                $
+                                {(
+                                  order.appliedDiscount.discountAmount ?? 0
+                                ).toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                          ) : null}
+                          {order.appliedDiscount?.loyaltyData?.redeemItem
+                            ?.itemName ? (
+                            <TableRow key={1}>
+                              <TableCell className="py-3 w-1/2">
+                                <span className="text-base font-semibold font-subheading-oo">
+                                  {
+                                    order.appliedDiscount.loyaltyData.redeemItem
+                                      ?.itemName
+                                  }{" "}
+                                  (Loyalty Redemption)
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-center py-3 text-base">
+                                1
+                              </TableCell>
+                              <TableCell className="text-right py-3 text-base">
+                                $
+                                {(
+                                  order.appliedDiscount.discountAmount ?? 0
+                                ).toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                          ) : null}
+                          {order.items.map((item, itemIndex) => {
+                            const finalPrice = item.qty * item.itemPrice;
+                            return (
+                              <TableRow key={itemIndex}>
+                                <TableCell className="py-3 w-1/2">
+                                  <span className="text-base font-semibold font-subheading-oo">
+                                    {item.itemName}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-center py-3 text-base">
+                                  {item.qty}
+                                </TableCell>
+                                <TableCell className="text-right py-3 text-base">
+                                  $
+                                  {(
+                                    (item.itemPrice +
+                                      calculateTotalModifiersPrice(
+                                        item.modifierGroups,
+                                      )) *
+                                    item.qty
+                                  ).toFixed(2)}
+                                </TableCell>
                               </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {order.appliedDiscount?.promoData
-                                ?.discountItemName ? (
-                                <TableRow key={0}>
-                                  <TableCell className="py-3 w-1/2">
-                                    <span className="text-base font-semibold font-subheading-oo">
-                                      {
-                                        order.appliedDiscount.promoData
-                                          .discountItemName
-                                      }{" "}
-                                      (Promo Item)
-                                    </span>
-                                  </TableCell>
-                                  <TableCell className="text-center py-3 text-base">
-                                    1
-                                  </TableCell>
-                                  <TableCell className="text-right py-3 text-base">
-                                    $
-                                    {(
-                                      order.appliedDiscount.discountAmount ?? 0
-                                    ).toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                              ) : null}
-                              {order.appliedDiscount?.loyaltyData?.redeemItem
-                                ?.itemName ? (
-                                <TableRow key={1}>
-                                  <TableCell className="py-3 w-1/2">
-                                    <span className="text-base font-semibold font-subheading-oo">
-                                      {
-                                        order.appliedDiscount.loyaltyData
-                                          .redeemItem?.itemName
-                                      }{" "}
-                                      (Loyalty Redemption)
-                                    </span>
-                                  </TableCell>
-                                  <TableCell className="text-center py-3 text-base">
-                                    1
-                                  </TableCell>
-                                  <TableCell className="text-right py-3 text-base">
-                                    $
-                                    {(
-                                      order.appliedDiscount.discountAmount ?? 0
-                                    ).toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                              ) : null}
-                              {order.items.map((item, itemIndex) => {
-                                const finalPrice = item.qty * item.itemPrice;
-                                return (
-                                  <TableRow key={itemIndex}>
-                                    <TableCell className="py-3 w-1/2">
-                                      <span className="text-base font-semibold font-subheading-oo">
-                                        {item.itemName}
-                                      </span>
-                                    </TableCell>
-                                    <TableCell className="text-center py-3 text-base">
-                                      {item.qty}
-                                    </TableCell>
-                                    <TableCell className="text-right py-3 text-base">
-                                      $
-                                      {(
-                                        (item.itemPrice +
-                                          calculateTotalModifiersPrice(
-                                            item.modifierGroups,
-                                          )) *
-                                        item.qty
-                                      ).toFixed(2)}
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </div>
-
-                      {/* Action Button */}
-                      <div className="flex gap-2 justify-end mt-auto">
-                        {order.canBeReOrdered &&
-                        (order?.totalAmount ?? 0) > 0 ? (
-                          <button
-                            className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
-                            onClick={() => reOrder(order._id)}
-                            style={{
-                              color: isContrastOkay(
-                                Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                                Env.NEXT_PUBLIC_BACKGROUND_COLOR,
-                              )
-                                ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                                : Env.NEXT_PUBLIC_TEXT_COLOR,
-                            }}
-                          >
-                            Reorder
-                          </button>
-                        ) : null}
-
-                        <button
-                          className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
-                          onClick={() => openModal(order._id)}
-                          style={{
-                            color: isContrastOkay(
-                              Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                              Env.NEXT_PUBLIC_BACKGROUND_COLOR,
-                            )
-                              ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                              : Env.NEXT_PUBLIC_TEXT_COLOR,
-                          }}
-                        >
-                          View Details
-                        </button>
-                      </div>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-          <PaginationControls />
-          {showModal && <OrderDetailsCardComponent />}
-        </>
-      ) : (
-        <GiftCardsContent />
-      )}
+
+                  {/* Action Button */}
+                  <div className="flex gap-2 justify-end mt-auto">
+                    {order.canBeReOrdered && (order?.totalAmount ?? 0) > 0 ? (
+                      <button
+                        className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
+                        onClick={() => reOrder(order._id)}
+                        style={{
+                          color: isContrastOkay(
+                            Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                            Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                          )
+                            ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                            : Env.NEXT_PUBLIC_TEXT_COLOR,
+                        }}
+                      >
+                        Reorder
+                      </button>
+                    ) : null}
+
+                    <button
+                      className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
+                      onClick={() => openModal(order._id)}
+                      style={{
+                        color: isContrastOkay(
+                          Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                          Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                        )
+                          ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                          : Env.NEXT_PUBLIC_TEXT_COLOR,
+                      }}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <PaginationControls />
+      {showModal && <OrderDetailsCardComponent />}
     </div>
   );
 };
@@ -2268,15 +2208,13 @@ export const GiftCardsContent: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="py-3 text-xs">Order ID</TableHead>
-                      <TableHead className="py-3 text-xs">Customer</TableHead>
-                      <TableHead className="py-3 text-xs text-right">
-                        Order Total
+                      <TableHead className="py-3 text-xs w-1/3">
+                        Order ID
                       </TableHead>
-                      <TableHead className="py-3 text-xs text-right">
+                      <TableHead className="py-3 text-xs text-center w-1/3">
                         Amount Used
                       </TableHead>
-                      <TableHead className="py-3 text-xs text-right">
+                      <TableHead className="py-3 text-xs text-right w-1/3">
                         Date
                       </TableHead>
                     </TableRow>
@@ -2285,7 +2223,7 @@ export const GiftCardsContent: React.FC = () => {
                     {selectedGc.usageHistory.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={5}
+                          colSpan={3}
                           className="py-6 text-center text-gray-500"
                         >
                           No usage yet.
@@ -2297,15 +2235,7 @@ export const GiftCardsContent: React.FC = () => {
                           <TableCell className="py-3 text-xs font-subheading-oo font-semibold">
                             {u.shortOrderId ?? "—"}
                           </TableCell>
-                          <TableCell className="py-3 text-xs">
-                            {u.customerName ?? "—"}
-                          </TableCell>
-                          <TableCell className="py-3 text-xs text-right">
-                            {u.orderTotal != null
-                              ? `$${u.orderTotal.toFixed(2)}`
-                              : "—"}
-                          </TableCell>
-                          <TableCell className="py-3 text-xs text-right text-green-600 font-semibold font-subheading-oo">
+                          <TableCell className="py-3 text-xs text-center text-green-600 font-semibold font-subheading-oo">
                             {u.amountUsed > 0
                               ? `-$${u.amountUsed.toFixed(2)}`
                               : "—"}

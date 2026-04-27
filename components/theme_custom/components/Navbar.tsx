@@ -53,9 +53,7 @@ const Navbar: React.FC<INavProps> = ({
     ? navItems.filter((item) => item.name !== "Events")
     : navItems;
   const moreItems = [
-    ...(moveEventsToMore
-      ? [{ name: "Events", link: "/event" as const }]
-      : []),
+    ...(moveEventsToMore ? [{ name: "Events", link: "/event" as const }] : []),
     ...(giftCardEnabled
       ? [
           {
@@ -396,7 +394,7 @@ const Navbar: React.FC<INavProps> = ({
               </li>
             ))}
 
-            {giftCardEnabled && (
+            {
               <li className="justify-between flex flex-col text-lg items-center font-medium">
                 <Link
                   href={
@@ -414,7 +412,7 @@ const Navbar: React.FC<INavProps> = ({
                   </span>
                 </Link>
               </li>
-            )}
+            }
 
             {offerNavTitles && offerNavTitles.length > 0 && (
               <li className="justify-between flex flex-col text-lg items-center font-medium pb-16">

@@ -48,7 +48,6 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
-  const [isGiftCardEnabled, setIsGiftCardEnabled] = useState(false);
   const [isMobileOffersOpen, setIsMobileOffersOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [offerNavitems, setOfferNavItems] = useState<
@@ -122,16 +121,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
       }
     };
 
-    const fetchGiftCardStatus = async () => {
-      try {
-        const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
-        const res = await sdk.getGiftCardEnabled({}, { cookie: cookieVal });
-        setIsGiftCardEnabled(res?.getGiftCardEnabled ?? false);
-      } catch (error) {
-        console.error("Error fetching gift card status:", error);
-      }
-    };
-    fetchGiftCardStatus();
+
 
     fetchNavItems();
   }, []);
@@ -184,7 +174,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 </p>
               </Link>
             ))}
-            {isGiftCardEnabled && (
+            {NavData && (
               <Link
                 href={
                   meCustomerData
@@ -449,7 +439,7 @@ const Navbar: React.FC<NavbarProps> = ({ myaccount }) => {
                 </Link>
               ))}
 
-              {isGiftCardEnabled && (
+              {NavData && (
                 <Link
                   href={
                     meCustomerData

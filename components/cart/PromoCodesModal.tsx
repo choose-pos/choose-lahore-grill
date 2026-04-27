@@ -80,7 +80,6 @@ const PromoCodesModal = ({
         sdk.ApplyDiscountCode({ code: code.code }),
       );
       if (res.applyDiscountCode.success) {
-        setToastData({ message: "Promo code applied!", type: "success" });
         await onApplied();
         onClose();
       } else {

@@ -951,8 +951,6 @@ export type GiftCardRedeemData = {
 export type GiftCardUsageEntry = {
   __typename?: 'GiftCardUsageEntry';
   amountUsed: Scalars['Float']['output'];
-  customerName?: Maybe<Scalars['String']['output']>;
-  orderTotal?: Maybe<Scalars['Float']['output']>;
   shortOrderId?: Maybe<Scalars['String']['output']>;
   usedAt?: Maybe<Scalars['DateTimeISO']['output']>;
 };
@@ -2691,11 +2689,6 @@ export type RemoveGiftCardFromCartMutationVariables = Exact<{ [key: string]: nev
 
 export type RemoveGiftCardFromCartMutation = { __typename?: 'Mutation', removeGiftCardFromCart: boolean };
 
-export type GetMyGiftCardsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetMyGiftCardsQuery = { __typename?: 'Query', getMyGiftCards: Array<{ __typename?: 'GetMyGiftCardsResult', _id: string, code: string, amount: number, remainingAmount: number, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, createdAt: any, isActive: boolean, senderInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string }, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string } }> };
-
 export type ValidatePromoCodeMutationVariables = Exact<{
   code: Scalars['String']['input'];
 }>;
@@ -2706,7 +2699,7 @@ export type ValidatePromoCodeMutation = { __typename?: 'Mutation', validatePromo
 export type GetAllOwnedGiftCardsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllOwnedGiftCardsQuery = { __typename?: 'Query', getAllOwnedGiftCards: Array<{ __typename?: 'OwnedGiftCardResult', _id: string, code: string, amount: number, remainingAmount?: number | null, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, scheduledSendAt?: any | null, createdAt: any, isActive: boolean, status: string, loyaltyPointsEarned?: number | null, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string }, usageHistory: Array<{ __typename?: 'GiftCardUsageEntry', shortOrderId?: string | null, amountUsed: number, orderTotal?: number | null, customerName?: string | null, usedAt?: any | null }> }> };
+export type GetAllOwnedGiftCardsQuery = { __typename?: 'Query', getAllOwnedGiftCards: Array<{ __typename?: 'OwnedGiftCardResult', _id: string, code: string, amount: number, remainingAmount?: number | null, design: GiftCardDesign, sendToSelf: boolean, note?: string | null, expiryDate?: any | null, scheduledSendAt?: any | null, createdAt: any, isActive: boolean, status: string, loyaltyPointsEarned?: number | null, recipientInfo: { __typename?: 'GiftCardPersonInfo', firstName: string, lastName: string, email: string }, usageHistory: Array<{ __typename?: 'GiftCardUsageEntry', shortOrderId?: string | null, amountUsed: number, usedAt?: any | null }> }> };
 
 export type FetchVisiblePromoCodesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3300,32 +3293,6 @@ export const RemoveGiftCardFromCartDocument = gql`
   removeGiftCardFromCart
 }
     `;
-export const GetMyGiftCardsDocument = gql`
-    query GetMyGiftCards {
-  getMyGiftCards {
-    _id
-    code
-    amount
-    remainingAmount
-    design
-    sendToSelf
-    note
-    expiryDate
-    createdAt
-    isActive
-    senderInfo {
-      firstName
-      lastName
-      email
-    }
-    recipientInfo {
-      firstName
-      lastName
-      email
-    }
-  }
-}
-    `;
 export const ValidatePromoCodeDocument = gql`
     mutation ValidatePromoCode($code: String!) {
   validatePromoCode(code: $code) {
@@ -3368,8 +3335,6 @@ export const GetAllOwnedGiftCardsDocument = gql`
     usageHistory {
       shortOrderId
       amountUsed
-      orderTotal
-      customerName
       usedAt
     }
   }
@@ -4201,9 +4166,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RemoveGiftCardFromCart(variables?: RemoveGiftCardFromCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<RemoveGiftCardFromCartMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RemoveGiftCardFromCartMutation>(RemoveGiftCardFromCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RemoveGiftCardFromCart', 'mutation', variables);
-    },
-    GetMyGiftCards(variables?: GetMyGiftCardsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetMyGiftCardsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetMyGiftCardsQuery>(GetMyGiftCardsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetMyGiftCards', 'query', variables);
     },
     ValidatePromoCode(variables: ValidatePromoCodeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ValidatePromoCodeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ValidatePromoCodeMutation>(ValidatePromoCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ValidatePromoCode', 'mutation', variables);

@@ -4,9 +4,12 @@ import { Env } from "@/env";
 import ToastStore from "@/store/toast";
 import meCustomerStore from "@/store/meCustomer";
 import useGiftCardStore from "@/store/giftCard";
+import RestaurantStore from "@/store/restaurant";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { extractErrorMessage } from "@/utils/UtilFncs";
 import { isContrastOkay } from "@/utils/isContrastOkay";
+import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
+import { getOrCreateUserHash, extractUTMParams } from "@/utils/analytics";
 import {
   Elements,
   PaymentElement,
@@ -26,14 +29,15 @@ import { useSidebarStore } from "@/store/sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeIn } from "@/utils/motion";
 import GiftCardPaymentStatus from "./GiftCardPaymentStatus";
+import { GiftCardsContent } from "@/components/account/TabBar";
+
+// #TODO: replace with actual images
 import CustomerVerification from "@/components/checkout/CustomerVerification";
 import HappyBirthdaySvg from "@/assets/Birthday.jpg";
-import HappyAnniversarySvg from "@/assets/Anniversary.jpg";
+import HappyAnniversary from "@/assets/Anniversary.jpg";
 import ThankYouSvg from "@/assets/Thankyou.jpg";
 import GiftCard from "@/assets/GiftCard.jpg";
-import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
-import { getOrCreateUserHash, extractUTMParams } from "@/utils/analytics";
-
+import GiftCardBgTexture from "@/assets/giftcardbgtexture.png";
 
 const PRESET_AMOUNTS = [25, 75, 150];
 
@@ -89,6 +93,7 @@ interface GiftCardPurchasePageProps {
   isAccountView?: boolean;
   loyaltyRule?: any;
   serverIsLoggedIn?: boolean;
+  giftCardEnabled?: boolean;
 }
 
 function calcGiftCardFees(
@@ -167,7 +172,7 @@ function SectionCard({
 }) {
   return (
     <div
-      className={`border border-gray-200 rounded-xl bg-white shadow-[0px_1px_3px_0px_rgba(16,24,40,0.06)] p-5 ${className}`}
+      className={`border border-gray-200 rounded-md bg-white shadow-[0px_1px_3px_0px_rgba(16,24,40,0.06)] p-5 ${className}`}
     >
       {children}
     </div>
@@ -179,9 +184,11 @@ function GiftCardPurchasePageInner({
   isAccountView,
   loyaltyRule,
   serverIsLoggedIn,
+  giftCardEnabled,
 }: Omit<GiftCardPurchasePageProps, "stripeId">) {
   const { setToastData } = ToastStore();
   const { meCustomerData } = meCustomerStore();
+  const { restaurantData } = RestaurantStore();
   const { setSignInOpen, setIsSignUpOpen, setRedirectAfterAuth } =
     useSidebarStore();
   const {
@@ -225,8 +232,14 @@ function GiftCardPurchasePageInner({
   >;
 
   const searchParams = new URLSearchParams(window.location.search);
-  // ── Check Balance mode state ──────────────────────────
-  const [activeMode, setActiveMode] = useState<"buy" | "check">("buy");
+
+  const isBuyEnabled = isAccountView
+    ? restaurantData?.giftCardEnabled !== false
+    : (giftCardEnabled ?? true);
+
+  const [activeMode, setActiveMode] = useState<"buy" | "check" | "owned">(
+    isBuyEnabled ? "buy" : "check",
+  );
   const [checkCode, setCheckCode] = useState("");
   const [checkLoading, setCheckLoading] = useState(false);
   const [checkError, setCheckError] = useState("");
@@ -479,7 +492,6 @@ function GiftCardPurchasePageInner({
     }
 
     if (isLoggedIn) {
-      // Analytics: track click on "Pay Now" for logged-in user
       const userHash = getOrCreateUserHash();
       const searchParams = new URLSearchParams(window.location.search);
       const pageQuery = Object.fromEntries(searchParams.entries());
@@ -544,7 +556,6 @@ function GiftCardPurchasePageInner({
 
     if (!stripe || !elements) return;
 
-    // Analytics: track click on "Pay Now" for guest user (after OTP verification)
     if (!isLoggedIn) {
       const userHash = getOrCreateUserHash();
       const searchParams = new URLSearchParams(window.location.search);
@@ -666,7 +677,6 @@ function GiftCardPurchasePageInner({
     }
   };
 
-  // Show payment status if payment was completed
   if (showPaymentStatus) {
     return (
       <GiftCardPaymentStatus
@@ -762,11 +772,16 @@ function GiftCardPurchasePageInner({
           </p>
         </div>
       ) : (
-        <div className="pt-8"></div>
+        <div className="pt-8 md:pt-3"></div>
       )}
-      <div className="font-body-oo bg-white shadow-sm border border-gray-100 rounded-lg mb-8 mt-2 p-1 flex sm:inline-flex w-full sm:w-auto">
-        <div className="flex items-center w-full">
-          {(["buy", "check"] as const).map((mode) => (
+      {!isAccountView && !isBuyEnabled ? null : (
+        <div className="font-body-oo mb-4 mt-2 md:mt-0 flex w-full sm:w-auto gap-4 sm:gap-6 pr-2">
+          {(isAccountView
+            ? isBuyEnabled
+              ? (["buy", "check", "owned"] as const)
+              : (["check", "owned"] as const)
+            : (["buy", "check"] as const)
+          ).map((mode) => (
             <button
               key={mode}
               type="button"
@@ -776,25 +791,28 @@ function GiftCardPurchasePageInner({
                 setCheckCode("");
                 setCheckError("");
               }}
-              className={`flex-1 sm:flex-none px-6 py-2.5 text-center rounded-md font-semibold font-subheading-oo text-[14px] sm:text-[15px] transition-colors whitespace-nowrap focus:outline-none ${
+              className={`pb-2 font-semibold font-subheading-oo text-[14.5px] sm:text-[15px] transition-colors  whitespace-nowrap focus:outline-none border-b-[3px] ${
                 activeMode === mode
-                  ? "shadow-sm"
-                  : "text-gray-600 hover:bg-gray-50 bg-transparent"
+                  ? "text-gray-900"
+                  : "text-gray-500 hover:text-gray-700 border-transparent"
               }`}
               style={
                 activeMode === mode
                   ? {
-                      backgroundColor: primaryColor,
-                      color: btnTextColor,
+                      borderBottomColor: primaryColor,
                     }
                   : {}
               }
             >
-              {mode === "buy" ? "Buy Gift Card" : "Check Balance"}
+              {mode === "buy"
+                ? "Buy Gift Card"
+                : mode === "check"
+                  ? "Check Balance"
+                  : "Purchase History"}
             </button>
           ))}
         </div>
-      </div>
+      )}
 
       {activeMode === "check" && (
         <div
@@ -820,7 +838,7 @@ function GiftCardPurchasePageInner({
                     setCheckError("");
                   }}
                   onKeyDown={(e) => e.key === "Enter" && handleCheckBalance()}
-                  className={`w-full font-body-oo border rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-[15px] tracking-wider transition-colors ${
+                  className={`w-full font-body-oo border rounded-md shadow-sm py-3 px-4 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-[15px] tracking-wider transition-colors ${
                     checkError
                       ? "border-red-400 bg-red-50"
                       : "border-gray-300 bg-white"
@@ -849,7 +867,7 @@ function GiftCardPurchasePageInner({
                   type="button"
                   onClick={handleCheckBalance}
                   disabled={checkLoading || !checkCode.trim()}
-                  className="w-full py-3 rounded-lg font-body-oo font-semibold text-[15px] transition-all hover:opacity-85 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-md font-body-oo font-semibold text-[15px] transition-all hover:opacity-85 disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ backgroundColor: primaryColor, color: btnTextColor }}
                 >
                   {checkLoading && (
@@ -876,32 +894,23 @@ function GiftCardPurchasePageInner({
                   className={`space-y-4 ${isAccountView ? "h-full" : ""}`}
                 >
                   <div
-                    className={`relative rounded-2xl overflow-hidden shadow-lg bg-white min-h-[200px] lg:min-h-[260px] w-full ${
+                    className={`relative rounded-xl overflow-hidden shadow-[5px_4px_20px_rgba(0,0,0,0.1),0_-4px_20px_rgba(0,0,0,0.05)]  min-h-[200px] lg:min-h-[260px] w-full ${
                       isAccountView
                         ? "max-w-[560px] ml-auto"
                         : "max-w-[500px] mx-auto"
                     }`}
                   >
-                    <div
-                      className="absolute -top-10 -right-8 w-40 h-40 rounded-full opacity-40"
-                      style={{
-                        background: `${primaryColor}`,
-                        aspectRatio: "1.75 / 1",
-                        opacity: 0.15,
-                      }}
+                    <Image
+                      src={GiftCardBgTexture}
+                      alt="Gift Card Texture"
+                      fill
+                      className="object-cover opacity-90 z-0 pointer-events-none select-none"
                     />
-                    <div
-                      className="absolute -bottom-10 -left-8 w-40 h-40 rounded-full opacity-40"
-                      style={{
-                        background: `${primaryColor}`,
-                        aspectRatio: "1.75 / 1",
-                        opacity: 0.15,
-                      }}
-                    />
-                    <div className="absolute inset-0 z-10 p-6 flex flex-col justify-between">
+                    <div className="absolute inset-0 z-10 p-5 sm:p-6 flex flex-col justify-between">
+                      {/* Top row: Gift Card label + card icon */}
                       <div className="flex justify-between items-start">
                         <p
-                          className="text-[12px] sm:text-xl uppercase font-body-oo font-semibold"
+                          className="text-[15px] sm:text-[18px] font-body-oo font-semibold tracking-wider"
                           style={{ color: "#000000" }}
                         >
                           Gift Card
@@ -941,55 +950,41 @@ function GiftCardPurchasePageInner({
                           />
                         </svg>
                       </div>
-                      <div className="flex w-full">
-                        <div
-                          className="flex-1 min-w-0 pr-3 sm:pr-6 border-r-[1.5px]"
-                          style={{ borderColor: `${primaryColor}20` }}
-                        >
-                          <p
-                            className={`font-secondary font-bold leading-none mb-1 ${
-                              isAccountView
-                                ? "text-[38px] xl:text-[43px]"
-                                : "text-3xl sm:text-[43px]"
-                            }`}
-                            style={{ color: "#000000" }}
-                          >
-                            ${cardDetails.remainingAmount.toFixed(2)}
-                          </p>
-                          <p
-                            className="text-[15px] sm:text-[15px] font-body-oo text-gray-500 mb-2 sm:mb-4"
-                            style={{ color: "#000000" }}
-                          >
-                            Remaining Balance
-                          </p>
-                          <p
-                            className="text-[18px] sm:text-[18px] font-body-oo font-medium break-all"
-                            style={{
-                              color: "#000000",
-                            }}
-                          >
-                            {cardDetails.code}
-                          </p>
-                        </div>
 
-                        <div className="flex-1 min-w-0 pl-3 sm:pl-6 flex flex-col justify-start">
-                          <p
-                            className={`font-secondary font-bold leading-none mb-1 ${
-                              isAccountView
-                                ? "text-[38px] xl:text-[43px]"
-                                : "text-3xl sm:text-[43px]"
-                            }`}
-                            style={{ color: "#000000" }}
-                          >
-                            ${cardDetails.amount.toFixed(2)}
-                          </p>
-                          <p
-                            className="text-[15px] sm:text-[15px] font-body-oo text-gray-500"
-                            style={{ color: "#000000" }}
-                          >
-                            Amount
-                          </p>
-                        </div>
+                      {/* Center: large balance amount */}
+                      <div className="flex flex-col items-center justify-center w-full">
+                        <p
+                          className={`font-secondary font-bold leading-none mb-1.5 ${
+                            isAccountView
+                              ? "text-[36px] xl:text-[44px]"
+                              : "text-[32px] sm:text-[44px]"
+                          }`}
+                          style={{ color: "#000000" }}
+                        >
+                          ${cardDetails.remainingAmount.toFixed(2)}
+                        </p>
+                        <p
+                          className="text-[15px] sm:text-[18px] font-body-oo"
+                          style={{ color: "#000000" }}
+                        >
+                          Balance Remaining
+                        </p>
+                      </div>
+
+                      {/* Bottom row: Value (left) + Code (right) */}
+                      <div className="flex justify-between items-end">
+                        <p
+                          className="text-[15px] sm:text-[17px] font-body-oo font-medium"
+                          style={{ color: "#000000" }}
+                        >
+                          Value: ${cardDetails.amount.toFixed(2)}
+                        </p>
+                        <p
+                          className="text-[15px] sm:text-[17px] font-body-oo font-medium tracking-wide"
+                          style={{ color: "#000000" }}
+                        >
+                          Code: {cardDetails.code}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1058,7 +1053,7 @@ function GiftCardPurchasePageInner({
                   value: GiftCardDesign.HappyAnniversary,
                   label: "Happy Anniversary",
                   bg: "#3a3a3a",
-                  svgComponent: HappyAnniversarySvg,
+                  svgComponent: HappyAnniversary,
                 },
                 {
                   value: GiftCardDesign.ThankYou,
@@ -1245,6 +1240,14 @@ function GiftCardPurchasePageInner({
                                 val = parts[0] + "." + parts.slice(1).join("");
                               }
                               const finalParts = val.split(".");
+                              // Limit integer part to 3 digits (max 999)
+                              if (finalParts[0].length > 3) {
+                                finalParts[0] = finalParts[0].slice(0, 3);
+                                val =
+                                  finalParts.length === 2
+                                    ? finalParts[0] + "." + finalParts[1]
+                                    : finalParts[0];
+                              }
                               if (
                                 finalParts.length === 2 &&
                                 finalParts[1].length > 2
@@ -1693,6 +1696,21 @@ function GiftCardPurchasePageInner({
                                 : "0.00"}
                           </span>
                         </div>
+                        {isLoggedIn && loyaltyRule && faceValue > 0 && (
+                          <div className="flex items-start gap-2 pt-1">
+                            <StarIcon
+                              size={16}
+                              className="mt-[0px] text-green-700 flex-shrink-0"
+                            />
+                            <p className="text-[13px] leading-snug font-medium font-body-oo text-green-700">
+                              You will earn{" "}
+                              <span className="font-semibold">
+                                {Math.round(faceValue) * 10} {loyaltyRule.name}
+                              </span>{" "}
+                              on this order.
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <div className="border-t border-gray-100 p-5 space-y-3">
                         <PaymentElement />
@@ -1703,7 +1721,7 @@ function GiftCardPurchasePageInner({
                             disabled={
                               !stripe || !elements || (isLoggedIn && loading)
                             }
-                            className="w-full py-3 rounded-lg font-body-oo font-semibold text-[15px] transition-opacity hover:opacity-85 disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-3 rounded-md font-body-oo font-semibold text-[15px] transition-opacity hover:opacity-85 disabled:opacity-50 flex items-center justify-center gap-2"
                             style={{
                               backgroundColor: primaryColor,
                               color: btnTextColor,
@@ -1735,6 +1753,8 @@ function GiftCardPurchasePageInner({
           )}
         </>
       )}
+
+      {activeMode === "owned" && <GiftCardsContent />}
 
       <AnimatePresence>
         {showFromModal && !isLoggedIn && (
@@ -1828,6 +1848,7 @@ export default function GiftCardPurchasePage({
   isAccountView,
   loyaltyRule,
   serverIsLoggedIn,
+  giftCardEnabled,
 }: GiftCardPurchasePageProps) {
   if (!stripeId) {
     return (
@@ -1867,6 +1888,7 @@ export default function GiftCardPurchasePage({
         isAccountView={isAccountView}
         loyaltyRule={loyaltyRule}
         serverIsLoggedIn={serverIsLoggedIn}
+        giftCardEnabled={giftCardEnabled}
       />
     </Elements>
   );

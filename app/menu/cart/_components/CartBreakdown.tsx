@@ -36,7 +36,10 @@ const CartBreakdown = ({
 
   return (
     <div className="px-6 font-body-oo font-normal">
-      {meCustomerData !== null && amounts.netAmt > 0 && loyaltyRule !== null ? (
+      {meCustomerData !== null &&
+      amounts.netAmt > 0 &&
+      loyaltyRule !== null &&
+      !cartDetails?.giftCardCode ? (
         <p className="text-sm text-gray-600 mb-2">
           {`You'll earn`}{" "}
           <span className="font-semibold">
@@ -190,4 +193,4 @@ const CartBreakdown = ({
   );
 };
 
-export default CartBreakdown
+export default CartBreakdown;

@@ -191,10 +191,7 @@ export default async function AcctPage({
     return <InActiveMenu />;
   }
 
-  const tab = queryParams?.tab;
-  if (tab === "giftcards" && restaurant.giftCardEnabled === false) {
-    redirect("/menu/my-account");
-  }
+
 
   return <MyAccountPage restaurant={restaurant} />;
 }

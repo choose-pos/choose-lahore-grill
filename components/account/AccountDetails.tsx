@@ -23,20 +23,17 @@ interface AccountDetailsProps {
 
 export default function AccountDetails({ customerData }: AccountDetailsProps) {
   const { restaurantData } = RestaurantStore();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [customerBalance, setCustomerBalance] = useState<number>(0);
   const [offers, setOffers] = useState<RestaurantRedeemOffers | null>(null);
   const [pointsRequire, setPointsRequire] = useState<number | null>(null);
-  const [programName, setProgramName] = useState<string>("points");
-  const [programDesc, setProgramDesc] = useState<string>(
-    "Earn more points with every purchase!"
-  );
-  const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-   const [activeTab, setActiveTab] = useState<string>(
+  const [activeTab, setActiveTab] = useState<string>(
     tabParam === "giftcards" ? "eGift Card" : "Rewards",
   );
-  const router = useRouter();
-  
+
   useEffect(() => {
     if (tabParam === "giftcards") {
       setActiveTab("eGift Card");
@@ -45,8 +42,16 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
       router.replace("/menu/my-account", { scroll: false });
     }
   }, [tabParam]);
-
-    // Fetch stripe account ID and fee config for gift card tab
+  const [programName, setProgramName] = useState<string>("points");
+  const [programDesc, setProgramDesc] = useState<string>(
+    "Earn more points with every purchase!",
+  );
+  const [loyaltyRule, setLoyaltyRule] = useState<{
+    value: number;
+    name: string;
+    signUpValue: number;
+  } | null>(null);
+  // Fetch stripe account ID and fee config for gift card tab
   const [stripeId, setStripeId] = useState<string>("");
   const [processingConfig, setProcessingConfig] = useState<{
     feePercent: number | null;
@@ -81,11 +86,19 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
     const fetchRules = async () => {
       try {
         const res = await sdk.fetchLoyaltyCustomerRules();
-        if (res.fetchLoyaltyCustomerRules.programName) {
-          setProgramName(res.fetchLoyaltyCustomerRules.programName);
+        const rules = res.fetchLoyaltyCustomerRules;
+        if (rules.programName) {
+          setProgramName(rules.programName);
         }
-        if (res.fetchLoyaltyCustomerRules.programDesc) {
-          setProgramDesc(res.fetchLoyaltyCustomerRules.programDesc);
+        if (rules.programDesc) {
+          setProgramDesc(rules.programDesc);
+        }
+        if (rules.onOrderRewardActive) {
+          setLoyaltyRule({
+            value: rules.onOrderRewardValue,
+            name: rules.programName,
+            signUpValue: rules.signUpRewardActive ? rules.signUpRewardValue : 0,
+          });
         }
       } catch (error) {
         console.error("Error fetching offers:", error);
@@ -214,6 +227,7 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
               stripeId={stripeId}
               processingConfig={processingConfig}
               isAccountView={true}
+              loyaltyRule={loyaltyRule}
             />
           </div>
         );

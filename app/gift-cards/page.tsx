@@ -107,9 +107,9 @@ export default async function GiftCardsPage() {
   const rDetails = restaurantData?.getCmsRestaurantDetails;
   const menuSection = cmsData?.getCmsDetails?.menuSection;
 
-  if (rDetails?.giftCardEnabled === false) {
-    redirect("/menu");
-  }
+  // if (rDetails?.giftCardEnabled === false) {
+  //   redirect("/menu");
+  // }
 
   const navItems: { name: string; link: string }[] = [
     { name: "Home", link: "/" },
@@ -153,6 +153,7 @@ export default async function GiftCardsPage() {
           processingConfig={feeConfig.processingConfig}
           loyaltyRule={loyaltyRule}
           serverIsLoggedIn={serverIsLoggedIn}
+          giftCardEnabled={rDetails?.giftCardEnabled !== false}
         />
       </div>
 
