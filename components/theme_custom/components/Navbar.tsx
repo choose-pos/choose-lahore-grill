@@ -31,8 +31,9 @@ const Navbar: React.FC<INavProps> = ({
   email,
   phone,
   offerNavTitles,
-  giftCardEnabled,
+  giftCardEnabled: _giftCardEnabled,
 }) => {
+  void _giftCardEnabled;
   const [isOpen, setIsOpen] = useState(false);
   const [showOffersMobileMenu, setShowOffersMobileMenu] = useState(false);
   const [showMoreMobileMenu, setShowMoreMobileMenu] = useState(false);
@@ -54,16 +55,10 @@ const Navbar: React.FC<INavProps> = ({
     : navItems;
   const moreItems = [
     ...(moveEventsToMore ? [{ name: "Events", link: "/event" as const }] : []),
-    ...(giftCardEnabled
-      ? [
-          {
-            name: "Gift Card",
-            link: meCustomerData
-              ? "/menu/my-account?tab=giftcards"
-              : "/gift-cards",
-          },
-        ]
-      : []),
+    {
+      name: "Gift Card",
+      link: meCustomerData ? "/menu/my-account?tab=giftcards" : "/gift-cards",
+    },
     { name: "Contact Us", link: "/contact" },
   ];
 
