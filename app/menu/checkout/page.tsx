@@ -142,6 +142,7 @@ async function getCartDetails() {
         deliveryDateAndTime: data.fetchCartDetails.deliveryDateAndTime,
         discountString: data.fetchCartDetails.discountString,
         discountItemImage: data.fetchCartDetails.discountItemImage,
+        giftCardCode: data.fetchCartDetails.giftCardCode ?? null,
       } as FetchCartDetails;
     }
   } catch (error) {

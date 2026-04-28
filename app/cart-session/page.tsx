@@ -22,6 +22,7 @@ const InitializeSession = () => {
     const utmParams = extractUTMParams(pageQuery);
     const campaignId = extractCampaignId(pageQuery);
     const itemId = searchParams.get("itemId");
+    const redirectTo = searchParams.get("redirect") ?? "/menu";
 
     const queryRecord = Object.fromEntries(
       Object.entries(pageQuery).filter(
@@ -29,7 +30,8 @@ const InitializeSession = () => {
           !key.startsWith("utm_") &&
           key.toLowerCase() !== "campaignid" &&
           key.toLowerCase() !== "cid" &&
-          key.toLowerCase() !== "itemid"
+          key.toLowerCase() !== "itemid" &&
+          key.toLowerCase() !== "redirect"
       )
     );
 
@@ -85,7 +87,7 @@ const InitializeSession = () => {
         });
 
         // Construct the final URL
-        const menuUrl = `/menu${
+       const menuUrl = `${redirectTo}${
           menuParams.toString() ? `?${menuParams.toString()}` : ""
         }`;
 
@@ -95,7 +97,7 @@ const InitializeSession = () => {
       } catch (err) {
         extractErrorMessage(err);
         setError(
-          "An unexpected error occurred, please close this tab and try again.",
+          "An unexpected error occurred, please close this tab and try again."
         );
       } finally {
         setLoading(false);
@@ -118,9 +120,7 @@ const InitializeSession = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">
-        {" "}
-        <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
+      <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">        <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
         <button
           style={{
             color: isContrastOkay(

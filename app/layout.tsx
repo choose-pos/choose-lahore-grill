@@ -40,6 +40,16 @@ const Modal = dynamic(
   }
 );
 
+const InAppRedirectBanner = dynamic(
+  () =>
+    import("@/components/InAppRedirectBanner").then(
+      (mod) => mod.InAppRedirectBanner,
+    ),
+  {
+    ssr: false,
+  },
+);
+
 const manrope_00 = Manrope({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
@@ -202,6 +212,8 @@ export default function RootLayout({
           )}
           {children}
           <AnalyticsLoader />
+          <InAppRedirectBanner />
+
         </>
       }
     </Suspense>

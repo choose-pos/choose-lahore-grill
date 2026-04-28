@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
   if (campaignId.value) {
     response.cookies.set(campaignId.key, campaignId.value, {
       maxAge: 60 * 60 * 24 * 30,
-    }); // 30 days
+    }); // 30 day
   }
 
   const itemId = searchParams.get("itemId");
@@ -87,8 +87,7 @@ export async function middleware(request: NextRequest) {
   }
   
   // Only redirect if there's no cartId and we're not already on cart-session
-  if ((!cartId || partnerId !== restaurantId) && pathname.includes("/menu")) {
-    const utmString =
+  if ((!cartId || partnerId !== restaurantId) && (pathname.includes("/menu") || pathname === "/gift-cards")) {    const utmString =
       utmParams.length > 0
         ? utmParams.map(({ key, value }) => `${key}=${value}`).join("&")
         : "";
@@ -99,11 +98,13 @@ export async function middleware(request: NextRequest) {
 
     const itemString = itemId ? `itemId=${itemId}` : "";
 
+    const redirectParam = pathname === "/gift-cards" ? `redirect=/gift-cards` : "";
     const queryString = [
       utmString,
       campaignString,
       itemString,
       otherQueryParams,
+      redirectParam,
     ]
       .filter(Boolean)
       .join("&");

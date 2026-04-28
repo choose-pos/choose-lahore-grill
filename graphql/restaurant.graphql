@@ -54,6 +54,7 @@ query GetCustomerRestaurantDetails {
       }
     }
     brandingLogo
+    giftCardEnabled
     website
     socialInfo {
       facebook
@@ -80,6 +81,10 @@ query GetCustomerRestaurantDetails {
       salesTax
     }
   }
+}
+
+query getGiftCardEnabled {
+  getGiftCardEnabled
 }
 
 query getCustomerCategoriesAndItems(
@@ -135,7 +140,6 @@ query getCustomerCategoriesAndItems(
         active
       }
     }
-
     createdAt
     updatedAt
   }

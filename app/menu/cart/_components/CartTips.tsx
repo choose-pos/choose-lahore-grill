@@ -1,11 +1,11 @@
 import { Env } from "@/env";
 import { useCartStore } from "@/store/cart";
 import ToastStore from "@/store/toast";
-import { sdk } from "@/utils/graphqlClient";
+import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { extractErrorMessage } from "@/utils/UtilFncs";
 import { useEffect, useRef, useState } from "react";
-import { IoCloseCircleOutline } from "react-icons/io5";
+import { IoClose } from "react-icons/io5";
 
 const CartTips = ({
   refreshData,
@@ -30,8 +30,10 @@ const CartTips = ({
   // Auto-set tip to 0% when disabled (only free loyalty item), or 10% when re-enabled
   useEffect(() => {
     if (disabled && (selectedTip ?? 0) !== 0) {
+      // Only free loyalty item — force tip to 0%
       handleTipSelection(0);
     } else if (!disabled && prevDisabledRef.current) {
+      // Transitioning from disabled to enabled — set 10% default
       handleTipSelection(10);
     }
     prevDisabledRef.current = disabled;
@@ -119,19 +121,30 @@ const CartTips = ({
             <button
               key={tip}
               onClick={() => handleTipSelection(selectedTip === tip ? 0 : tip)}
-              className={`flex flex-col items-center justify-center  rounded-md border-2 transition-all duration-200 ${
+              className={`relative flex flex-col items-center justify-center py-2 sm:py-3 rounded-md border-2 transition-all duration-200 ${
                 selectedTip === tip
                   ? "border-primary bg-gray-50"
                   : "border-gray-200 bg-white hover:bg-gray-50"
               }`}
             >
+              {selectedTip === tip && (
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTipSelection(0);
+                  }}
+                  className="absolute top-1 right-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                >
+                  <IoClose size={12} />
+                </span>
+              )}
               <span
-                className={` sm:text-lg ${selectedTip === tip ? "text-black" : "text-gray-800"}`}
+                className={`text-sm sm:text-base ${selectedTip === tip ? "text-black" : "text-gray-800"}`}
               >
                 {tip}%
               </span>
               <span
-                className={`text-xs sm:text-sm ${selectedTip === tip ? "text-black font-medium" : "text-gray-500"}`}
+                className={`text-xs ${selectedTip === tip ? "text-black font-medium" : "text-gray-500"}`}
               >
                 $
                 {(
@@ -147,28 +160,36 @@ const CartTips = ({
                 ![10, 15, 20].includes(selectedTip ?? 0) &&
                 (selectedTip ?? 0) > 0
               ) {
-                // If it's already a custom amount and clicked, we clear it (toggle off)
-                handleTipSelection(0);
+                // If it's already a custom positive amount and clicked, open modal to change
+                setShowCustomTipModal(true);
               } else {
                 setShowCustomTipModal(true);
               }
             }}
-            className={`flex flex-col items-center justify-center py-3 sm:py-4 rounded-md border-2 transition-all duration-200 ${
+            className={`flex flex-col items-center justify-center py-2 sm:py-3 rounded-md border-2 transition-all duration-200 ${
               ![10, 15, 20].includes(selectedTip ?? 0)
                 ? "border-primary bg-gray-50"
                 : "border-gray-200 bg-white hover:bg-gray-50"
             }`}
           >
-            {![10, 15, 20].includes(selectedTip ?? 0) ? (
-              <>
-                <span className=" text-base  text-black">Custom</span>
-                <span className="text-xs sm:text-sm text-black font-medium">
-                  ${(tipAmt ?? 0).toFixed(2)}
-                </span>
-              </>
-            ) : (
-              <span className=" sm:text-lg text-gray-800 my-auto">Other</span>
-            )}
+            <span
+              className={`text-sm sm:text-base ${
+                ![10, 15, 20].includes(selectedTip ?? 0)
+                  ? "text-black"
+                  : "text-gray-800"
+              }`}
+            >
+              Custom
+            </span>
+            <span
+              className={`text-xs ${
+                ![10, 15, 20].includes(selectedTip ?? 0)
+                  ? "text-black font-medium"
+                  : "text-gray-500"
+              }`}
+            >
+              ${(tipAmt ?? 0).toFixed(2)}
+            </span>
           </button>
         </div>
 
@@ -266,7 +287,7 @@ const CartTips = ({
                 style={{
                   color: isContrastOkay(
                     Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                    Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                    Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                   )
                     ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                     : Env.NEXT_PUBLIC_TEXT_COLOR,

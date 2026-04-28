@@ -79,6 +79,7 @@ interface OurStoryClientProps {
   restaurantData: any; // Use appropriate type from your API
   navItems: { name: string; link: string }[];
   offerNavTitles?: { title: string; link: string }[];
+  giftCardEnabled?: boolean;
 }
 
 export default function OurStoryClient({
@@ -86,6 +87,7 @@ export default function OurStoryClient({
   restaurantData,
   navItems,
   offerNavTitles,
+  giftCardEnabled = false,
 }: OurStoryClientProps) {
   const {
     name,
@@ -100,6 +102,7 @@ export default function OurStoryClient({
   return (
     <div>
       <Navbar
+        giftCardEnabled={giftCardEnabled}
         email={email}
         phone={phone}
         navItems={navItems}

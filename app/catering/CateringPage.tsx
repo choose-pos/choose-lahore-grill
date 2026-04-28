@@ -19,6 +19,7 @@ interface CateringPageClientProps {
   restaurantData: any; // Use appropriate type from your API
   navItems: { name: string; link: string }[];
   offerNavTitles?: { title: string; link: string }[];
+  giftCardEnabled?: boolean;
 }
 
 export default function CateringPageClient({
@@ -26,6 +27,7 @@ export default function CateringPageClient({
   restaurantData,
   navItems,
   offerNavTitles,
+  giftCardEnabled = false,
 }: CateringPageClientProps) {
   const {
     name,
@@ -40,6 +42,7 @@ export default function CateringPageClient({
   return (
     <div>
       <Navbar
+        giftCardEnabled={giftCardEnabled}
         email={email}
         phone={phone}
         navItems={navItems}

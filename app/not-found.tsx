@@ -53,8 +53,12 @@ export default async function NotFound() {
         color: Env.NEXT_PUBLIC_TEXT_COLOR,
       }}
     >
-      <Navbar navItems={[]} logo={brandingLogo ?? ""} offerNavTitles={[]} email={email} phone={phone} />
+      <Navbar navItems={[]} 
+      logo={brandingLogo ?? ""}
+      giftCardEnabled={false}
+      offerNavTitles={[]} email={email} phone={phone} />
 
+      
     <div className="min-h-[85vh] mt-16 flex items-center justify-center  px-6 font-subheading-oo  bg-bg2 text-subtext">
       <div className="max-w-md w-full text-center ">
         {/* 404 Number */}

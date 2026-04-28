@@ -13,6 +13,7 @@ interface PartyProps {
   restaurantData: any;
   navItems: { name: string; link: string }[];
   offerNavTitles?: { title: string; link: string }[];
+  giftCardEnabled?: boolean;
 }
 
 export default function PartyClient({
@@ -20,6 +21,7 @@ export default function PartyClient({
   restaurantData,
   navItems,
   offerNavTitles,
+  giftCardEnabled,
 }: PartyProps) {
   const {
     name,
@@ -34,6 +36,7 @@ export default function PartyClient({
   return (
     <div>
       <Navbar
+        giftCardEnabled={giftCardEnabled ?? false}
         email={email}
         phone={phone}
         navItems={navItems}

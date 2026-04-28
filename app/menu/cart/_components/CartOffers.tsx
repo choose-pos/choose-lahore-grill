@@ -9,6 +9,7 @@ import { Env } from "@/env";
 import {
   LoyaltyRedeemType,
   FetchVisiblePromoCodesQuery,
+  GiftCardDesign,
 } from "@/generated/graphql";
 import { useCartStore } from "@/store/cart";
 import meCustomerStore from "@/store/meCustomer";
@@ -24,8 +25,8 @@ import { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FiX } from "react-icons/fi";
 import { CiDiscount1 } from "react-icons/ci";
-import PromoCodesModal from "@/components/cart/PromoCodesModal";
 import StarIcon from "@/components/common/StarIcon";
+import PromoCodesModal from "@/components/cart/PromoCodesModal";
 
 interface ICartOffersProps {
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
@@ -47,14 +48,18 @@ const CartOffers = ({
   const { setSignInOpen, setIsSignUpOpen, setCartOpen } = useSidebarStore();
 
   // States
-  const [addPromoLoading, setAddPromoLoading] = useState(false);
-  const [promoCodeInput, setPromoCodeInput] = useState<string>("");
   const [promoError, setPromoError] = useState<string>();
-  const [isPromoFocused, setIsPromoFocused] = useState(false);
   const [showPromoModal, setShowPromoModal] = useState(false);
   const [isSwappingPromo, setIsSwappingPromo] = useState(false);
+  const [codeInput, setCodeInput] = useState<string>("");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState<string>();
+  const [isCodeFocused, setIsCodeFocused] = useState(false);
   const [visiblePromoCodes, setVisiblePromoCodes] = useState<
-    FetchVisiblePromoCodesQuery["fetchVisiblePromoCodes"]
+    FetchVisiblePromoCodesQuery["fetchVisiblePromoCodes"]["promoCodes"]
+  >([]);
+  const [visibleGiftCards, setVisibleGiftCards] = useState<
+    FetchVisiblePromoCodesQuery["fetchVisiblePromoCodes"]["giftCards"]
   >([]);
 
   useEffect(() => {
@@ -73,9 +78,14 @@ const CartOffers = ({
 
   const handleSwapFailed = async () => {
     try {
-      if (cartDetails?.discountCode) {
+      if (cartDetails?.giftCardCode) {
+        // Re-apply the previously active gift card
         await fetchWithAuth(() =>
-          sdk.ValidatePromoCode({ code: cartDetails.discountCode! }),
+          sdk.ApplyDiscountCode({ code: cartDetails.giftCardCode! }),
+        );
+      } else if (cartDetails?.discountCode) {
+        await fetchWithAuth(() =>
+          sdk.ApplyDiscountCode({ code: cartDetails.discountCode! }),
         );
       }
     } finally {
@@ -149,13 +159,26 @@ const CartOffers = ({
   useEffect(() => {
     sdk
       .fetchVisiblePromoCodes()
-      .then((res) => setVisiblePromoCodes(res.fetchVisiblePromoCodes ?? []))
-      .catch(() => setVisiblePromoCodes([]));
+      .then((res) => {
+        setVisiblePromoCodes(res.fetchVisiblePromoCodes?.promoCodes ?? []);
+        setVisibleGiftCards(res.fetchVisiblePromoCodes?.giftCards ?? []);
+      })
+      .catch(() => {
+        setVisiblePromoCodes([]);
+        setVisibleGiftCards([]);
+      });
   }, []);
 
   // Handlers / Functions
   const handleRemoveOffer = async (skipRefresh = false) => {
     try {
+      // If a gift card is applied, use the gift card removal mutation
+      if (cartDetails?.giftCardCode) {
+        await fetchWithAuth(() => sdk.RemoveGiftCardFromCart());
+        if (!skipRefresh) refreshData();
+        return;
+      }
+
       const res = await sdk.updateCartDetails({
         input: { amounts: { discountAmount: 0 }, discountString: null },
       });
@@ -171,31 +194,30 @@ const CartOffers = ({
   };
 
   const handleApplyOffer = async (e: React.FormEvent) => {
-    // Stopping default form behaviour
     e.preventDefault();
-
-    if (promoCodeInput.trim().length === 0) {
-      setToastData({ message: "Please enter a promo code", type: "error" });
+    if (codeInput.trim().length === 0) {
+      setToastData({
+        message: "Please enter a promo or gift card code",
+        type: "error",
+      });
       return;
     }
-
-    setAddPromoLoading(true);
+    setCodeLoading(true);
+    setCodeError(undefined);
     try {
       const res = await fetchWithAuth(() =>
-        sdk.ValidatePromoCode({ code: promoCodeInput.trim() }),
+        sdk.ApplyDiscountCode({ code: codeInput.trim() }),
       );
-
-      if (res.validatePromoCode) {
+      if (res.applyDiscountCode.success) {
         refreshData();
-
-        // Reset local state to default
-        setPromoError(undefined);
-        setPromoCodeInput("");
+        setCodeInput("");
+      } else {
+        setCodeError(res.applyDiscountCode.message ?? "Invalid code");
       }
     } catch (error) {
-      setPromoError(extractErrorMessage(error));
+      setCodeError(extractErrorMessage(error));
     } finally {
-      setAddPromoLoading(false);
+      setCodeLoading(false);
     }
   };
 
@@ -309,7 +331,12 @@ const CartOffers = ({
                       <div
                         key={index}
                         data-promo-card
-                        className="bg-white border transition-all duration-300 w-full md:h-28 rounded-md -z-10"
+                        className="bg-white border transition-all duration-300 w-full md:h-28 rounded-md -z-10 cursor-pointer hover:bg-gray-50"
+                        onClick={() => {
+                          setCartOpen(false);
+                          setSignInOpen(true);
+                          setIsSignUpOpen(true);
+                        }}
                       >
                         <div className="p-3 md:p-4 h-full flex flex-col justify-center">
                           <div className="flex items-start justify-between">
@@ -335,9 +362,35 @@ const CartOffers = ({
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center justify-end mt-2">
+                              <div
+                                className="flex items-center justify-end mt-2 cursor-pointer"
+                                onClick={() => {
+                                  setCartOpen(false);
+                                  setSignInOpen(true);
+                                  setIsSignUpOpen(true);
+                                }}
+                              >
                                 <p className="text-xs sm:text-sm px-2 py-1 font-body-oo font-semibold text-gray-600">
-                                  Sign Up / Sign In to redeem
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setCartOpen(false);
+                                      setSignInOpen(true);
+                                      setIsSignUpOpen(true);
+                                    }}
+                                  >
+                                    Sign Up
+                                  </span>
+                                  {" / "}
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSignInOpen(true);
+                                    }}
+                                  >
+                                    Sign In
+                                  </span>
+                                  {" to redeem"}
                                 </p>
                               </div>
                             </div>
@@ -371,35 +424,27 @@ const CartOffers = ({
                   className="grid grid-cols-12 gap-2 sm:gap-4"
                 >
                   <div
-                    className={`relative transition-all duration-300 ${
-                      isPromoFocused || promoCodeInput.length > 0
-                        ? "col-span-8"
-                        : "col-span-12 md:col-span-8"
-                    }`}
+                    className={`relative transition-all duration-300 ${isCodeFocused || codeInput.length > 0 ? "col-span-8" : "col-span-12 md:col-span-8"}`}
                   >
                     <CiDiscount1 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
                     <input
                       type="text"
-                      value={promoCodeInput}
-                      onFocus={() => setIsPromoFocused(true)}
-                      onBlur={() => setIsPromoFocused(false)}
-                      onChange={(e) => {
-                        const input = e.target.value.toUpperCase();
-                        setPromoCodeInput(input);
-                      }}
-                      placeholder="Enter your promo code"
-                      className="w-full pl-10 pr-2 py-2 sm:py-2 border border-black/30 font-body-oo border-black rounded-md outline-none bg-transparent"
+                      value={codeInput}
+                      onFocus={() => setIsCodeFocused(true)}
+                      onBlur={() => setIsCodeFocused(false)}
+                      onChange={(e) =>
+                        setCodeInput(e.target.value.toUpperCase())
+                      }
+                      placeholder="Enter promo or gift card code"
+                      className="w-full pl-10 pr-2 py-2 border border-black/30 font-body-oo rounded-md outline-none bg-transparent"
                     />
                   </div>
                   <button
                     type="submit"
-                    disabled={addPromoLoading || promoCodeInput.length === 0}
-                    className={`w-full bg-primary text-white px-4 font-body-oo font-semibold rounded-md h-auto transition duration-200 items-center justify-center col-span-4 disabled:bg-primary/60 ${
-                      !isPromoFocused && promoCodeInput.length === 0
-                        ? "hidden md:flex"
-                        : "flex"
-                    }`}
+                    disabled={codeLoading || codeInput.length === 0}
+                    className={`w-full bg-primary px-4 font-body-oo font-semibold rounded-md h-auto transition duration-200 items-center justify-center col-span-4 disabled:opacity-60 ${!isCodeFocused && codeInput.length === 0 ? "hidden md:flex" : "flex"}`}
                     style={{
+                      backgroundColor: Env.NEXT_PUBLIC_PRIMARY_COLOR,
                       color: isContrastOkay(
                         Env.NEXT_PUBLIC_PRIMARY_COLOR,
                         Env.NEXT_PUBLIC_BACKGROUND_COLOR,
@@ -408,7 +453,7 @@ const CartOffers = ({
                         : Env.NEXT_PUBLIC_TEXT_COLOR,
                     }}
                   >
-                    {addPromoLoading ? (
+                    {codeLoading ? (
                       <>
                         <AiOutlineLoading3Quarters className="animate-spin mr-2" />
                         Loading...
@@ -418,12 +463,18 @@ const CartOffers = ({
                     )}
                   </button>
                 </form>
-                {promoError ? (
-                  <p className="text-red-500 text-sm mt-2 col-span-12">
+                {codeError && (
+                  <p className="text-red-500 text-sm mt-2 font-body-oo">
+                    {codeError}
+                  </p>
+                )}
+                {promoError && (
+                  <p className="text-red-500 text-sm mt-2 font-body-oo">
                     {promoError}
                   </p>
-                ) : null}
-                {visiblePromoCodes.length > 0 && (
+                )}
+                {(visiblePromoCodes.length > 0 ||
+                  visibleGiftCards.length > 0) && (
                   <button
                     type="button"
                     onClick={() => setShowPromoModal(true)}
@@ -459,15 +510,16 @@ const CartOffers = ({
                 </button>
               </div>
             )}
-            {!isSwappingPromo && visiblePromoCodes.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowPromoModal(true)}
-                className="text-sm text-gray-500 underline mt-2 font-medium font-body-oo hover:opacity-80 transition-opacity"
-              >
-                View All Offers
-              </button>
-            )}
+            {!isSwappingPromo &&
+              (visiblePromoCodes.length > 0 || visibleGiftCards.length > 0) && (
+                <button
+                  type="button"
+                  onClick={() => setShowPromoModal(true)}
+                  className="text-sm text-gray-500 underline mt-2 font-medium hover:opacity-80  font-body-oo transition-opacity"
+                >
+                  View All Offers
+                </button>
+              )}
           </>
         ) : null}
 
@@ -522,10 +574,10 @@ const CartOffers = ({
                                   </div>
                                 )}
                                 <div className="flex-1">
-                                  <p className="sm:text-lg  text-base font-body-oo font-semibold text-gray-900 line-clamp-1 ">
+                                  <p className="sm:text-lg text-base font-body-oo font-semibold text-gray-900 line-clamp-1">
                                     {offer.name}
                                   </p>
-                                  <p className="text-xs text-gray-600 line-clamp-1 font-body-oo  font-normal">
+                                  <p className="text-xs text-gray-600 line-clamp-1 font-body-oo font-normal">
                                     {offer.points}{" "}
                                     {loyaltyRule?.name ?? "points"} required
                                   </p>
@@ -568,7 +620,6 @@ const CartOffers = ({
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-
                 <div className="flex gap-4 mt-4 justify-center">
                   {loyaltyRewards.map((_, index) => (
                     <button
@@ -587,71 +638,74 @@ const CartOffers = ({
               </Carousel>
             </div>
 
-            <form
-              onSubmit={handleApplyOffer}
-              className="grid grid-cols-12 gap-2 sm:gap-4 w-full"
-            >
-              <div
-                className={`relative transition-all duration-300 ${
-                  isPromoFocused || promoCodeInput.length > 0
-                    ? "col-span-8"
-                    : "col-span-12 md:col-span-8"
-                }`}
-              >
-                <CiDiscount1 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-                <input
-                  type="text"
-                  value={promoCodeInput}
-                  onFocus={() => setIsPromoFocused(true)}
-                  onBlur={() => setIsPromoFocused(false)}
-                  onChange={(e) => {
-                    const input = e.target.value.toUpperCase();
-                    setPromoCodeInput(input);
-                  }}
-                  placeholder="Enter your promo code"
-                  className="w-full pl-10 pr-2 py-2 sm:py-2 font-body-oo border border-black/30 rounded-md outline-none bg-transparent"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={addPromoLoading || promoCodeInput.length === 0}
-                className={`w-full bg-primary text-white font-body-oo font-semibold px-4 rounded-md h-auto transition duration-200 items-center justify-center col-span-4 disabled:bg-primary/60 ${
-                  !isPromoFocused && promoCodeInput.length === 0
-                    ? "hidden md:flex"
-                    : "flex"
-                }`}
-                style={{
-                  color: isContrastOkay(
-                    Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                    Env.NEXT_PUBLIC_BACKGROUND_COLOR,
-                  )
-                    ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                    : Env.NEXT_PUBLIC_TEXT_COLOR,
-                }}
-              >
-                {addPromoLoading ? (
-                  <>
-                    <AiOutlineLoading3Quarters className="animate-spin mr-2" />
-                    Loading...
-                  </>
-                ) : (
-                  "Apply"
+            {/* Combined promo / gift card input */}
+            {!cartDetails?.discountString && (
+              <div className="mt-2">
+                <form
+                  onSubmit={handleApplyOffer}
+                  className="grid grid-cols-12 gap-2 sm:gap-4 w-full"
+                >
+                  <div
+                    className={`relative transition-all duration-300 ${isCodeFocused || codeInput.length > 0 ? "col-span-8" : "col-span-12 md:col-span-8"}`}
+                  >
+                    <CiDiscount1 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+                    <input
+                      type="text"
+                      value={codeInput}
+                      onFocus={() => setIsCodeFocused(true)}
+                      onBlur={() => setIsCodeFocused(false)}
+                      onChange={(e) =>
+                        setCodeInput(e.target.value.toUpperCase())
+                      }
+                      placeholder="Enter promo or gift card code"
+                      className="w-full pl-10 pr-2 py-2 font-body-oo border border-black/30 rounded-md outline-none bg-transparent"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={codeLoading || codeInput.length === 0}
+                    className={`w-full font-body-oo font-semibold px-4 rounded-md h-auto transition duration-200 items-center justify-center col-span-4 disabled:opacity-60 ${!isCodeFocused && codeInput.length === 0 ? "hidden md:flex" : "flex"}`}
+                    style={{
+                      backgroundColor: Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                      color: isContrastOkay(
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                      )
+                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        : Env.NEXT_PUBLIC_TEXT_COLOR,
+                    }}
+                  >
+                    {codeLoading ? (
+                      <>
+                        <AiOutlineLoading3Quarters className="animate-spin mr-2" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Apply"
+                    )}
+                  </button>
+                </form>
+                {codeError && (
+                  <p className="text-red-500 text-sm mt-2 font-body-oo">
+                    {codeError}
+                  </p>
                 )}
-              </button>
-            </form>
-            {promoError ? (
-              <p className="text-red-500 text-sm mt-2 col-span-12">
-                {promoError}
-              </p>
-            ) : null}
-            {visiblePromoCodes.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowPromoModal(true)}
-                className="text-sm text-gray-500 underline mt-2 font-body-oo font-medium hover:opacity-80 transition-opacity"
-              >
-                View All Offers
-              </button>
+                {promoError && (
+                  <p className="text-red-500 text-sm mt-2 font-body-oo">
+                    {promoError}
+                  </p>
+                )}
+                {(visiblePromoCodes.length > 0 ||
+                  visibleGiftCards.length > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPromoModal(true)}
+                    className="text-sm text-gray-500 underline mt-2 font-body-oo font-medium hover:opacity-80 transition-opacity"
+                  >
+                    View All Offers
+                  </button>
+                )}
+              </div>
             )}
           </>
         ) : null}
@@ -661,12 +715,17 @@ const CartOffers = ({
           onClose={() => setShowPromoModal(false)}
           onApplied={() => handleSwapSuccess()}
           promoCodes={visiblePromoCodes}
-          appliedCode={cartDetails?.discountCode}
+          giftCards={visibleGiftCards}
+          appliedCode={
+            cartDetails?.discountCode || cartDetails?.giftCardCode || undefined
+          }
           onRemoveExisting={
-            cartDetails?.discountString ? handleSwapStart : undefined
+            cartDetails?.discountString || cartDetails?.giftCardCode
+              ? handleSwapStart
+              : undefined
           }
           onSwapFailed={
-            cartDetails?.discountCode ? handleSwapFailed : undefined
+            cartDetails?.discountString ? handleSwapFailed : undefined
           }
         />
       )}

@@ -91,6 +91,7 @@ export interface CustomerRestaurant {
     _id: string;
     salesTax: number;
   }[];
+  giftCardEnabled?: boolean;
 }
 interface Item {
   name: string;
@@ -261,6 +262,8 @@ export interface FetchCartDetails {
   loyaltyRedeemPoints?: number | null;
   loyaltyType?: LoyaltyRedeemType | null;
   discountItemImage?: string | null;
+  giftCardCode?: string | null;
+  giftCardDiscountAmount?: number | null;
 }
 
 export type TAmounts = {
@@ -271,6 +274,7 @@ export type TAmounts = {
   tipAmt: number;
   platformFeeAmt: number;
   deliveryFeeAmt: number | null;
+  giftCardAmt?: number;
 };
 
 // types.ts

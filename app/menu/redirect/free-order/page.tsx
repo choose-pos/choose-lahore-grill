@@ -20,6 +20,7 @@ import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import {
   calculateTotalModifiersPrice,
   extractErrorMessage,
+  formatGiftCardCode,
   formattedNumber,
   getCookie,
 } from "@/utils/UtilFncs";
@@ -535,10 +536,47 @@ const PaymentStatusPage = () => {
                 </div>
               ) : null}
 
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
-              </div>
+              {selectedOrder.appliedGiftCard?.amountUsed ? (
+                <>
+                  <div className="flex justify-between font-bold text-lg border-t pt-2">
+                    <span>Subtotal</span>
+                    <span>
+                      $
+                      {(
+                        (selectedOrder.subTotalAmount ?? 0) -
+                        calcDiscountAmt() +
+                        (selectedOrder.taxAmount ?? 0) +
+                        (selectedOrder.platformFees ?? 0) +
+                        (selectedOrder.tipAmount ?? 0) +
+                        (selectedOrder.deliveryAmount ?? 0)
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-green-600">
+                    <span>
+                      Gift Card ({formatGiftCardCode(selectedOrder.appliedGiftCard.giftCardCode)})
+                    </span>
+                    <span>
+                      -${selectedOrder.appliedGiftCard.amountUsed.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span>
+                      $
+                      {(
+                        (selectedOrder?.finalAmount ?? 0) -
+                        (selectedOrder?.appliedGiftCard.amountUsed ?? 0)
+                      )?.toFixed(2)}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
+                </div>
+              )}
 
               {(selectedOrder?.refundAmount ?? 0) > 0 ? (
                 <div className="flex justify-between font-bold text-lg">
@@ -619,9 +657,8 @@ const PaymentStatusPage = () => {
               </div>
             )}
 
-            <div className="mt-6 text-center text-gray-500 text-xs">
               <div className="mt-6 text-center">
-                <p className="text-gray-500 text-xs mb-6 font-body-oo">
+                <p className="text-gray-500 text-xs mb-6">
                   Thank you for your order!
                 </p>
 
@@ -677,7 +714,7 @@ const PaymentStatusPage = () => {
                       onChange={(e) => setFeedbackRemark(e.target.value)}
                       maxLength={150}
                       placeholder="Share your experience with us..."
-                      className="w-full p-2 border rounded-md font-subheading-oo focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
+                       className="w-full p-2 border rounded-md font-body-oo focus:outline-none focus:ring-0 border-black resize-none h-24 overflow-y-auto"
                     />
                     <p className="text-sm mt-1 text-right font-body-oo">
                       {feedbackRemark.length}/150 characters
@@ -702,7 +739,6 @@ const PaymentStatusPage = () => {
                     >
                       Submit Feedback
                     </button>
-                  </div>
                 </div>
               </div>
             </div>

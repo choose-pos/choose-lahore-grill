@@ -26,6 +26,7 @@ import { isContrastOkay } from "@/utils/isContrastOkay";
 import {
   calculateTotalModifiersPrice,
   extractErrorMessage,
+  formatGiftCardCode,
   formattedNumber,
   getCookie,
 } from "@/utils/UtilFncs";
@@ -161,7 +162,6 @@ const PaymentStatusPage = () => {
                 facebook: Restaurant.socialInfo.facebook ?? undefined,
                 instagram: Restaurant.socialInfo.instagram ?? undefined,
                 googleMapsLink: Restaurant.socialInfo.googleMapsLink ?? undefined,
-
               }
             : undefined,
           availability: Restaurant.availability || undefined,
@@ -213,7 +213,7 @@ const PaymentStatusPage = () => {
           const data = await fetchWithAuth(() =>
             sdk.fetchOrderById({
               id: orderId,
-            })
+            }),
           );
           setSelectedOrder(data.fetchCustomerOrderById);
 
@@ -256,7 +256,7 @@ const PaymentStatusPage = () => {
           setPaymentFailed(true);
         } else if (piStatus.getPaymentStatus === "processing") {
           setError(
-            "Payment is processing, please check you email for confirmation."
+            "Payment is processing, please check you email for confirmation.",
           );
         } else {
           setError("Payment is failed, please try again later.");
@@ -283,7 +283,7 @@ const PaymentStatusPage = () => {
     // Check if feedback already submitted for this order
     if (orderId) {
       const submittedOrders = JSON.parse(
-        sessionStorage.getItem("feedbackSubmittedOrders") || "[]"
+        sessionStorage.getItem("feedbackSubmittedOrders") || "[]",
       );
       if (submittedOrders.includes(orderId)) {
         setFeedbackSubmitted(true);
@@ -314,7 +314,7 @@ const PaymentStatusPage = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center font-body-oo">
+      <div className="w-full min-h-screen flex flex-col items-center justify-center font-body-oo ">
         <span className="mb-2 text-gray-600">Please wait...</span>
         <LoadingDots />
       </div>
@@ -323,10 +323,10 @@ const PaymentStatusPage = () => {
 
   if (error) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center h-64 font-body-oo">
+      <div className="w-full min-h-screen flex items-center justify-center h-64">
         <div className="text-center text-red-600">
           <FaExclamationCircle className="mx-auto text-3xl mb-2" />
-          <p className="text-sm">{error}</p>
+          <p className="text-sm font-body-oo">{error}</p>
         </div>
       </div>
     );
@@ -344,12 +344,12 @@ const PaymentStatusPage = () => {
               </p>
             </div>
           </Link>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-body-oo font-bold text-gray-800 mb-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-subheading-oo font-bold text-gray-800 mb-4">
             Oops! Payment Failed
           </h1>
 
           <div className="space-y-4 text-xl md:text-2xl">
-            <div className="flex items-center font-body-oo justify-center space-x-3">
+            <div className="flex items-center justify-center font-subheading-oo space-x-3">
               <span>
                 Don&apos;t worry! <br /> no charges were made.
               </span>
@@ -936,11 +936,48 @@ const PaymentStatusPage = () => {
                     </span>
                   </div>
                 ) : null}
-
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
-                </div>
+                {}
+                {selectedOrder.appliedGiftCard?.amountUsed ? (
+                  <>
+                    <div className="flex justify-between font-bold text-lg border-t pt-2">
+                      <span>Subtotal</span>
+                      <span>
+                        $
+                        {(
+                          (selectedOrder.subTotalAmount ?? 0) -
+                          calcDiscountAmt() +
+                          (selectedOrder.taxAmount ?? 0) +
+                          (selectedOrder.platformFees ?? 0) +
+                          (selectedOrder.tipAmount ?? 0) +
+                          (selectedOrder.deliveryAmount ?? 0)
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-green-600">
+                      <span>
+                        Gift Card ({formatGiftCardCode(selectedOrder.appliedGiftCard.giftCardCode)})
+                      </span>
+                      <span>
+                        -${selectedOrder.appliedGiftCard.amountUsed.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Total</span>
+                      <span>
+                        $
+                        {(
+                          (selectedOrder?.finalAmount ?? 0) -
+                          (selectedOrder?.appliedGiftCard.amountUsed ?? 0)
+                        )?.toFixed(2)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
+                  </div>
+                )}
 
                 {(selectedOrder?.refundAmount ?? 0) > 0 ? (
                   <div className="flex justify-between font-bold text-lg">

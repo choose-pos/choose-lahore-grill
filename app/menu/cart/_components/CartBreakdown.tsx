@@ -36,7 +36,10 @@ const CartBreakdown = ({
 
   return (
     <div className="px-6 font-body-oo font-normal">
-      {meCustomerData !== null && amounts.netAmt > 0 && loyaltyRule !== null ? (
+      {meCustomerData !== null &&
+      amounts.netAmt > 0 &&
+      loyaltyRule !== null &&
+      !cartDetails?.giftCardCode ? (
         <p className="text-sm text-gray-600 mb-2">
           {`You'll earn`}{" "}
           <span className="font-semibold">
@@ -55,7 +58,7 @@ const CartBreakdown = ({
         </span>
       </div>
 
-      {amounts.discAmt > 0 ? (
+      {amounts.discAmt > 0 && !cartDetails?.giftCardCode ? (
         <>
           <div className="flex justify-between mb-3 text-green-600">
             <span className="text-base md:text-lg font-body-oo font-medium">
@@ -155,6 +158,37 @@ const CartBreakdown = ({
           ${totalAmount.toFixed(2)}
         </span>
       </div>
+      {/* Gift Card - shown AFTER total */}
+      {cartDetails?.giftCardCode && cartDetails?.giftCardDiscountAmount ? (
+        <>
+          <div className="flex justify-between mt-3 text-green-600">
+            <span className="text-base md:text-lg font-body-oo font-medium">
+              Gift Card Applied
+            </span>
+            <span className="text-base md:text-lg font-medium font-subheading-oo">
+              -$
+              {Math.min(
+                cartDetails.giftCardDiscountAmount,
+                totalAmount,
+              ).toFixed(2)}
+            </span>
+          </div>
+
+          <div className="flex justify-between mt-3 pt-3 border-t border-gray-200">
+            <span className="text-lg md:text-xl font-body-oo font-semibold text-gray-900">
+              Amount to Pay
+            </span>
+            <span className="text-lg md:text-xl font-semibold font-subheading-oo text-gray-900">
+              $
+              {Math.max(
+                0,
+                totalAmount -
+                  Math.min(cartDetails.giftCardDiscountAmount, totalAmount),
+              ).toFixed(2)}
+            </span>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

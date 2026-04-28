@@ -150,11 +150,24 @@ async function getOfferLinks() {
   }
 }
 
+
+async function getGiftCardEnabledData() {
+  try {
+    const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+    const res = await sdk.getGiftCardEnabled({}, { cookie: cookieVal });
+    return res.getGiftCardEnabled;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 export default async function OurStoryPage() {
-  const [partyData, restaurantData, cmsData] = await Promise.all([
+  const [partyData, restaurantData, cmsData, giftCardEnabled] = await Promise.all([
     getOurStoryData(),
     getRestaurantData(),
     getRestaurtCmsData(),
+    getGiftCardEnabledData(),
   ]);
   const offerNavItems = await getOfferLinks();
   if (!restaurantData || !partyData) {
@@ -174,7 +187,7 @@ export default async function OurStoryPage() {
     { name: "Banquet Hall", link: "/parties" },
     { name: "Events", link: "/event" },
     // { name: "Reservations", link: "/reservations" },
-    { name: "Contact us", link: "/contact" },
+    // { name: "Contact us", link: "/contact" },
   ];
 
   if (menuSection.show) {
@@ -186,6 +199,7 @@ export default async function OurStoryPage() {
 
   return (
     <PartyClient
+      giftCardEnabled={giftCardEnabled ?? false}
       navItems={navItems}
       partyPageData={partyData}
       restaurantData={restaurantData}

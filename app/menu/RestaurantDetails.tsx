@@ -212,6 +212,8 @@ RestaurantDetailsProps) {
           pickUpDateAndTime: cartStore.pickUpDateAndTime,
           deliveryDateAndTime: cartStore.deliveryDateAndTime,
           discountString: cartStore.discountString,
+          discountCode: cartStore.discountCode ?? "",
+          giftCardCode: cartStore.giftCardCode ?? null,
           loyaltyType: cartStore.loyaltyType,
           loyaltyRedeemPoints: cartStore.loyaltyRedeemPoints,
         };

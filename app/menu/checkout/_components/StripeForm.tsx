@@ -1,6 +1,7 @@
 import { Env } from "@/env";
 import {
   CreateOrderInput,
+  CreateOrderWihoutPaymentInput,
   LoyaltyRedeemType,
   OrderDiscountType,
 } from "@/generated/graphql";
@@ -50,7 +51,7 @@ const CheckoutStripeForm = forwardRef<
       refreshData,
       setIsOtpVerified,
     },
-    ref
+    ref,
   ) => {
     // Configs
     const {} = useRouter();
@@ -59,7 +60,7 @@ const CheckoutStripeForm = forwardRef<
 
     // Stores
     const { setToastData } = ToastStore();
-    const { cartData, specialRemarks } = useCartStore();
+    const { cartData, cartDetails, specialRemarks } = useCartStore();
     const { meCustomerData } = meCustomerStore();
     const { customerData } = CustomerDataStore();
 
@@ -85,7 +86,7 @@ const CheckoutStripeForm = forwardRef<
       if (submitError) {
         setPlaceOrderErrorMessage(
           extractErrorMessage(submitError.message) ||
-            "Error validating payment details"
+            "Error validating payment details",
         );
         setPlaceOrderLoading(false);
         return;
@@ -104,31 +105,77 @@ const CheckoutStripeForm = forwardRef<
           return;
         }
 
-        const clientSecret = response.createCheckoutPaymentIntent.cs;
-        const intententId = response.createCheckoutPaymentIntent.id;
+        const {
+          cs: clientSecret,
+          id: intentId,
+          isFreeOrder,
+        } = response.createCheckoutPaymentIntent;
         const userHash = getOrCreateUserHash();
 
-        const formattedOrderDatawitId: CreateOrderInput = {
-          paymentIntentId: intententId,
-          discount:
-            discountData !== null
-              ? (discountData.discountCode ?? "").length > 0
+        const giftCardDiscount = cartDetails?.giftCardCode
+          ? {
+              discountType: OrderDiscountType.Giftcard,
+              giftCardCode: cartDetails.giftCardCode,
+              giftCardAmount: cartDetails.giftCardDiscountAmount ?? undefined,
+            }
+          : null;
+
+        const promoLoyaltyDiscount =
+          discountData !== null
+            ? (discountData.discountCode ?? "").length > 0
+              ? {
+                  discountType: OrderDiscountType.Promo,
+                  promoCode: discountData.discountCode,
+                }
+              : (discountData.loyaltyPointsRedeemed ?? 0) > 0
                 ? {
-                    discountType: OrderDiscountType.Promo,
-                    promoCode: discountData.discountCode,
-                  }
-                : (discountData.loyaltyPointsRedeemed ?? 0) > 0
-                  ? {
-                      discountType: OrderDiscountType.Loyalty,
-                      loyaltyInput: {
-                        loyaltyPointsRedeemed:
-                          discountData.loyaltyPointsRedeemed ?? 0,
-                        redeemType:
+                    discountType: OrderDiscountType.Loyalty,
+                    loyaltyInput: {
+                      loyaltyPointsRedeemed:
+                        discountData.loyaltyPointsRedeemed ?? 0,
+                      redeemType:
                         discountData.loyaltyType ?? LoyaltyRedeemType.Discount,
-                      },
-                    }
-                  : null
-              : null,
+                    },
+                  }
+                : null
+            : null;
+
+        const discount = giftCardDiscount ?? promoLoyaltyDiscount;
+
+        // Gift card covers full amount — skip Stripe, place as free order
+        if (isFreeOrder) {
+          const freeOrderInput: CreateOrderWihoutPaymentInput = {
+            discount,
+            guestCustomerDetails:
+              meCustomerData === null && customerData !== null
+                ? customerData
+                : null,
+            specialRemark: specialRemarks.length > 0 ? specialRemarks : null,
+          };
+
+          const resp = await fetchWithAuth(() =>
+            sdk.createOrderWithoutPayment({ createOrder: freeOrderInput }),
+          );
+
+          if (resp.createOrderWithoutPayment?.success === false) {
+            setToastData({
+              message: resp.createOrderWithoutPayment.message ?? "",
+              type: "error",
+            });
+            setPlaceOrderErrorMessage(
+              resp.createOrderWithoutPayment.message ?? "Failed to place order",
+            );
+            setIsOtpVerified(false);
+            return;
+          }
+
+          window.location.href = `${Env.NEXT_PUBLIC_DOMAIN}/menu/redirect/payment-status?orderId=${resp.createOrderWithoutPayment.orderId}`;
+          return;
+        }
+
+        const formattedOrderDatawitId: CreateOrderInput = {
+          paymentIntentId: intentId ?? "",
+          discount,
           guestCustomerDetails:
             meCustomerData === null && customerData !== null
               ? customerData
@@ -138,17 +185,18 @@ const CheckoutStripeForm = forwardRef<
         };
 
         const resp = await fetchWithAuth(() =>
-          sdk.CreateOrder({
-            createOrder: formattedOrderDatawitId,
-          })
+          sdk.CreateOrder({ createOrder: formattedOrderDatawitId }),
         );
 
         if (resp.createOrder.message && resp.createOrder.success === false) {
-          setToastData({
-            message: resp.createOrder.message,
-            type: "error",
-          });
+          setToastData({ message: resp.createOrder.message, type: "error" });
           setPlaceOrderErrorMessage(resp.createOrder.message);
+          setIsOtpVerified(false);
+          return;
+        }
+
+        if (!clientSecret) {
+          setPlaceOrderErrorMessage("Payment setup failed. Please try again.");
           setIsOtpVerified(false);
           return;
         }
@@ -164,10 +212,10 @@ const CheckoutStripeForm = forwardRef<
         if (error) {
           setPlaceOrderErrorMessage(
             extractErrorMessage(error.message) ||
-              "An error occurred while processing your payment"
+              "An error occurred while processing your payment",
           );
-           try {
-            const j = sdk.handleOrderCreationFailure({
+          try {
+            sdk.handleOrderCreationFailure({
               orderId: resp.createOrder.orderId ?? "",
               error: error.message
                 ? extractErrorMessage(error.message)
@@ -180,17 +228,14 @@ const CheckoutStripeForm = forwardRef<
         }
 
         if (resp.createOrder.message) {
-          setToastData({
-            message: resp.createOrder.message,
-            type: "success",
-          });
+          setToastData({ message: resp.createOrder.message, type: "success" });
         }
       } catch (err) {
         refreshData();
 
         if (extractErrorMessage(err) == "TypeError: Failed to fetch")
           setPlaceOrderErrorMessage(
-            "Something went wrong, please try again later."
+            "Something went wrong, please try again later.",
           );
         else {
           setPlaceOrderErrorMessage(extractErrorMessage(err));
@@ -212,7 +257,7 @@ const CheckoutStripeForm = forwardRef<
         <br />
       </form>
     );
-  }
+  },
 );
 
 CheckoutStripeForm.displayName = "CheckoutStripeForm";

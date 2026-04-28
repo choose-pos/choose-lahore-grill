@@ -14,8 +14,8 @@ import {
 } from "./TabBar";
 // import { useRouter } from "next/router";
 import { CustomerNew } from "@/store/meCustomer";
-import { useRouter } from "next/navigation";
-// import { IoMdArrowBack } from 'react-icons/io';
+import { useRouter, useSearchParams } from "next/navigation";// import { IoMdArrowBack } from 'react-icons/io';
+import GiftCardPurchasePage from "../giftCard/GiftCardPurchasePage";
 
 interface AccountDetailsProps {
   customerData: CustomerNew | null;
@@ -23,25 +23,82 @@ interface AccountDetailsProps {
 
 export default function AccountDetails({ customerData }: AccountDetailsProps) {
   const { restaurantData } = RestaurantStore();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [customerBalance, setCustomerBalance] = useState<number>(0);
   const [offers, setOffers] = useState<RestaurantRedeemOffers | null>(null);
   const [pointsRequire, setPointsRequire] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("Rewards");
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<string>(
+    tabParam === "giftcards" ? "eGift Card" : "Rewards",
+  );
+
+  useEffect(() => {
+    if (tabParam === "giftcards") {
+      setActiveTab("eGift Card");
+    }
+    if (tabParam) {
+      router.replace("/menu/my-account", { scroll: false });
+    }
+  }, [tabParam]);
   const [programName, setProgramName] = useState<string>("points");
   const [programDesc, setProgramDesc] = useState<string>(
-    "Earn more points with every purchase!"
+    "Earn more points with every purchase!",
   );
-  const router = useRouter();
+  const [loyaltyRule, setLoyaltyRule] = useState<{
+    value: number;
+    name: string;
+    signUpValue: number;
+  } | null>(null);
+  // Fetch stripe account ID and fee config for gift card tab
+  const [stripeId, setStripeId] = useState<string>("");
+  const [processingConfig, setProcessingConfig] = useState<{
+    feePercent: number | null;
+    maxFeeAmount: number | null;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchGiftCardConfig = async () => {
+      try {
+        const [stripeRes, restaurantRes] = await Promise.all([
+          sdk.getStripeAccountId(),
+          sdk.GetCustomerRestaurantDetails(),
+        ]);
+        setStripeId(stripeRes.getStripeAccountId);
+        const r = restaurantRes.getCustomerRestaurantDetails;
+        setProcessingConfig(
+          r?.processingConfig
+            ? {
+                feePercent: r.processingConfig.feePercent ?? null,
+                maxFeeAmount: r.processingConfig.maxFeeAmount ?? null,
+              }
+            : null,
+        );
+      } catch (error) {
+        console.error("Error fetching gift card config:", error);
+      }
+    };
+    fetchGiftCardConfig();
+  }, []);
 
   useEffect(() => {
     const fetchRules = async () => {
       try {
         const res = await sdk.fetchLoyaltyCustomerRules();
-        if (res.fetchLoyaltyCustomerRules.programName) {
-          setProgramName(res.fetchLoyaltyCustomerRules.programName);
+        const rules = res.fetchLoyaltyCustomerRules;
+        if (rules.programName) {
+          setProgramName(rules.programName);
         }
-        if (res.fetchLoyaltyCustomerRules.programDesc) {
-          setProgramDesc(res.fetchLoyaltyCustomerRules.programDesc);
+        if (rules.programDesc) {
+          setProgramDesc(rules.programDesc);
+        }
+        if (rules.onOrderRewardActive) {
+          setLoyaltyRule({
+            value: rules.onOrderRewardValue,
+            name: rules.programName,
+            signUpValue: rules.signUpRewardActive ? rules.signUpRewardValue : 0,
+          });
         }
       } catch (error) {
         console.error("Error fetching offers:", error);
@@ -161,6 +218,20 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
         return <ProfileContent customerData={customerData} />;
       case "Orders":
         return <OrdersContent />;
+      case "eGift Card": {
+        if (!stripeId)
+          return <p className="text-center py-10 font-body-oo">Loading...</p>;
+        return (
+          <div>
+            <GiftCardPurchasePage
+              stripeId={stripeId}
+              processingConfig={processingConfig}
+              isAccountView={true}
+              loyaltyRule={loyaltyRule}
+            />
+          </div>
+        );
+      }
       default:
         return null;
     }
@@ -181,7 +252,11 @@ export default function AccountDetails({ customerData }: AccountDetailsProps) {
           <p className="ml-2 text-base sm:text-lg font-body-oo">Menu</p>
         </div>
         <div className="flex flex-col md:flex-row items-start xl:px-10 w-full  font-body-oo">
-          <StickyTabbar onTabChange={handleTabChange} />
+           <StickyTabbar
+            onTabChange={handleTabChange}
+            showGiftCards={restaurantData.giftCardEnabled !== false}
+            initialTab={activeTab}
+          />
 
           <div className="w-full">
             <div className="w-full flex flex-col justify-between">
