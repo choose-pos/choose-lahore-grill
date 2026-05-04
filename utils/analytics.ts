@@ -1,5 +1,17 @@
 import { cookieKeys } from "@/constants";
 
+// ---------------------------------------------------------------------------
+// extractUTMParams
+//
+// Reads UTM parameters directly from a URL query string object (the output
+// of useSearchParams().entries()). Returns null if none of the three standard
+// UTM params are present.
+//
+// NOTE: This function is intentionally kept narrow — it only reads from the
+// query string. The broader UTM resolution logic (query → referrer → cookies)
+// lives in useAnalytics.ts in the resolveUTM() function. Do not expand this
+// function to read cookies or referrer; keep the separation of concerns.
+// ---------------------------------------------------------------------------
 export const extractUTMParams = (query: {
   [key: string]: string;
 }): {
@@ -24,11 +36,11 @@ export const extractCampaignId = (query: {
   return campaignId ? campaignId : null;
 };
 
+// Server sets this via middleware → /visitor/init.
+// Client generation is a fallback only for edge cases.
 export const getOrCreateUserHash = (): string => {
   const COOKIE_NAME = cookieKeys.userHash;
-  const FIFTEEN_DAY_IN_SECONDS = 60 * 60 * 24 * 15;
 
-  // Helper function to read a cookie by name
   const getCookie = (name: string): string | null => {
     const cookieMatch = document.cookie
       .split("; ")
@@ -36,22 +48,10 @@ export const getOrCreateUserHash = (): string => {
     return cookieMatch ? cookieMatch.split("=")[1] : null;
   };
 
-  // Helper function to set a cookie
-  const setCookie = (name: string, value: string, maxAge: number): void => {
-    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`;
-  };
-
-  // Try to get the existing user hash from cookies
   const existingHash = getCookie(COOKIE_NAME);
   if (existingHash) {
-    return existingHash; // Return if already exists
+    return existingHash;
   }
 
-  // Generate a new UUID as the user hash
-  const newHash = crypto.randomUUID();
-
-  // Save the new hash in a cookie
-  setCookie(COOKIE_NAME, newHash, FIFTEEN_DAY_IN_SECONDS);
-
-  return newHash;
+  return crypto.randomUUID();
 };

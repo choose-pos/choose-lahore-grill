@@ -15,13 +15,35 @@ export async function middleware(request: NextRequest) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  const response = NextResponse.next();
-
   const userAgent = request.headers.get("user-agent") || "";
 
   if (isCrawlerUserAgent(userAgent)) {
-    // Do not redirect. Let the crawler see the real content.
-    return response;
+    // Do not redirect or initialize visitor tracking for bots/crawlers.
+    return NextResponse.next();
+  }
+
+  const response = NextResponse.next();
+
+  // Call /visitor/init on the first request so the server-assigned visitor
+  // hash is set before any page renders — including promotional pages and the
+  // homepage — and before cart creation. The hash persists for 30 days via the
+  // choose_oos_uh cookie set by the ordering server. If the fetch fails, the
+  // client-side fallback in analytics.ts handles the missing hash gracefully.
+  const visitorHashCookie = request.cookies.get(cookieKeys.userHash)?.value;
+  let visitorInitSetCookie: string | null = null;
+  if (!visitorHashCookie) {
+    try {
+      const visitorInitRes = await fetch(
+        `${Env.NEXT_PUBLIC_SERVER_BASE_URL}/visitor/init`,
+        { headers: { cookie: request.headers.get("cookie") ?? "" } },
+      );
+      visitorInitSetCookie = visitorInitRes.headers.get("set-cookie");
+      if (visitorInitSetCookie) {
+        response.headers.append("set-cookie", visitorInitSetCookie);
+      }
+    } catch {
+      // Silent — client-side fallback in analytics.ts handles missing hash
+    }
   }
 
   // Extract UTM parameters
@@ -44,7 +66,7 @@ export async function middleware(request: NextRequest) {
       ([key]) =>
         !key.startsWith("utm_") &&
         key.toLowerCase() !== "campaignid" &&
-        key.toLowerCase() !== "itemid"
+        key.toLowerCase() !== "itemid",
     )
     .map(([key, value]) => `${key}=${value}`)
     .join("&");
@@ -52,7 +74,7 @@ export async function middleware(request: NextRequest) {
   if (campaignId.value) {
     response.cookies.set(campaignId.key, campaignId.value, {
       maxAge: 60 * 60 * 24 * 30,
-    }); // 30 day
+    }); // 30 days
   }
 
   const itemId = searchParams.get("itemId");
@@ -62,7 +84,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-    // Don't apply session validation for feedback-related routes
+  // Don't apply session validation for feedback-related routes
   // Allow users to access feedback pages without a session
   const isFeedbackRoute =
     pathname.includes("/feedback") ||
@@ -83,11 +105,18 @@ export async function middleware(request: NextRequest) {
       });
     }
     resp.cookies.set(cookieKeys.restaurantCookie, partnerId);
+    if (visitorInitSetCookie) {
+      resp.headers.append("set-cookie", visitorInitSetCookie);
+    }
     return resp;
   }
-  
+
   // Only redirect if there's no cartId and we're not already on cart-session
-  if ((!cartId || partnerId !== restaurantId) && (pathname.includes("/menu") || pathname === "/gift-cards")) {    const utmString =
+  if (
+    (!cartId || partnerId !== restaurantId) &&
+    (pathname.includes("/menu") || pathname === "/gift-cards")
+  ) {
+    const utmString =
       utmParams.length > 0
         ? utmParams.map(({ key, value }) => `${key}=${value}`).join("&")
         : "";
@@ -98,7 +127,9 @@ export async function middleware(request: NextRequest) {
 
     const itemString = itemId ? `itemId=${itemId}` : "";
 
-    const redirectParam = pathname === "/gift-cards" ? `redirect=/gift-cards` : "";
+    const redirectParam =
+      pathname === "/gift-cards" ? `redirect=/gift-cards` : "";
+
     const queryString = [
       utmString,
       campaignString,
@@ -124,6 +155,9 @@ export async function middleware(request: NextRequest) {
         maxAge: 60 * 60 * 24 * 30,
       }); // 30 days
     }
+    if (visitorInitSetCookie) {
+      response.headers.append("set-cookie", visitorInitSetCookie);
+    }
     return response;
   }
 
@@ -139,6 +173,9 @@ export async function middleware(request: NextRequest) {
     }); // 30 days
   }
   resp.cookies.set(cookieKeys.restaurantCookie, partnerId);
+  if (visitorInitSetCookie) {
+    resp.headers.append("set-cookie", visitorInitSetCookie);
+  }
 
   return resp;
 }
