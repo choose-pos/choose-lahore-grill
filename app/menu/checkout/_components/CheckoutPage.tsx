@@ -127,6 +127,7 @@ const CheckoutPage = ({
 
         if (cartStore) {
           const groupedCart: FetchCartDetails = {
+            _id: cartStore._id,
             customerDetails: {
               firstName: cartStore.customerDetails.firstName,
             },

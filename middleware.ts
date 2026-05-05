@@ -22,29 +22,58 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const response = NextResponse.next();
-
-  // Call /visitor/init on the first request so the server-assigned visitor
-  // hash is set before any page renders — including promotional pages and the
-  // homepage — and before cart creation. The hash persists for 30 days via the
-  // choose_oos_uh cookie set by the ordering server. If the fetch fails, the
-  // client-side fallback in analytics.ts handles the missing hash gracefully.
+  // ---------------------------------------------------------------------------
+  // VISITOR HASH — resolve once at the top, apply to every response branch.
+  //
+  // WHY: Previously we forwarded the raw Set-Cookie header from /visitor/init
+  // via response.headers.append("set-cookie", rawHeader). That header contains
+  // SameSite=Strict (set by ServerCookies on the ordering server). Instagram's
+  // in-app browser and other strict WebViews silently drop SameSite=Strict
+  // cookies when they arrive on a redirect response, because the navigation is
+  // treated as a cross-site entry point (Meta ad click → your domain).
+  //
+  // FIX: Parse the hash value from the JSON response body and set the cookie
+  // ourselves using response.cookies.set() with sameSite: "lax". This means:
+  // - We control the cookie attributes — no more forwarding a raw header string
+  // - SameSite=Lax allows the cookie to survive top-level cross-site navigations
+  //   (ad clicks, redirects) while still blocking third-party iframe contexts
+  // - The cookie is set on the current domain (bawarchiatlanta.com) correctly
+  //   by Next.js, not on the API subdomain
+  //
+  // cartId works fine without this because it is set by the browser hitting
+  // the ordering server directly — not forwarded through middleware.
+  // ---------------------------------------------------------------------------
   const visitorHashCookie = request.cookies.get(cookieKeys.userHash)?.value;
-  let visitorInitSetCookie: string | null = null;
+  let resolvedVisitorHash: string | null = visitorHashCookie ?? null;
+
   if (!visitorHashCookie) {
     try {
       const visitorInitRes = await fetch(
         `${Env.NEXT_PUBLIC_SERVER_BASE_URL}/visitor/init`,
         { headers: { cookie: request.headers.get("cookie") ?? "" } },
       );
-      visitorInitSetCookie = visitorInitRes.headers.get("set-cookie");
-      if (visitorInitSetCookie) {
-        response.headers.append("set-cookie", visitorInitSetCookie);
-      }
+      const data = await visitorInitRes.json();
+      resolvedVisitorHash = data?.visitorHash ?? null;
     } catch {
       // Silent — client-side fallback in analytics.ts handles missing hash
     }
   }
+
+  // Helper: sets the visitorHash cookie on any NextResponse object.
+  // Only sets it when we just resolved a new hash (visitorHashCookie was absent).
+  // When the cookie already existed we don't need to re-set it — the browser
+  // already has it. This avoids unnecessary Set-Cookie headers on every request.
+  const setVisitorHashCookie = (res: NextResponse): void => {
+    if (resolvedVisitorHash && !visitorHashCookie) {
+      res.cookies.set(cookieKeys.userHash, resolvedVisitorHash, {
+        maxAge: 60 * 60 * 24 * 30, // 30 days — matches cart cookie expiry
+        path: "/",
+        httpOnly: false, // must be false — useAnalytics reads it client-side
+        sameSite: "lax", // lax survives cross-site navigations and redirects
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+  };
 
   // Extract UTM parameters
   const campaignId = {
@@ -54,12 +83,6 @@ export async function middleware(request: NextRequest) {
   const utmParams = ["utm_source", "utm_medium", "utm_campaign"]
     .map((param) => ({ key: param, value: searchParams.get(param) }))
     .filter(({ value }) => value !== null);
-
-  if (utmParams.length > 0) {
-    utmParams.forEach(({ key, value }) => {
-      response.cookies.set(key, value ?? "", { maxAge: 60 * 60 * 24 * 30 }); // 30 days
-    });
-  }
 
   const otherQueryParams = Array.from(searchParams.entries())
     .filter(
@@ -71,28 +94,34 @@ export async function middleware(request: NextRequest) {
     .map(([key, value]) => `${key}=${value}`)
     .join("&");
 
-  if (campaignId.value) {
-    response.cookies.set(campaignId.key, campaignId.value, {
-      maxAge: 60 * 60 * 24 * 30,
-    }); // 30 days
-  }
-
   const itemId = searchParams.get("itemId");
 
-  // Don't apply middleware to the cart-session page itself
-  if (pathname == "/cart-session") {
+  // Don't apply middleware to the cart-session page itself.
+  // Still set UTM cookies and visitorHash on this response so they are
+  // available when cart-session/page.tsx runs.
+  if (pathname === "/cart-session") {
+    const response = NextResponse.next();
+    if (utmParams.length > 0) {
+      utmParams.forEach(({ key, value }) => {
+        response.cookies.set(key, value ?? "", { maxAge: 60 * 60 * 24 * 30 });
+      });
+    }
+    if (campaignId.value) {
+      response.cookies.set(campaignId.key, campaignId.value, {
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+    setVisitorHashCookie(response);
     return response;
   }
 
-  // Don't apply session validation for feedback-related routes
-  // Allow users to access feedback pages without a session
+  // Feedback routes — set UTM and visitor cookies but never redirect
   const isFeedbackRoute =
     pathname.includes("/feedback") ||
     pathname.includes("/payment-status") ||
     pathname.includes("/free-order");
 
   if (isFeedbackRoute) {
-    // Still set UTM cookies and restaurant cookie, but don't redirect
     const resp = NextResponse.next();
     if (utmParams.length > 0) {
       utmParams.forEach(({ key, value }) => {
@@ -105,13 +134,11 @@ export async function middleware(request: NextRequest) {
       });
     }
     resp.cookies.set(cookieKeys.restaurantCookie, partnerId);
-    if (visitorInitSetCookie) {
-      resp.headers.append("set-cookie", visitorInitSetCookie);
-    }
+    setVisitorHashCookie(resp);
     return resp;
   }
 
-  // Only redirect if there's no cartId and we're not already on cart-session
+  // Redirect to /cart-session when no cartId on menu/gift-cards routes
   if (
     (!cartId || partnerId !== restaurantId) &&
     (pathname.includes("/menu") || pathname === "/gift-cards")
@@ -147,38 +174,38 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.redirect(cartSessionUrl);
     if (utmParams.length > 0) {
       utmParams.forEach(({ key, value }) => {
-        response.cookies.set(key, value ?? "", { maxAge: 60 * 60 * 24 * 30 }); // 30 days
+        response.cookies.set(key, value ?? "", { maxAge: 60 * 60 * 24 * 30 });
       });
     }
     if (campaignId.value) {
       response.cookies.set(campaignId.key, campaignId.value, {
         maxAge: 60 * 60 * 24 * 30,
-      }); // 30 days
+      });
     }
-    if (visitorInitSetCookie) {
-      response.headers.append("set-cookie", visitorInitSetCookie);
-    }
+    // Critical: visitorHash must survive this redirect.
+    // Previously used headers.append("set-cookie", rawHeader) with SameSite=Strict
+    // which Instagram's browser drops. setVisitorHashCookie uses sameSite:"lax".
+    setVisitorHashCookie(response);
     return response;
   }
 
+  // Default — all other routes
   const resp = NextResponse.next();
   if (utmParams.length > 0) {
     utmParams.forEach(({ key, value }) => {
-      resp.cookies.set(key, value ?? "", { maxAge: 60 * 60 * 24 * 30 }); // 30 days
+      resp.cookies.set(key, value ?? "", { maxAge: 60 * 60 * 24 * 30 });
     });
   }
   if (campaignId.value) {
     resp.cookies.set(campaignId.key, campaignId.value, {
       maxAge: 60 * 60 * 24 * 30,
-    }); // 30 days
+    });
   }
   resp.cookies.set(cookieKeys.restaurantCookie, partnerId);
-  if (visitorInitSetCookie) {
-    resp.headers.append("set-cookie", visitorInitSetCookie);
-  }
-
+  setVisitorHashCookie(resp);
   return resp;
 }
+
 export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|cart-session).*)",

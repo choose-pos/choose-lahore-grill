@@ -243,6 +243,7 @@ export interface PromoData {
 }
 
 export interface FetchCartDetails {
+  _id?: string;
   customerDetails: {
     firstName?: string | null;
   };
