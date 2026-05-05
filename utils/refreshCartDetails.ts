@@ -13,6 +13,7 @@ export const refreshCartDetails =
       const data = await sdk.fetchCartDetails();
       if (data.fetchCartDetails) {
         const groupedCart: FetchCartDetails = {
+          _id: data.fetchCartDetails._id,
           customerDetails: {
             firstName: data.fetchCartDetails.customerDetails.firstName,
           },
