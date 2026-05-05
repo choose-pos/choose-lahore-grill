@@ -17,7 +17,9 @@ import {
 import { extractFreeDiscountItemDetails } from "@/utils/UtilFncs";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { useRouter } from "next/navigation";
+import { resolveUTM, sendAnalyticsEvent } from "@/hooks/useAnalytics";
+import { getOrCreateUserHash } from "@/utils/analytics";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CartBreakdown from "../../cart/_components/CartBreakdown";
 import CartHeader from "../../cart/_components/CartHeader";
@@ -81,7 +83,9 @@ const CheckoutPage = ({
   const [showStickyTotal, setShowStickyTotal] = useState(false);
   const totalRef = useRef<HTMLDivElement>(null);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
-
+  const checkoutTrackedRef = useRef(false);
+  const searchParams = useSearchParams();
+  const searchParamsString = searchParams.toString();
   // UseEffects
   useEffect(() => {
     // Fetching customer details if loggedin
@@ -193,6 +197,39 @@ const CheckoutPage = ({
     stateChange,
   ]);
 
+  // Fire checkout_started analytics event once after cart data loads
+  useEffect(() => {
+    if (checkoutTrackedRef.current || !cartDetails || !cartCountInfo) return;
+    if (cartCountInfo <= 0) return;
+    checkoutTrackedRef.current = true;
+    const userHash = getOrCreateUserHash();
+    const pageQuery = Object.fromEntries(
+      new URLSearchParams(searchParamsString).entries(),
+    );
+
+    const isScheduled =
+      !!cartDetails.pickUpDateAndTime || !!cartDetails.deliveryDateAndTime;
+    sendAnalyticsEvent({
+      restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
+      pagePath: "/menu/checkout",
+      pageQuery: Object.keys(pageQuery).length > 0 ? pageQuery : null,
+      source: document.referrer || "direct",
+      utm: resolveUTM(pageQuery),
+      userHash,
+      eventType: "checkout_started",
+      metadata: {
+        cartId: null,
+        orderType: cartDetails.orderType ?? null,
+        scheduledOrAsap: isScheduled ? "scheduled" : "asap",
+        loggedIn: !!meCustomerData,
+        itemCount: cartCountInfo,
+        cartAmounts: amounts,
+        hasDiscount:
+          !!discountData?.discountCode || !!discountData?.loyaltyPointsRedeemed,
+      },
+    });
+  }, []);
+
   useEffect(() => {
     // Calculating amounts
     const cartAmts = cartDetails?.amounts;
@@ -224,13 +261,15 @@ const CheckoutPage = ({
 
     finalAmts.discAmt = hasGiftCard ? 0 : (cartAmts.discountAmount ?? 0);
     finalAmts.netAmt = parseFloat(
-      (finalAmts.subTotalAmt - finalAmts.discAmt).toFixed(2)
+      (finalAmts.subTotalAmt - finalAmts.discAmt).toFixed(2),
     );
     finalAmts.taxAmt = parseFloat(
-      ((taxPercent / 100) * finalAmts.netAmt).toFixed(2)
+      ((taxPercent / 100) * finalAmts.netAmt).toFixed(2),
     );
-   const tipP = (cartAmts.tipPercent ?? 0) / 100;
+    const tipP = (cartAmts.tipPercent ?? 0) / 100;
     finalAmts.tipAmt = parseFloat((tipP * finalAmts.subTotalAmt).toFixed(2));
+
+    // Calculate processing fee with restaurant-specific or global config (same logic as backend)
     let feePercent = 0;
     let maxFeeAmount: number | null = null;
 
@@ -318,7 +357,7 @@ const CheckoutPage = ({
     setTotalAmount,
   ]);
 
-    useEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setShowStickyTotal(entry.isIntersecting),
       { threshold: 0.1 },

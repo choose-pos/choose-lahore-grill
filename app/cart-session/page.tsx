@@ -92,7 +92,11 @@ const InitializeSession = () => {
         }`;
 
         if (typeof window !== "undefined") {
-          window.location.href = menuUrl;
+         if (menuUrl.startsWith("http")) {
+           window.location.href = menuUrl;
+         } else {
+           router.replace(menuUrl);
+         }
         }
       } catch (err) {
         extractErrorMessage(err);

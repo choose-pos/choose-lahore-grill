@@ -196,6 +196,7 @@ export type Cart = {
   restaurant: Restaurant;
   updatedAt: Scalars['DateTimeISO']['output'];
   utmDetails: UtmDetails;
+  visitorHash?: Maybe<Scalars['String']['output']>;
 };
 
 export type CartItem = {
@@ -894,22 +895,6 @@ export type FulfillmentConfig = {
   largeOrderExtraTime?: Maybe<Scalars['Float']['output']>;
   largeOrderTreshold?: Maybe<Scalars['Float']['output']>;
   prepTime?: Maybe<Scalars['Float']['output']>;
-};
-
-export type GetMyGiftCardsResult = {
-  __typename?: 'GetMyGiftCardsResult';
-  _id: Scalars['String']['output'];
-  amount: Scalars['Float']['output'];
-  code: Scalars['String']['output'];
-  createdAt: Scalars['DateTimeISO']['output'];
-  design: GiftCardDesign;
-  expiryDate?: Maybe<Scalars['DateTimeISO']['output']>;
-  isActive: Scalars['Boolean']['output'];
-  note?: Maybe<Scalars['String']['output']>;
-  recipientInfo: GiftCardPersonInfo;
-  remainingAmount: Scalars['Float']['output'];
-  sendToSelf: Scalars['Boolean']['output'];
-  senderInfo: GiftCardPersonInfo;
 };
 
 /** Available gift card design themes */
@@ -2029,7 +2014,6 @@ export type Query = {
   getGiftCardByCode: PublicGiftCardResult;
   getGiftCardDetailsByCode: PublicGiftCardResult;
   getGiftCardEnabled: Scalars['Boolean']['output'];
-  getMyGiftCards: Array<GetMyGiftCardsResult>;
   getPaymentStatus?: Maybe<Scalars['String']['output']>;
   getPlaceDetails?: Maybe<PlaceDetail>;
   getPlacesList: Array<Places>;

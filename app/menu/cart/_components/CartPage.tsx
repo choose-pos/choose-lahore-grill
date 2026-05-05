@@ -29,6 +29,7 @@ import {
 } from "@/utils/UtilFncs";
 import { AnimatePresence, motion } from "framer-motion";
 import { fadeIn } from "@/utils/motion";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CartBreakdown from "./CartBreakdown";
@@ -97,6 +98,7 @@ const CartPage = ({
   const [isTotalVisible, setIsTotalVisible] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [promoRemovedMsg, setPromoRemovedMsg] = useState<string | null>(null);
+  useAnalytics("cart_visited");
 
   useEffect(() => {
     const el = totalRef.current;
