@@ -31,8 +31,8 @@ const InitializeSession = () => {
           key.toLowerCase() !== "campaignid" &&
           key.toLowerCase() !== "cid" &&
           key.toLowerCase() !== "itemid" &&
-          key.toLowerCase() !== "redirect"
-      )
+          key.toLowerCase() !== "redirect",
+      ),
     );
 
     const initializeSession = async () => {
@@ -56,7 +56,7 @@ const InitializeSession = () => {
                 Object.keys(queryRecord).length > 0 ? queryRecord : null,
             }),
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -68,7 +68,7 @@ const InitializeSession = () => {
 
         // Add UTM parameters if they exist
         Object.entries(utmParams || {}).forEach(([key, value]) => {
-          if (value) menuParams.append(key, value);
+          if (value) menuParams.append(`utm_${key}`, value);
         });
 
         // Add campaign ID if it exists
@@ -87,21 +87,22 @@ const InitializeSession = () => {
         });
 
         // Construct the final URL
-       const menuUrl = `${redirectTo}${
+        const menuUrl = `${redirectTo}${
           menuParams.toString() ? `?${menuParams.toString()}` : ""
         }`;
 
-        if (typeof window !== "undefined") {
-         if (menuUrl.startsWith("http")) {
-           window.location.href = menuUrl;
-         } else {
-           router.replace(menuUrl);
-         }
-        }
+        // if (typeof window !== "undefined") {
+        //   if (menuUrl.startsWith("http")) {
+        //     window.location.href = menuUrl;
+        //   } else {
+        //     router.replace(menuUrl);
+        //   }
+        // }
+        router.replace(menuUrl);
       } catch (err) {
         extractErrorMessage(err);
         setError(
-          "An unexpected error occurred, please close this tab and try again."
+          "An unexpected error occurred, please close this tab and try again.",
         );
       } finally {
         setLoading(false);
@@ -124,12 +125,14 @@ const InitializeSession = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">        <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
+      <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">
+        {" "}
+        <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
         <button
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
-              Env.NEXT_PUBLIC_BACKGROUND_COLOR
+              Env.NEXT_PUBLIC_BACKGROUND_COLOR,
             )
               ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
               : Env.NEXT_PUBLIC_TEXT_COLOR,
