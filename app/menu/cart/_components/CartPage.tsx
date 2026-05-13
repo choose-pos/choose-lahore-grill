@@ -112,34 +112,6 @@ const CartPage = ({
   }, [amounts]);
 
   useEffect(() => {
-    if (!checkDeliveryAvailable) {
-      // Only remove if a discount-type promo is applied (not a free item promo)
-      const hasDiscountPromo =
-        cartDetails?.discountCode && cartDetails?.discountString;
-
-      if (hasDiscountPromo) {
-        sdk
-          .updateCartDetails({
-            input: { amounts: { discountAmount: 0 }, discountString: null },
-          })
-          .then(() => {
-            setStateChange((prev) => !prev);
-          })
-          .catch(() => {});
-        setToastData({
-          type: "error",
-          message: `Your cart value does not meet the minimum delivery order value. The applied promo has been removed.`,
-        });
-      } else {
-        setToastData({
-          type: "error",
-          message: `Your cart value does not meet the minimum delivery order value.`,
-        });
-      }
-    }
-  }, [checkDeliveryAvailable]);
-
-  useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
     }
