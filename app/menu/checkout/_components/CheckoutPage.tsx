@@ -198,9 +198,15 @@ const CheckoutPage = ({
     stateChange,
   ]);
 
-  // Fire checkout_started analytics event once after cart data loads
+  // Fire checkout_started analytics event once after cart data AND amounts load
   useEffect(() => {
-    if (checkoutTrackedRef.current || !cartDetails || !cartCountInfo) return;
+    if (
+      checkoutTrackedRef.current ||
+      !cartDetails ||
+      !cartCountInfo ||
+      !amounts
+    )
+      return;
     if (cartCountInfo <= 0) return;
     checkoutTrackedRef.current = true;
     const userHash = getOrCreateUserHash();
@@ -219,7 +225,7 @@ const CheckoutPage = ({
       userHash,
       eventType: "checkout_started",
       metadata: {
-        cartId: null,
+        cartId: cartDetails._id ?? null,
         orderType: cartDetails.orderType ?? null,
         scheduledOrAsap: isScheduled ? "scheduled" : "asap",
         loggedIn: !!meCustomerData,
@@ -229,7 +235,14 @@ const CheckoutPage = ({
           !!discountData?.discountCode || !!discountData?.loyaltyPointsRedeemed,
       },
     });
-  }, []);
+  }, [
+    cartDetails,
+    cartCountInfo,
+    amounts,
+    discountData,
+    meCustomerData,
+    searchParamsString,
+  ]);
 
   useEffect(() => {
     // Calculating amounts
@@ -270,6 +283,9 @@ const CheckoutPage = ({
     const tipP = (cartAmts.tipPercent ?? 0) / 100;
     finalAmts.tipAmt = parseFloat((tipP * finalAmts.subTotalAmt).toFixed(2));
 
+    // Set delivery fee early so gift card cap logic can reference it
+    finalAmts.deliveryFeeAmt = deliveryFee;
+
     // Calculate processing fee with restaurant-specific or global config (same logic as backend)
     let feePercent = 0;
     let maxFeeAmount: number | null = null;
@@ -286,47 +302,31 @@ const CheckoutPage = ({
 
     // For gift card orders, calculate platform fees AFTER gift card deduction
     if (hasGiftCard) {
-      // Calculate total without platform fees first
-      const totalWithoutPlatformFee =
-        finalAmts.netAmt +
-        finalAmts.taxAmt +
-        finalAmts.tipAmt +
-        (finalAmts.deliveryFeeAmt ?? 0);
+      // The server already caps giftCardDiscountAmount at (subtotal + tax + restaurantTip).
+      const totalWithoutPlatformFee = parseFloat(
+        (
+          finalAmts.netAmt +
+          finalAmts.taxAmt +
+          finalAmts.tipAmt +
+          (finalAmts.deliveryFeeAmt ?? 0)
+        ).toFixed(2),
+      );
 
-      // Git card amount capped at totalWithoutPlatformFee
-      finalAmts.giftCardAmt = parseFloat(
+      const rawGiftCardUsage = parseFloat(
         Math.min(
           cartDetails.giftCardDiscountAmount ?? 0,
           totalWithoutPlatformFee,
         ).toFixed(2),
       );
 
-      // Remaining after gift card (before platform fee)
-      const remainingAmount = parseFloat(
-        (totalWithoutPlatformFee - finalAmts.giftCardAmt).toFixed(2),
+      const remaining = parseFloat(
+        Math.max(0, totalWithoutPlatformFee - rawGiftCardUsage).toFixed(2),
       );
 
-      if (remainingAmount > 0) {
-        // Platform fee on SUBTOTAL (item total), not on remaining
-        let calculatedPlatformFee = (feePercent / 100) * finalAmts.subTotalAmt;
-        if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
-          calculatedPlatformFee = maxFeeAmount;
-        }
-        const stripeCharge = parseFloat(
-          (remainingAmount + calculatedPlatformFee).toFixed(2),
-        );
-        // Waive platform fee if fee >= stripe charge (all money goes to restaurant)
-        if (calculatedPlatformFee >= stripeCharge) {
-          finalAmts.platformFeeAmt = 0;
-        } else {
-          finalAmts.platformFeeAmt = parseFloat(
-            calculatedPlatformFee.toFixed(2),
-          );
-        }
-      } else {
-        // Full coverage — no platform fee
-        finalAmts.platformFeeAmt = 0;
-      }
+      finalAmts.giftCardAmt = rawGiftCardUsage;
+
+      // No platform fees when gift card is used
+      finalAmts.platformFeeAmt = 0;
     } else {
       // No gift card — calculate platform fees on net amount (original logic unchanged)
       let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
@@ -336,8 +336,6 @@ const CheckoutPage = ({
       finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
       finalAmts.giftCardAmt = 0;
     }
-
-    finalAmts.deliveryFeeAmt = deliveryFee;
 
     setAmounts(finalAmts);
 
@@ -486,13 +484,16 @@ const CheckoutPage = ({
         {!showStickyTotal && (
           <div className="block lg:hidden sticky w-full bottom-0 right-0 left-0 px-6 py-4 bg-white border-t z-20">
             {(() => {
-              const orderTotal =
+              const rawTotal =
                 (amounts?.subTotalAmt ?? 0) -
                 (amounts?.discAmt ?? 0) +
                 (amounts?.taxAmt ?? 0) +
                 (amounts?.tipAmt ?? 0) +
                 (amounts?.platformFeeAmt ?? 0) +
                 (amounts?.deliveryFeeAmt ?? 0);
+              const orderTotal = parseFloat(
+                Math.max(0, rawTotal - (amounts?.giftCardAmt ?? 0)).toFixed(2),
+              );
               return (
                 <>
                   <div className="flex justify-between items-center mb-1 font-subheading-oo font-semibold">

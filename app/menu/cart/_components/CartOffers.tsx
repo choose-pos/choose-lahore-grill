@@ -43,7 +43,7 @@ const CartOffers = ({
 }: ICartOffersProps) => {
   // Stores
   const { setToastData } = ToastStore();
-  const { cartDetails } = useCartStore();
+  const { cartDetails, freeItemInCart, cartData } = useCartStore();
   const { meCustomerData } = meCustomerStore();
   const { setSignInOpen, setIsSignUpOpen, setCartOpen } = useSidebarStore();
 
@@ -244,6 +244,8 @@ const CartOffers = ({
       setApplyLoyaltyLoading(false);
     }
   };
+
+  const isOnlyFreeItem = cartData.length === 0 && freeItemInCart !== null;
 
   if (amounts === null) {
     return null;
@@ -473,16 +475,17 @@ const CartOffers = ({
                     {promoError}
                   </p>
                 )}
-                {(visiblePromoCodes.length > 0 ||
-                  visibleGiftCards.length > 0) && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPromoModal(true)}
-                    className="text-sm text-gray-500 font-body-oo font-medium underline mt-2 hover:opacity-80 transition-opacity"
-                  >
-                    View All Offers
-                  </button>
-                )}
+                {!isOnlyFreeItem &&
+                  (visiblePromoCodes.length > 0 ||
+                    visibleGiftCards.length > 0) && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPromoModal(true)}
+                      className="text-sm text-gray-500 font-body-oo font-medium underline mt-2 hover:opacity-80 transition-opacity"
+                    >
+                      View All Offers
+                    </button>
+                  )}
               </div>
             )}
           </>
@@ -511,6 +514,7 @@ const CartOffers = ({
               </div>
             )}
             {!isSwappingPromo &&
+              !isOnlyFreeItem &&
               (visiblePromoCodes.length > 0 || visibleGiftCards.length > 0) && (
                 <button
                   type="button"
@@ -695,16 +699,17 @@ const CartOffers = ({
                     {promoError}
                   </p>
                 )}
-                {(visiblePromoCodes.length > 0 ||
-                  visibleGiftCards.length > 0) && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPromoModal(true)}
-                    className="text-sm text-gray-500 underline mt-2 font-body-oo font-medium hover:opacity-80 transition-opacity"
-                  >
-                    View All Offers
-                  </button>
-                )}
+                {!isOnlyFreeItem &&
+                  (visiblePromoCodes.length > 0 ||
+                    visibleGiftCards.length > 0) && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPromoModal(true)}
+                      className="text-sm text-gray-500 underline mt-2 font-body-oo font-medium hover:opacity-80 transition-opacity"
+                    >
+                      View All Offers
+                    </button>
+                  )}
               </div>
             )}
           </>

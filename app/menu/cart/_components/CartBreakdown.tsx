@@ -158,6 +158,7 @@ const CartBreakdown = ({
           ${totalAmount.toFixed(2)}
         </span>
       </div>
+
       {/* Gift Card - shown AFTER total */}
       {cartDetails?.giftCardCode && cartDetails?.giftCardDiscountAmount ? (
         <>
@@ -166,11 +167,7 @@ const CartBreakdown = ({
               Gift Card Applied
             </span>
             <span className="text-base md:text-lg font-medium font-subheading-oo">
-              -$
-              {Math.min(
-                cartDetails.giftCardDiscountAmount,
-                totalAmount,
-              ).toFixed(2)}
+              -${cartDetails.giftCardDiscountAmount.toFixed(2)}
             </span>
           </div>
 
@@ -180,11 +177,7 @@ const CartBreakdown = ({
             </span>
             <span className="text-lg md:text-xl font-semibold font-subheading-oo text-gray-900">
               $
-              {Math.max(
-                0,
-                totalAmount -
-                  Math.min(cartDetails.giftCardDiscountAmount, totalAmount),
-              ).toFixed(2)}
+              {Math.max(0, totalAmount - (amounts.giftCardAmt ?? 0)).toFixed(2)}
             </span>
           </div>
         </>
