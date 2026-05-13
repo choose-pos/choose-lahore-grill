@@ -60,7 +60,8 @@ const CheckoutStripeForm = forwardRef<
 
     // Stores
     const { setToastData } = ToastStore();
-    const { cartData, cartDetails, specialRemarks } = useCartStore();
+    const { cartData, cartDetails, specialRemarks } =
+      useCartStore();
     const { meCustomerData } = meCustomerStore();
     const { customerData } = CustomerDataStore();
 
@@ -250,7 +251,8 @@ const CheckoutStripeForm = forwardRef<
         <h2 className="mb-4 font-subheading-oo font-semibold text-xl capitalize">
           Payment Details
         </h2>
-        {cartData.length > 0 && <PaymentElement />}
+        {(cartData.length > 0 ||
+          (cartDetails?.loyaltyRedeemPoints ?? 0) > 0) && <PaymentElement />}
         <button ref={ref} type="submit" className="hidden sr-only">
           Pay Now
         </button>

@@ -146,6 +146,8 @@ const CheckoutPage = ({
             discountItemImage: cartStore.discountItemImage ?? null,
             giftCardCode: cartStore.giftCardCode ?? null,
             giftCardDiscountAmount: cartStore.giftCardDiscountAmount ?? null,
+            loyaltyRedeemPoints: cartStore.loyaltyRedeemPoints ?? 0,
+            loyaltyType: cartStore.loyaltyType ?? LoyaltyRedeemType.Discount,
           };
           setCartDetails(groupedCart);
 
