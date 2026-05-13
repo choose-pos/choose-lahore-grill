@@ -192,29 +192,40 @@ const CartPage = ({
           sdk.checkDeliveryAvailable(),
         ]);
 
-        if (!checkDeliveryAvailable.checkDeliveryAvailable) {
+        const cartCount0 = cartCountReq.fetchCartCount;
+        const cartStore0 = cartStoreReq.fetchCartDetails;
+
+        if (!checkDeliveryAvailable.checkDeliveryAvailable && cartCount0 > 0) {
           // Only remove if a discount-type promo is applied (not a free item promo)
-          const cartStore0 = cartStoreReq.fetchCartDetails;
           const hasFreeItem0 = !!extractFreeDiscountItemDetails(
             cartStore0?.discountString ?? "",
           );
           const hasDiscountPromo0 = !!cartStore0?.discountCode && !hasFreeItem0;
 
-          if (hasDiscountPromo0) {
-            sdk
-              .updateCartDetails({
-                input: { amounts: { discountAmount: 0 }, discountString: null },
-              })
-              .catch(() => {});
-            setToastData({
-              type: "error",
-              message: `Your cart value does not meet the minimum delivery order value. The applied promo has been removed.`,
-            });
-          } else {
-            setToastData({
-              type: "error",
-              message: `Your cart value does not meet the minimum delivery order value.`,
-            });
+          const isOnlyLoyaltyFreeItem =
+            (cartStore0?.loyaltyRedeemPoints ?? 0) > 0 &&
+            cartStore0?.loyaltyType === "ITEM";
+
+          if (!isOnlyLoyaltyFreeItem) {
+            if (hasDiscountPromo0) {
+              sdk
+                .updateCartDetails({
+                  input: {
+                    amounts: { discountAmount: 0 },
+                    discountString: null,
+                  },
+                })
+                .catch(() => {});
+              setToastData({
+                type: "error",
+                message: `Your cart value does not meet the minimum delivery order value. The applied promo has been removed.`,
+              });
+            } else {
+              setToastData({
+                type: "error",
+                message: `Your cart value does not meet the minimum delivery order value.`,
+              });
+            }
           }
         }
         let cartCount = cartCountReq.fetchCartCount;
@@ -295,6 +306,23 @@ const CartPage = ({
           // If cart count is 0, redirect to menu page
           if (cartCount === 0 && !freeItemObj) {
             setSpecialRemarks("");
+            const prevDiscountString = cartDetails?.discountString ?? "";
+            const hadFreeItemPromo =
+              !!extractFreeDiscountItemDetails(prevDiscountString);
+
+            // Loyalty free item redemptions should not show this error
+            const wasLoyaltyFreeItem =
+              (cartDetails?.loyaltyRedeemPoints ?? 0) > 0 &&
+              cartDetails?.loyaltyType === LoyaltyRedeemType.Item;
+
+            if (hadFreeItemPromo && !wasLoyaltyFreeItem) {
+              setToastData({
+                type: "error",
+                message:
+                  "Your free item promo was removed as there are no qualifying items in your cart.",
+              });
+            }
+
             replace("/menu");
           }
         }

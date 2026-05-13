@@ -63,6 +63,19 @@ export async function middleware(request: NextRequest) {
   // Only sets it when we just resolved a new hash (visitorHashCookie was absent).
   // When the cookie already existed we don't need to re-set it — the browser
   // already has it. This avoids unnecessary Set-Cookie headers on every request.
+  //
+  // domain: The ordering server sets its cookies via determineCookieDomain() which
+  // returns ".bawarchiatlanta.com" (dot-prefixed apex domain). Without a domain
+  // attribute here, Next.js scopes this cookie to the exact host only — it is never
+  // sent to api.bawarchiatlanta.com on cross-origin fetches. Setting the same
+  // dot-prefixed apex domain makes the cookie visible to all subdomains, matching
+  // the ordering server's scope and allowing ServerCookies.getCookie to find it.
+  const host = request.headers.get("host") ?? "";
+  const apexDomain =
+    process.env.NODE_ENV === "production"
+      ? `.${host.replace(/:\d+$/, "").replace(/^www\./, "")}`
+      : undefined;
+
   const setVisitorHashCookie = (res: NextResponse): void => {
     if (resolvedVisitorHash && !visitorHashCookie) {
       res.cookies.set(cookieKeys.userHash, resolvedVisitorHash, {
@@ -71,6 +84,7 @@ export async function middleware(request: NextRequest) {
         httpOnly: false, // must be false — useAnalytics reads it client-side
         sameSite: "lax", // lax survives cross-site navigations and redirects
         secure: process.env.NODE_ENV === "production",
+        domain: apexDomain,
       });
     }
   };
