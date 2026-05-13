@@ -1835,7 +1835,9 @@ export const OrdersContent: React.FC = () => {
 
                   {/* Action Button */}
                   <div className="flex gap-2 justify-end mt-auto">
-                    {order.canBeReOrdered && (order?.totalAmount ?? 0) > 0 ? (
+                    {order.canBeReOrdered &&
+                    (order?.totalAmount ?? 0) > 0 &&
+                    order.items.length > 0 ? (
                       <button
                         className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
                         onClick={() => reOrder(order._id)}
