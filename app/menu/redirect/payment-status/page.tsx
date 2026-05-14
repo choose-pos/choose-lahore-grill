@@ -161,7 +161,8 @@ const PaymentStatusPage = () => {
             ? {
                 facebook: Restaurant.socialInfo.facebook ?? undefined,
                 instagram: Restaurant.socialInfo.instagram ?? undefined,
-                googleMapsLink: Restaurant.socialInfo.googleMapsLink ?? undefined,
+                googleMapsLink:
+                  Restaurant.socialInfo.googleMapsLink ?? undefined,
               }
             : undefined,
           availability: Restaurant.availability || undefined,
@@ -246,7 +247,7 @@ const PaymentStatusPage = () => {
           const data = await fetchWithAuth(() =>
             sdk.fetchOrderById({
               id: orderId ?? "",
-            })
+            }),
           );
           setSelectedOrder(data.fetchCustomerOrderById);
           setCartCountInfo(0);
@@ -407,19 +408,19 @@ const PaymentStatusPage = () => {
             remarks: feedbackRemark || undefined,
             meta: { visitorHash, cartId, restaurantId },
           },
-        })
+        }),
       );
 
       if (response.submitChooseOrderingFeedback?._id) {
         // Save to session storage on success
         const submittedOrders = JSON.parse(
-          sessionStorage.getItem("feedbackSubmittedOrders") || "[]"
+          sessionStorage.getItem("feedbackSubmittedOrders") || "[]",
         );
         if (!submittedOrders.includes(orderId)) {
           submittedOrders.push(orderId);
           sessionStorage.setItem(
             "feedbackSubmittedOrders",
-            JSON.stringify(submittedOrders)
+            JSON.stringify(submittedOrders),
           );
         }
 
@@ -505,7 +506,7 @@ const PaymentStatusPage = () => {
             <h1 className="text-3xl md:text-4xl font-semibold mb-2">
               Share Your Feedback
             </h1>
-            <p className="text-gray-600 font-body-oo mb-8">
+            <p className="text-gray-600 mb-8">
               Help us improve your experience
             </p>
 
@@ -808,7 +809,7 @@ const PaymentStatusPage = () => {
                       <span className="col-span-3 text-right">
                         $
                         {selectedOrder.appliedDiscount?.loyaltyData?.redeemItem?.itemPrice?.toFixed(
-                          2
+                          2,
                         )}
                       </span>
                     </div>
@@ -829,7 +830,7 @@ const PaymentStatusPage = () => {
                       <span className="col-span-3 text-right">
                         $
                         {selectedOrder.appliedDiscount?.promoData?.discountValue?.toFixed(
-                          2
+                          2,
                         ) || "0.00"}
                       </span>
                     </div>
@@ -898,7 +899,9 @@ const PaymentStatusPage = () => {
                   </div>
                 ) : null}
 
-                {selectedOrder.taxAmount && selectedOrder.platformFees ? (
+                {selectedOrder.taxAmount &&
+                (selectedOrder.platformFees !== null ||
+                  selectedOrder.platformFees !== undefined) ? (
                   <div className="flex justify-between">
                     <span>Taxes & Fees</span>
                     <span>
@@ -955,7 +958,11 @@ const PaymentStatusPage = () => {
                     </div>
                     <div className="flex justify-between text-green-600">
                       <span>
-                        Gift Card ({formatGiftCardCode(selectedOrder.appliedGiftCard.giftCardCode)})
+                        Gift Card (
+                        {formatGiftCardCode(
+                          selectedOrder.appliedGiftCard.giftCardCode,
+                        )}
+                        )
                       </span>
                       <span>
                         -${selectedOrder.appliedGiftCard.amountUsed.toFixed(2)}
@@ -974,8 +981,8 @@ const PaymentStatusPage = () => {
                   </>
                 ) : (
                   <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
+                    <span>Total</span>$
+                    {selectedOrder?.finalAmount?.toFixed(2)}{" "}
                   </div>
                 )}
 
@@ -1173,11 +1180,11 @@ const PaymentStatusPage = () => {
                             rating === 0
                               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                               : isContrastOkay(
-                                  Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                                  Env.NEXT_PUBLIC_BACKGROUND_COLOR
-                                )
-                              ? `bg-primaryColor text-background hover:opacity-90`
-                              : `bg-primaryColor text-textColor hover:opacity-90`
+                                    Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                                    Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                                  )
+                                ? `bg-primaryColor text-background hover:opacity-90`
+                                : `bg-primaryColor text-textColor hover:opacity-90`
                           }`}
                         >
                           Submit Feedback

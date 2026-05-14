@@ -1,7 +1,10 @@
 "use client";
-
 import { Env } from "@/env";
-import { extractCampaignId, extractUTMParams } from "@/utils/analytics";
+import {
+  extractCampaignId,
+  extractUTMParams,
+  getOrCreateUserHash,
+} from "@/utils/analytics";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { extractErrorMessage } from "@/utils/UtilFncs";
 import { useRouter } from "next/navigation";
@@ -43,6 +46,13 @@ const InitializeSession = () => {
       }
 
       try {
+        // Read the visitorHash from the client cookie before the cross-domain
+        // fetch. The cookie was set on bawarchiatlanta.com by middleware but is
+        // not forwarded to the api subdomain, so we pass it in the body instead.
+        //
+
+        const visitorHash = getOrCreateUserHash();
+
         const response = await fetch(
           `${Env.NEXT_PUBLIC_SERVER_BASE_URL}/restaurant/session`,
           {
@@ -54,14 +64,11 @@ const InitializeSession = () => {
               campaignId,
               queryRecord:
                 Object.keys(queryRecord).length > 0 ? queryRecord : null,
+              visitorHash,
             }),
             credentials: "include",
           },
         );
-
-        if (!response.ok) {
-          throw new Error("Failed to initialize session");
-        }
 
         // Construct menu URL with parameters
         const menuParams = new URLSearchParams();
@@ -90,14 +97,6 @@ const InitializeSession = () => {
         const menuUrl = `${redirectTo}${
           menuParams.toString() ? `?${menuParams.toString()}` : ""
         }`;
-
-        // if (typeof window !== "undefined") {
-        //   if (menuUrl.startsWith("http")) {
-        //     window.location.href = menuUrl;
-        //   } else {
-        //     router.replace(menuUrl);
-        //   }
-        // }
         router.replace(menuUrl);
       } catch (err) {
         extractErrorMessage(err);
@@ -117,7 +116,7 @@ const InitializeSession = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen font-body-oo">
         <p className="text-lg">Please wait...</p>
       </div>
     );
@@ -126,7 +125,6 @@ const InitializeSession = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen font-subheading-oo">
-        {" "}
         <h2 className="text-2xl font-medium mb-4">Something went wrong!</h2>
         <button
           style={{

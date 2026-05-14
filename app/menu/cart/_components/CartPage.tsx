@@ -112,12 +112,6 @@ const CartPage = ({
   }, [amounts]);
 
   useEffect(() => {
-    if (!checkDeliveryAvailable) {
-      replace(`/menu?delivery=${true}`);
-    }
-  }, [checkDeliveryAvailable]);
-
-  useEffect(() => {
     if (mismatch) {
       setShowMenu(false);
     }
@@ -170,8 +164,41 @@ const CartPage = ({
           sdk.checkDeliveryAvailable(),
         ]);
 
-        if (!checkDeliveryAvailable.checkDeliveryAvailable) {
-          replace(`/menu?delivery=${true}`);
+        const cartCount0 = cartCountReq.fetchCartCount;
+        const cartStore0 = cartStoreReq.fetchCartDetails;
+
+        if (!checkDeliveryAvailable.checkDeliveryAvailable && cartCount0 > 0) {
+          // Only remove if a discount-type promo is applied (not a free item promo)
+          const hasFreeItem0 = !!extractFreeDiscountItemDetails(
+            cartStore0?.discountString ?? "",
+          );
+          const hasDiscountPromo0 = !!cartStore0?.discountCode && !hasFreeItem0;
+
+          const isOnlyLoyaltyFreeItem =
+            (cartStore0?.loyaltyRedeemPoints ?? 0) > 0 &&
+            cartStore0?.loyaltyType === "ITEM";
+
+          if (!isOnlyLoyaltyFreeItem) {
+            if (hasDiscountPromo0) {
+              sdk
+                .updateCartDetails({
+                  input: {
+                    amounts: { discountAmount: 0 },
+                    discountString: null,
+                  },
+                })
+                .catch(() => {});
+              setToastData({
+                type: "error",
+                message: `Your cart value does not meet the minimum delivery order value. The applied promo has been removed.`,
+              });
+            } else {
+              setToastData({
+                type: "error",
+                message: `Your cart value does not meet the minimum delivery order value.`,
+              });
+            }
+          }
         }
         let cartCount = cartCountReq.fetchCartCount;
         let cartStore = cartStoreReq.fetchCartDetails;
@@ -251,6 +278,23 @@ const CartPage = ({
           // If cart count is 0, redirect to menu page
           if (cartCount === 0 && !freeItemObj) {
             setSpecialRemarks("");
+            const prevDiscountString = cartDetails?.discountString ?? "";
+            const hadFreeItemPromo =
+              !!extractFreeDiscountItemDetails(prevDiscountString);
+
+            // Loyalty free item redemptions should not show this error
+            const wasLoyaltyFreeItem =
+              (cartDetails?.loyaltyRedeemPoints ?? 0) > 0 &&
+              cartDetails?.loyaltyType === LoyaltyRedeemType.Item;
+
+            if (hadFreeItemPromo && !wasLoyaltyFreeItem) {
+              setToastData({
+                type: "error",
+                message:
+                  "Your free item promo was removed as there are no qualifying items in your cart.",
+              });
+            }
+
             replace("/menu");
           }
         }
@@ -299,7 +343,6 @@ const CartPage = ({
 
     finalAmts.subTotalAmt = cartAmts.subTotalAmount ?? 0;
 
-    // Check if gift card is applied - if so, discount should be 0
     const hasGiftCard = !!(
       cartDetails?.giftCardCode && cartDetails?.giftCardDiscountAmount
     );
@@ -311,14 +354,16 @@ const CartPage = ({
     finalAmts.taxAmt = parseFloat(
       ((taxPercent / 100) * finalAmts.netAmt).toFixed(2),
     );
+
     const tipP = (cartAmts.tipPercent ?? 0) / 100;
 
     finalAmts.tipAmt = parseFloat((tipP * finalAmts.subTotalAmt).toFixed(2));
-    // Calculate processing fee with restaurant-specific or global config (same logic as backend)
+
+    finalAmts.deliveryFeeAmt = deliveryFee;
+
     let feePercent = 0;
     let maxFeeAmount: number | null = null;
 
-    // Check if restaurant has custom processing config
     if (
       processingConfig?.feePercent != null &&
       processingConfig.feePercent > 0
@@ -329,49 +374,29 @@ const CartPage = ({
     }
 
     if (hasGiftCard) {
-      // Calculate total without platform fees first
-      const totalWithoutPlatformFee =
-        finalAmts.netAmt +
-        finalAmts.taxAmt +
-        finalAmts.tipAmt +
-        (finalAmts.deliveryFeeAmt ?? 0);
+      // Store the real gift card usage value, and separately store the grossed-up Stripe charge.
+      const totalWithoutPlatformFee = parseFloat(
+        (
+          finalAmts.netAmt +
+          finalAmts.taxAmt +
+          finalAmts.tipAmt +
+          (finalAmts.deliveryFeeAmt ?? 0)
+        ).toFixed(2),
+      );
 
-      // Git card amount capped at totalWithoutPlatformFee
-      finalAmts.giftCardAmt = parseFloat(
+      // The server already caps giftCardDiscountAmount at (subtotal + tax + restaurantTip).
+      const rawGiftCardUsage = parseFloat(
         Math.min(
           cartDetails.giftCardDiscountAmount ?? 0,
           totalWithoutPlatformFee,
         ).toFixed(2),
       );
 
-      // Remaining after gift card (before platform fee)
-      const remainingAmount = parseFloat(
-        (totalWithoutPlatformFee - finalAmts.giftCardAmt).toFixed(2),
-      );
+      finalAmts.giftCardAmt = rawGiftCardUsage;
 
-      if (remainingAmount > 0) {
-        // Platform fee on SUBTOTAL (item total), not on remaining
-        let calculatedPlatformFee = (feePercent / 100) * finalAmts.subTotalAmt;
-        if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
-          calculatedPlatformFee = maxFeeAmount;
-        }
-        const stripeCharge = parseFloat(
-          (remainingAmount + calculatedPlatformFee).toFixed(2),
-        );
-        // Waive platform fee if fee >= stripe charge (all money goes to restaurant)
-        if (calculatedPlatformFee >= stripeCharge) {
-          finalAmts.platformFeeAmt = 0;
-        } else {
-          finalAmts.platformFeeAmt = parseFloat(
-            calculatedPlatformFee.toFixed(2),
-          );
-        }
-      } else {
-        // Full coverage — no platform fee
-        finalAmts.platformFeeAmt = 0;
-      }
+      // No platform fees when gift card is used
+      finalAmts.platformFeeAmt = 0;
     } else {
-      // No gift card — calculate platform fees on net amount (original logic unchanged)
       let calculatedPlatformFee = (feePercent / 100) * finalAmts.netAmt;
       if (maxFeeAmount != null && calculatedPlatformFee > maxFeeAmount) {
         calculatedPlatformFee = maxFeeAmount;
@@ -379,8 +404,6 @@ const CartPage = ({
       finalAmts.platformFeeAmt = parseFloat(calculatedPlatformFee.toFixed(2));
       finalAmts.giftCardAmt = 0;
     }
-
-    finalAmts.deliveryFeeAmt = deliveryFee;
 
     setAmounts(finalAmts);
 
@@ -405,7 +428,6 @@ const CartPage = ({
     if (!amounts) return;
     setActionLoading(true);
 
-    // Total before gift card deduction
     const total =
       amounts.subTotalAmt -
       amounts.discAmt +
@@ -414,7 +436,6 @@ const CartPage = ({
       amounts.platformFeeAmt +
       (amounts.deliveryFeeAmt ?? 0);
 
-    // Amount the user actually needs to pay after gift card deduction
     const amountToPay = parseFloat(
       Math.max(0, total - (amounts?.giftCardAmt ?? 0)).toFixed(2),
     );

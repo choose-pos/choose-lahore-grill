@@ -100,7 +100,7 @@ export const StickyTabbar: React.FC<TabProps> = ({
                       ? {
                           color: isContrastOkay(
                             Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                            "#ffffff"
+                            "#ffffff",
                           )
                             ? "#ffffff"
                             : "#000000",
@@ -133,7 +133,7 @@ export const StickyTabbar: React.FC<TabProps> = ({
                       backgroundColor: Env.NEXT_PUBLIC_PRIMARY_COLOR,
                       color: isContrastOkay(
                         Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                        "#ffffff"
+                        "#ffffff",
                       )
                         ? "#ffffff"
                         : "#000000",
@@ -195,7 +195,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
             loyaltyPointsRedeemed: points,
             redeemType: type,
           },
-        })
+        }),
       );
       if (res.validateLoyaltyRedemptionOnCart) {
         router.push(`/menu/cart`);
@@ -241,7 +241,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
       try {
         await handleSave(
           points,
-          type === "item" ? LoyaltyRedeemType.Item : LoyaltyRedeemType.Discount
+          type === "item" ? LoyaltyRedeemType.Item : LoyaltyRedeemType.Discount,
         );
       } finally {
         setIsCurrentLoading(false);
@@ -365,7 +365,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
                     type === "item"
                       ? LoyaltyRedeemType.Item
                       : LoyaltyRedeemType.Discount,
-                    cartDetails
+                    cartDetails,
                   ) ? (
                     <>
                       <span>View cart</span>
@@ -562,7 +562,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
         dob: dob.length === 0 ? null : dob,
       };
       const res = await fetchWithAuth(() =>
-        sdk.UpdateCustomerDetails({ input: inputData })
+        sdk.UpdateCustomerDetails({ input: inputData }),
       );
       if (res.updateCustomerDetails) {
         setToastData({ type: "success", message: "Account details updated!" });
@@ -732,7 +732,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
-              Env.NEXT_PUBLIC_BACKGROUND_COLOR
+              Env.NEXT_PUBLIC_BACKGROUND_COLOR,
             )
               ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
               : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -762,7 +762,8 @@ export type Order = {
   status?: string | null;
   systemRemark?: string;
   canBeReOrdered?: boolean;
-    appliedDiscount?: {
+
+  appliedDiscount?: {
     discountType: OrderDiscountType;
     discountAmount?: number | null;
     promoData?: {
@@ -1124,7 +1125,7 @@ export const OrdersContent: React.FC = () => {
                 ? {
                     color: isContrastOkay(
                       Env.NEXT_PUBLIC_PRIMARY_COLOR,
-                      Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                      Env.NEXT_PUBLIC_BACKGROUND_COLOR,
                     )
                       ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
                       : Env.NEXT_PUBLIC_TEXT_COLOR,
@@ -1707,11 +1708,7 @@ export const OrdersContent: React.FC = () => {
                       Total Amount:
                     </div>
                     <span className="text-base lg:text-lg font-semibold font-subheading-oo">
-                      $
-                      {(
-                        (order.totalAmount ?? 0) -
-                        (order.appliedGiftCard?.amountUsed ?? 0)
-                      ).toFixed(2)}
+                      ${(order.totalAmount ?? 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -1838,7 +1835,9 @@ export const OrdersContent: React.FC = () => {
 
                   {/* Action Button */}
                   <div className="flex gap-2 justify-end mt-auto">
-                    {order.canBeReOrdered && (order?.totalAmount ?? 0) > 0 ? (
+                    {order.canBeReOrdered &&
+                    (order?.totalAmount ?? 0) > 0 &&
+                    order.items.length > 0 ? (
                       <button
                         className="px-6 py-2 bg-primary text-white rounded-md text-base transition-colors"
                         onClick={() => reOrder(order._id)}
