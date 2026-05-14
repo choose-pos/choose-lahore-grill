@@ -34,8 +34,8 @@ const InitializeSession = () => {
           key.toLowerCase() !== "campaignid" &&
           key.toLowerCase() !== "cid" &&
           key.toLowerCase() !== "itemid" &&
-          key.toLowerCase() !== "redirect"
-      )
+          key.toLowerCase() !== "redirect",
+      ),
     );
 
     const initializeSession = async () => {
@@ -67,7 +67,7 @@ const InitializeSession = () => {
               visitorHash,
             }),
             credentials: "include",
-          }
+          },
         );
 
         // Construct menu URL with parameters
@@ -94,14 +94,14 @@ const InitializeSession = () => {
         });
 
         // Construct the final URL
-       const menuUrl = `${redirectTo}${
+        const menuUrl = `${redirectTo}${
           menuParams.toString() ? `?${menuParams.toString()}` : ""
         }`;
         router.replace(menuUrl);
       } catch (err) {
         extractErrorMessage(err);
         setError(
-          "An unexpected error occurred, please close this tab and try again."
+          "An unexpected error occurred, please close this tab and try again.",
         );
       } finally {
         setLoading(false);
@@ -130,7 +130,7 @@ const InitializeSession = () => {
           style={{
             color: isContrastOkay(
               Env.NEXT_PUBLIC_PRIMARY_COLOR,
-              Env.NEXT_PUBLIC_BACKGROUND_COLOR
+              Env.NEXT_PUBLIC_BACKGROUND_COLOR,
             )
               ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
               : Env.NEXT_PUBLIC_TEXT_COLOR,
