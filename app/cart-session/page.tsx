@@ -53,6 +53,17 @@ const InitializeSession = () => {
 
         const visitorHash = getOrCreateUserHash();
 
+        // Read entry_source from the website's cookie jar — the API server is
+        // on a different parent domain (api.orderchoose.com) so it can't read
+        // lahoregrill.com cookies directly. We forward the value in the body,
+        // same pattern as visitorHash.
+        const entrySource = (() => {
+          const match = document.cookie
+            .split("; ")
+            .find((c) => c.startsWith("entry_source="));
+          return match ? decodeURIComponent(match.split("=")[1]) : null;
+        })();
+
         const response = await fetch(
           `${Env.NEXT_PUBLIC_SERVER_BASE_URL}/restaurant/session`,
           {
@@ -65,6 +76,7 @@ const InitializeSession = () => {
               queryRecord:
                 Object.keys(queryRecord).length > 0 ? queryRecord : null,
               visitorHash,
+              entrySource,
             }),
             credentials: "include",
           },

@@ -55,26 +55,48 @@ const extractUTMFromReferrer = (
 // This is the final fallback and the only source that correctly attributes
 // /menu/cart and /menu/checkout events back to the original campaign.
 // ---------------------------------------------------------------------------
+const readCookie = (name: string): string | undefined => {
+  const match = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.split("=")[1]) : undefined;
+};
+
 const readUTMFromCookies = (): {
   campaign?: string;
   medium?: string;
   source?: string;
 } | null => {
-  const getCookie = (name: string): string | undefined => {
-    const match = document.cookie
-      .split("; ")
-      .find((c) => c.startsWith(`${name}=`));
-    return match ? decodeURIComponent(match.split("=")[1]) : undefined;
-  };
-
-  const source = getCookie("utm_source");
+  const source = readCookie("utm_source");
   if (!source) return null;
 
   return {
     source,
-    medium: getCookie("utm_medium"),
-    campaign: getCookie("utm_campaign"),
+    medium: readCookie("utm_medium"),
+    campaign: readCookie("utm_campaign"),
   };
+};
+
+// resolveSource — the value sent to tracking as `source` (becomes pageSources[0]).
+//
+// Hard navigation through /cart-session clobbers document.referrer with the
+// internal cart-session URL, so the original external entry (Instagram, Meta,
+// Google, etc.) is lost on every page after the landing. middleware.ts persists
+// the first external referrer in the `entry_source` cookie. Here we prefer
+// document.referrer when it is external, and fall back to the cookie otherwise.
+const resolveSource = (): string => {
+  const referrer = typeof document !== "undefined" ? document.referrer : "";
+  const refIsExternal = (() => {
+    if (!referrer) return false;
+    try {
+      return new URL(referrer).hostname !== window.location.hostname;
+    } catch {
+      return false;
+    }
+  })();
+
+  if (refIsExternal) return referrer;
+  return readCookie("entry_source") || referrer || "direct";
 };
 
 // ---------------------------------------------------------------------------
@@ -172,7 +194,10 @@ export const useAnalytics = (
         restaurant: Env.NEXT_PUBLIC_RESTAURANT_ID,
         pagePath: pathname,
         pageQuery: Object.keys(pageQuery).length > 0 ? pageQuery : null,
-        source: document.referrer || "direct",
+        // Prefer external document.referrer, fall back to entry_source cookie
+        // so pageSources keeps the original Instagram/Meta/Google entry across
+        // the cart-session hard navigation.
+        source: resolveSource(),
         // FIX: use the three-tier resolver instead of extractUTMParams alone
         utm: resolveUTM(pageQuery),
         userHash,
