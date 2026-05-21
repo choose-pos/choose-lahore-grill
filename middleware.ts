@@ -89,6 +89,46 @@ export async function middleware(request: NextRequest) {
     }
   };
 
+  // ENTRY SOURCE — capture the original external referrer once per visitor.
+  //
+  // After cart-session does window.location.replace('/menu'), document.referrer
+  // on /menu becomes the cart-session URL (same-origin), losing the original
+  // Instagram/Meta/Google referrer. The hard nav is required to break the
+  // cookie-race redirect loop, so we persist the entry referrer in a cookie
+  // here and let useAnalytics prefer it whenever document.referrer is internal.
+  //
+  // Set once and only once — on the request that carries an external Referer.
+  // Subsequent requests on the same site don't overwrite (otherwise the cookie
+  // would flip to the previous internal page on every navigation).
+  const entrySourceCookie = request.cookies.get("entry_source")?.value;
+  let resolvedEntrySource: string | null = entrySourceCookie ?? null;
+  if (!entrySourceCookie) {
+    const refererHeader = request.headers.get("referer");
+    if (refererHeader) {
+      try {
+        const refHost = new URL(refererHeader).hostname;
+        if (refHost && refHost !== request.nextUrl.hostname) {
+          resolvedEntrySource = refererHeader;
+        }
+      } catch {
+        // Malformed referer — ignore.
+      }
+    }
+  }
+
+  const setEntrySourceCookie = (res: NextResponse): void => {
+    if (resolvedEntrySource && !entrySourceCookie) {
+      res.cookies.set("entry_source", resolvedEntrySource, {
+        maxAge: 60 * 60 * 24 * 30,
+        path: "/",
+        httpOnly: false, // useAnalytics + cart-session read it client-side
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        domain: apexDomain,
+      });
+    }
+  };
+
   // Extract UTM parameters
   const campaignId = {
     key: "campaignId",
@@ -126,6 +166,7 @@ export async function middleware(request: NextRequest) {
       });
     }
     setVisitorHashCookie(response);
+    setEntrySourceCookie(response);
     return response;
   }
 
@@ -149,6 +190,7 @@ export async function middleware(request: NextRequest) {
     }
     resp.cookies.set(cookieKeys.restaurantCookie, partnerId);
     setVisitorHashCookie(resp);
+    setEntrySourceCookie(resp);
     return resp;
   }
 
@@ -200,6 +242,7 @@ export async function middleware(request: NextRequest) {
     // Previously used headers.append("set-cookie", rawHeader) with SameSite=Strict
     // which Instagram's browser drops. setVisitorHashCookie uses sameSite:"lax".
     setVisitorHashCookie(response);
+    setEntrySourceCookie(response);
     return response;
   }
 
@@ -217,6 +260,7 @@ export async function middleware(request: NextRequest) {
   }
   resp.cookies.set(cookieKeys.restaurantCookie, partnerId);
   setVisitorHashCookie(resp);
+  setEntrySourceCookie(resp);
   return resp;
 }
 

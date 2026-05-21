@@ -109,6 +109,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const { toastData } = ToastStore();
+  const metaPixelId = /^\d+$/.test(
+    process.env.NEXT_PUBLIC_META_PIXEL_ID ?? ""
+  )
+    ? process.env.NEXT_PUBLIC_META_PIXEL_ID
+    : "";
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [promoData, setPromoData] = useState<PromoData | null>(null);
   useEffect(() => {
@@ -227,8 +232,7 @@ export default function RootLayout({
           )}
         </>
       )}
-
-       {metaPixelId && (
+      {metaPixelId && (
         <>
           <Script
             id="meta-pixel"
