@@ -123,7 +123,12 @@ const writeStorageSet = (
 
 const getStorage = (kind: "local" | "session"): Storage | undefined => {
   if (typeof window === "undefined") return undefined;
-  return kind === "local" ? window.localStorage : window.sessionStorage;
+
+  try {
+    return kind === "local" ? window.localStorage : window.sessionStorage;
+  } catch {
+    return undefined;
+  }
 };
 
 const resolveCartValue = (amounts: CartAmounts): number | undefined => {
