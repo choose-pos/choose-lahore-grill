@@ -11,6 +11,7 @@ import meCustomerStore from "@/store/meCustomer";
 import ToastStore from "@/store/toast";
 import { getOrCreateUserHash } from "@/utils/analytics";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
+import { markMetaPixelPurchasePending } from "@/utils/metaPixel";
 import { extractErrorMessage } from "@/utils/UtilFncs";
 import {
   PaymentElement,
@@ -170,7 +171,9 @@ const CheckoutStripeForm = forwardRef<
             return;
           }
 
-          window.location.href = `${Env.NEXT_PUBLIC_DOMAIN}/menu/redirect/payment-status?orderId=${resp.createOrderWithoutPayment.orderId}`;
+          const orderId = resp.createOrderWithoutPayment.orderId ?? "";
+          markMetaPixelPurchasePending(orderId);
+          window.location.href = `${Env.NEXT_PUBLIC_DOMAIN}/menu/redirect/payment-status?orderId=${orderId}`;
           return;
         }
 
@@ -202,11 +205,14 @@ const CheckoutStripeForm = forwardRef<
           return;
         }
 
+        const orderId = resp.createOrder.orderId ?? "";
+        markMetaPixelPurchasePending(orderId);
+
         const { error } = await stripe.confirmPayment({
           elements,
           clientSecret,
           confirmParams: {
-            return_url: `${Env.NEXT_PUBLIC_DOMAIN}/menu/redirect/payment-status?orderId=${resp.createOrder.orderId}`,
+            return_url: `${Env.NEXT_PUBLIC_DOMAIN}/menu/redirect/payment-status?orderId=${orderId}`,
           },
         });
 

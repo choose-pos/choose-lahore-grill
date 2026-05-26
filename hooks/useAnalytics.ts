@@ -2,6 +2,7 @@
 
 import { Env } from "@/env";
 import { extractUTMParams, getOrCreateUserHash } from "@/utils/analytics";
+import { trackMetaPixelFromAnalyticsEvent } from "@/utils/metaPixel";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -219,6 +220,8 @@ export const useAnalytics = (
 };
 
 export const sendAnalyticsEvent = async (data: Record<string, unknown>) => {
+  trackMetaPixelFromAnalyticsEvent(data);
+
   try {
     await fetch(TRACKING_URL, {
       method: "POST",

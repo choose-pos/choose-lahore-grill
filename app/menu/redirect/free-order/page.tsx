@@ -33,6 +33,7 @@ import { IoMdArrowBack } from "react-icons/io";
 import ToastStore from "@/store/toast";
 import { getOrCreateUserHash } from "@/utils/analytics";
 import { isContrastOkay } from "@/utils/isContrastOkay";
+import { trackMetaPixelPurchase } from "@/utils/metaPixel";
 import { getCartId } from "@/app/actions/cookies";
 
 const PaymentStatusPage = () => {
@@ -212,6 +213,12 @@ const PaymentStatusPage = () => {
 
     fetchFunc();
   }, [orderId, setCartCountInfo, setCartData]);
+
+  useEffect(() => {
+    if (!selectedOrder || isLoading) return;
+
+    trackMetaPixelPurchase(selectedOrder);
+  }, [isLoading, selectedOrder]);
 
   if (isLoading) {
     return (

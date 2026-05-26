@@ -166,10 +166,6 @@ export default function RootLayout({
     }
   }, []);
 
-  const metaPixelId = /^\d+$/.test(process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "")
-    ? process.env.NEXT_PUBLIC_META_PIXEL_ID
-    : "";
-
   return (
     <html lang="en" className={`${rubik.variable} ${bebas.variable}`}>
       <head>
@@ -219,7 +215,6 @@ export default function RootLayout({
       }
     </Suspense>
         </PostHogProvider>
-      </body>
 
       {toastData && <Toast message={toastData.message} type={toastData.type} />}
       {process.env.NEXT_PUBLIC_GTAG_ID && (
@@ -253,6 +248,7 @@ export default function RootLayout({
             }}
           />
           <noscript>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               height="1"
               width="1"
@@ -263,6 +259,7 @@ export default function RootLayout({
           </noscript>
         </>
       )}
+      </body>
     </html>
   );
 }

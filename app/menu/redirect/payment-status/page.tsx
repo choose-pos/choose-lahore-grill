@@ -23,6 +23,7 @@ import { getOrCreateUserHash } from "@/utils/analytics";
 import { convertToRestoTimezone } from "@/utils/formattedTime";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
+import { trackMetaPixelPurchase } from "@/utils/metaPixel";
 import {
   calculateTotalModifiersPrice,
   extractErrorMessage,
@@ -271,6 +272,19 @@ const PaymentStatusPage = () => {
 
     fetchFunc();
   }, [orderId, pi, piCs, setCartCountInfo, setCartData]);
+
+  useEffect(() => {
+    if (
+      !selectedOrder ||
+      isLoading ||
+      paymentFailed ||
+      isChooseFeedbackOnly
+    ) {
+      return;
+    }
+
+    trackMetaPixelPurchase(selectedOrder);
+  }, [isChooseFeedbackOnly, isLoading, paymentFailed, selectedOrder]);
 
   // Check if mobile and show modal after 2 seconds
   useEffect(() => {
