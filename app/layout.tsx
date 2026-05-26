@@ -165,6 +165,11 @@ export default function RootLayout({
       fetchPromoData();
     }
   }, []);
+
+  const metaPixelId = /^\d+$/.test(process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "")
+    ? process.env.NEXT_PUBLIC_META_PIXEL_ID
+    : "";
+
   return (
     <html lang="en" className={`${rubik.variable} ${bebas.variable}`}>
       <head>
