@@ -15,6 +15,7 @@ import RestaurantStore from "@/store/restaurant";
 import ToastStore from "@/store/toast";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { isContrastOkay } from "@/utils/isContrastOkay";
+import { markMetaPixelPurchasePending } from "@/utils/metaPixel";
 import { refreshCart } from "@/utils/refreshCart";
 import {
   CustomerRestaurant,
@@ -478,9 +479,9 @@ const CartPage = ({
         );
 
         if (response.createOrderWithoutPayment?.success) {
-          replace(
-            `/menu/redirect/free-order?orderId=${response.createOrderWithoutPayment.orderId}`,
-          );
+          const orderId = response.createOrderWithoutPayment.orderId ?? "";
+          markMetaPixelPurchasePending(orderId);
+          replace(`/menu/redirect/free-order?orderId=${orderId}`);
         }
       } catch (error) {
         setToastData({

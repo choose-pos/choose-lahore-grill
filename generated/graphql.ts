@@ -175,6 +175,7 @@ export type Cart = {
   amounts: AmountDetails;
   campaignDetails: CampaignDetails;
   createdAt: Scalars['DateTimeISO']['output'];
+  createdByUserId?: Maybe<Scalars['String']['output']>;
   customerDetails: CustomerDetails;
   delivery?: Maybe<AddressInfo>;
   deliveryDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
@@ -191,6 +192,7 @@ export type Cart = {
   loyaltyRedeemPoints?: Maybe<Scalars['Float']['output']>;
   loyaltyType?: Maybe<LoyaltyRedeemType>;
   orderType?: Maybe<OrderType>;
+  phoneOrderId?: Maybe<Scalars['String']['output']>;
   pickUpDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
   queryRecord?: Maybe<Scalars['JSONObject']['output']>;
   restaurant: Restaurant;
@@ -482,6 +484,7 @@ export type CmsRestaurant = {
   heroSection: CmsHeroSection;
   isCustom: Scalars['Boolean']['output'];
   menuSection: CmsMenuSection;
+  metaPixelId?: Maybe<Scalars['String']['output']>;
   onlineOrderingConfig: CmsOnlineOrderingConfig;
   posthogHost?: Maybe<Scalars['String']['output']>;
   posthogKey?: Maybe<Scalars['String']['output']>;
@@ -1503,6 +1506,19 @@ export type MutationVerifyGiftCardOtpArgs = {
   phone: Scalars['String']['input'];
 };
 
+/** Channel used to send a phone order notification */
+export enum NotificationChannel {
+  Email = 'Email',
+  Sms = 'SMS'
+}
+
+/** What action triggered this notification */
+export enum NotificationTrigger {
+  Initial = 'Initial',
+  Regenerate = 'Regenerate',
+  Resend = 'Resend'
+}
+
 export type OnlineOrderTimingConfig = {
   __typename?: 'OnlineOrderTimingConfig';
   endBeforeMinutes?: Maybe<Scalars['Float']['output']>;
@@ -1544,15 +1560,18 @@ export type Order = {
   isAsap?: Maybe<Scalars['Boolean']['output']>;
   items: Array<OrderItem>;
   loyaltyRedeemed?: Maybe<Scalars['Float']['output']>;
+  orderEntry?: Maybe<OrderEntryType>;
   orderId: Scalars['String']['output'];
   orderType?: Maybe<OrderType>;
   payment?: Maybe<PaymentIntent>;
   paymentMethod?: Maybe<Scalars['String']['output']>;
+  phoneOrderId?: Maybe<PhoneOrder>;
   pickUpDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
   /** This field stores the guest details entered by customer when placing a guest order but the number is already registered with restaurant */
   placedAsGuestData?: Maybe<GuestData>;
   platformFeeAmount?: Maybe<Scalars['Float']['output']>;
   platformFeePercent: Scalars['Float']['output'];
+  preGrossUpAmount?: Maybe<Scalars['Float']['output']>;
   queryRecord?: Maybe<Scalars['JSONObject']['output']>;
   refundAmount: Scalars['Float']['output'];
   refundLoyalty: Scalars['Float']['output'];
@@ -1572,6 +1591,12 @@ export type Order = {
   utmDetails: UtmDetails;
   visitorHash?: Maybe<Scalars['String']['output']>;
 };
+
+/** How/where the order was initiated */
+export enum OrderEntryType {
+  Online = 'Online',
+  PhoneOrder = 'PhoneOrder'
+}
 
 export type OrderItem = {
   __typename?: 'OrderItem';
@@ -1662,16 +1687,19 @@ export type OrderWithTotals = {
   items: Array<OrderItem>;
   loyaltyRedeemed?: Maybe<Scalars['Float']['output']>;
   loyaltyTransactions: Array<LoyaltyTransactionSummary>;
+  orderEntry?: Maybe<OrderEntryType>;
   orderId: Scalars['String']['output'];
   orderType?: Maybe<OrderType>;
   payment?: Maybe<PaymentIntent>;
   paymentMethod?: Maybe<Scalars['String']['output']>;
+  phoneOrderId?: Maybe<PhoneOrder>;
   pickUpDateAndTime?: Maybe<Scalars['DateTimeISO']['output']>;
   /** This field stores the guest details entered by customer when placing a guest order but the number is already registered with restaurant */
   placedAsGuestData?: Maybe<GuestData>;
   platformFeeAmount?: Maybe<Scalars['Float']['output']>;
   platformFeePercent: Scalars['Float']['output'];
   platformFees: Scalars['Float']['output'];
+  preGrossUpAmount?: Maybe<Scalars['Float']['output']>;
   queryRecord?: Maybe<Scalars['JSONObject']['output']>;
   refundAmount: Scalars['Float']['output'];
   refundLoyalty: Scalars['Float']['output'];
@@ -1764,6 +1792,49 @@ export enum PermissionTypeEnum {
   UpdateRestaurant = 'UpdateRestaurant',
   UpdateTax = 'UpdateTax',
   UserManagement = 'UserManagement'
+}
+
+export type PhoneOrder = {
+  __typename?: 'PhoneOrder';
+  _id: Scalars['ID']['output'];
+  cart?: Maybe<Cart>;
+  createdAt: Scalars['DateTimeISO']['output'];
+  createdBy: User;
+  customerEmail?: Maybe<Scalars['String']['output']>;
+  customerFirstName?: Maybe<Scalars['String']['output']>;
+  customerLastName?: Maybe<Scalars['String']['output']>;
+  customerPhone: Scalars['String']['output'];
+  deliveryDetails?: Maybe<AddressInfo>;
+  fullUrl: Scalars['String']['output'];
+  linkExpiresAt: Scalars['DateTimeISO']['output'];
+  linkRegenerateCount: Scalars['Float']['output'];
+  linkToken: Scalars['String']['output'];
+  maxLinkRegenerations: Scalars['Float']['output'];
+  notificationLog: Array<PhoneOrderNotificationLog>;
+  orderId?: Maybe<Order>;
+  orderShortId?: Maybe<Scalars['String']['output']>;
+  orderType: OrderType;
+  restaurant: Restaurant;
+  shortLinkCode: Scalars['String']['output'];
+  specialRemark?: Maybe<Scalars['String']['output']>;
+  status: PhoneOrderStatus;
+  updatedAt: Scalars['DateTimeISO']['output'];
+};
+
+export type PhoneOrderNotificationLog = {
+  __typename?: 'PhoneOrderNotificationLog';
+  channel: NotificationChannel;
+  recipient: Scalars['String']['output'];
+  sentAt: Scalars['DateTimeISO']['output'];
+  trigger: NotificationTrigger;
+};
+
+/** Status of a phone order link */
+export enum PhoneOrderStatus {
+  Cancelled = 'Cancelled',
+  Expired = 'Expired',
+  Paid = 'Paid',
+  Pending = 'Pending'
 }
 
 export type Pickup = {
@@ -2170,6 +2241,7 @@ export type Restaurant = {
   fulfillmentConfig?: Maybe<FulfillmentConfig>;
   giftCardEnabled?: Maybe<Scalars['Boolean']['output']>;
   integrations: Array<IntegrationInfo>;
+  isFeedbackAlertEnabled?: Maybe<Scalars['Boolean']['output']>;
   loyaltyConfig?: Maybe<LoyaltyConfig>;
   meatType?: Maybe<MeatType>;
   menus?: Maybe<Array<MenuInfo>>;

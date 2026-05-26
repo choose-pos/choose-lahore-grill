@@ -15,6 +15,7 @@ export const Env = createEnv({
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
     NEXT_PUBLIC_TRACKING_URL: z.string().min(1),
     NEXT_PUBLIC_GTAG_ID: z.string().optional(),
+    NEXT_PUBLIC_META_PIXEL_ID: z.string().optional(),
   },
   runtimeEnv: {
     NEXT_PUBLIC_THEME: process.env.NEXT_PUBLIC_THEME,
@@ -31,5 +32,6 @@ export const Env = createEnv({
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_TRACKING_URL: process.env.NEXT_PUBLIC_TRACKING_URL,
     NEXT_PUBLIC_GTAG_ID: process.env.NEXT_PUBLIC_GTAG_ID,
+    NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
   },
 });

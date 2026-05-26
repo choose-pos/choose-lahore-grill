@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { FaExclamationCircle } from "react-icons/fa";
 import { IoMdArrowBack } from "react-icons/io";
 import { PublicGiftCardResult } from "@/generated/graphql";
+import { trackMetaPixelGiftCardPurchase } from "@/utils/metaPixel";
 import meCustomerStore from "@/store/meCustomer";
 import useGiftCardStore from "@/store/giftCard";
 
@@ -129,6 +130,7 @@ const GiftCardPaymentStatus = ({
 
         if (gcData) {
           setLocalGiftCardData(gcData as PublicGiftCardResult);
+          trackMetaPixelGiftCardPurchase(gcData as PublicGiftCardResult);
           await new Promise((resolve) => setTimeout(resolve, 1000));
           clearPaymentIntent();
         } else if (lastError) {
