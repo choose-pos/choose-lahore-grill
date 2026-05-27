@@ -73,6 +73,35 @@ const CheckoutPage = ({
   // States
   const [stateChange, setStateChange] = useState<boolean>(false);
   const [amounts, setAmounts] = useState<TAmounts | null>(null);
+
+  // Read phone-order prefill data synchronously before first render.
+  // Lazy useState initializer runs once on mount (before paint), so
+  // CustomerVerification receives prefillData on its very first render
+  // and useState() inside it seeds correctly.
+  const [phoneOrderPrefill] = useState<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    specialRemark?: string;
+  } | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem("phone_order_prefill");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // Enforce 45-min TTL — discard silently if expired
+        if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+          sessionStorage.removeItem("phone_order_prefill");
+          return null;
+        }
+        // Remove immediately — prevents re-seed on page refresh
+        sessionStorage.removeItem("phone_order_prefill");
+        return parsed;
+      }
+    } catch {}
+    return null;
+  });
   const [discountData, setDiscountData] = useState<{
     discountCode?: string | null;
     loyaltyPointsRedeemed?: number | null;
@@ -87,6 +116,16 @@ const CheckoutPage = ({
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
   // UseEffects
+
+  // Seed the cart store's specialRemarks from phone-order prefill (if any).
+  // Runs once after first render when phoneOrderPrefill is set.
+  useEffect(() => {
+    if (phoneOrderPrefill?.specialRemark) {
+      setSpecialRemarks(phoneOrderPrefill.specialRemark);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     // Fetching customer details if loggedin
     const fetchInitialCustomer = async () => {
@@ -383,6 +422,7 @@ const CheckoutPage = ({
                   amounts={amounts}
                   loyaltyRule={loyaltyRule}
                   refreshData={() => setStateChange((prev) => !prev)}
+                  prefillData={phoneOrderPrefill}
                 />
               </div>
               <hr className="mx-6 my-5 border-gray-200" />

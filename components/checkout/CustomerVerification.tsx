@@ -30,6 +30,7 @@ const CustomerVerification = ({
   onVerified,
   verifyMode = "order",
   afterVerifiedContent,
+  prefillData,
 }: {
   isOtpVerified: boolean;
   setIsOtpVerified: React.Dispatch<React.SetStateAction<boolean>>;
@@ -52,12 +53,18 @@ const CustomerVerification = ({
   }) => void;
   verifyMode?: "order" | "giftcard";
   afterVerifiedContent?: React.ReactNode;
+  prefillData?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+  } | null;
 }) => {
   const [formData, setFormData] = useState({
-    phone: "",
-    email: "",
-    firstName: "",
-    lastName: "",
+    phone: prefillData?.phone ?? "",
+    email: prefillData?.email ?? "",
+    firstName: prefillData?.firstName ?? "",
+    lastName: prefillData?.lastName ?? "",
     otp: "",
   });
   const [showOtp, setShowOtp] = useState(false);
@@ -68,7 +75,11 @@ const CustomerVerification = ({
   const proceedBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOtpVerified && typeof window !== "undefined" && window.innerWidth < 640) {
+    if (
+      isOtpVerified &&
+      typeof window !== "undefined" &&
+      window.innerWidth < 640
+    ) {
       setTimeout(() => {
         proceedBtnRef.current?.scrollIntoView({
           behavior: "smooth",

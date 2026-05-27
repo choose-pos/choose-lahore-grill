@@ -174,7 +174,8 @@ export async function middleware(request: NextRequest) {
   const isFeedbackRoute =
     pathname.includes("/feedback") ||
     pathname.includes("/payment-status") ||
-    pathname.includes("/free-order");
+    pathname.includes("/free-order") ||
+    pathname.includes("/phone-order");
 
   if (isFeedbackRoute) {
     const resp = NextResponse.next();
