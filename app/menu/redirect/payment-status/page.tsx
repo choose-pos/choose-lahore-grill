@@ -72,6 +72,8 @@ const PaymentStatusPage = () => {
   // Check if we should show only feedback form
   const isChooseFeedbackOnly = feedbackType?.toLowerCase() === "choose";
 
+  const isPhoneOrder = searchParams.get("phone-order") === "true";
+
   // UseEffects
   useEffect(() => {
     // Fetching customer details if loggedin
@@ -274,12 +276,7 @@ const PaymentStatusPage = () => {
   }, [orderId, pi, piCs, setCartCountInfo, setCartData]);
 
   useEffect(() => {
-    if (
-      !selectedOrder ||
-      isLoading ||
-      paymentFailed ||
-      isChooseFeedbackOnly
-    ) {
+    if (!selectedOrder || isLoading || paymentFailed || isChooseFeedbackOnly) {
       return;
     }
 
@@ -744,6 +741,11 @@ const PaymentStatusPage = () => {
             </div>
           ) : selectedOrder ? (
             <div className="font-body-oo text-sm">
+              {isPhoneOrder ? (
+                <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-center text-sm font-medium text-green-800">
+                  Your order is already placed. Here is your order receipt.
+                </div>
+              ) : null}
               <div className="text-center mb-4">
                 <h3 className="text-xl md:text-2xl font-subheading-oo font-semibold">
                   {selectedOrder.restaurantInfo.name}
@@ -995,8 +997,8 @@ const PaymentStatusPage = () => {
                   </>
                 ) : (
                   <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>$
-                    {selectedOrder?.finalAmount?.toFixed(2)}{" "}
+                    <span>Total</span>
+                    <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
                   </div>
                 )}
 

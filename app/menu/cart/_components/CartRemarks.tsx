@@ -4,7 +4,7 @@ import { Env } from "@/env";
 import { useCartStore } from "@/store/cart";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiEdit2, FiFileText } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 
@@ -12,6 +12,31 @@ const CartRemarks = () => {
   const { specialRemarks, setSpecialRemarks } = useCartStore();
   const [showSheet, setShowSheet] = useState(false);
   const [draft, setDraft] = useState(specialRemarks);
+
+  // Seed from phone-order prefill when customer lands on /cart before /checkout.
+  // We only read (never remove) the key here — CheckoutPage removes it when it
+  // reads the full payload for CustomerVerification prefill.
+
+  useEffect(() => {
+    if (!specialRemarks) {
+      try {
+        const raw = sessionStorage.getItem("phone_order_prefill");
+        if (raw) {
+          const prefill = JSON.parse(raw);
+          // Enforce 45-min TTL — discard silently if expired
+          if (prefill.expiresAt && Date.now() > prefill.expiresAt) {
+            sessionStorage.removeItem("phone_order_prefill");
+            return;
+          }
+          if (prefill.specialRemark) {
+            setSpecialRemarks(prefill.specialRemark);
+            setDraft(prefill.specialRemark);
+          }
+        }
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openSheet = () => {
     setDraft(specialRemarks);

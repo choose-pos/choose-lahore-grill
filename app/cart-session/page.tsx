@@ -109,7 +109,7 @@ const InitializeSession = () => {
         const menuUrl = `${redirectTo}${
           menuParams.toString() ? `?${menuParams.toString()}` : ""
         }`;
-        router.replace(menuUrl);
+         window.location.replace(menuUrl);
       } catch (err) {
         extractErrorMessage(err);
         setError(
