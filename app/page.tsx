@@ -270,8 +270,16 @@ export default async function Home() {
     });
   }
 
+    const jsonLd = generateRestaurantJsonLd(
+      restaurantData.getCmsRestaurantDetails,
+    );
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Head>
         <link
           rel="preconnect"
@@ -299,14 +307,14 @@ export default async function Home() {
           href={brandingLogo ?? ""}
           crossOrigin="anonymous"
         />
-        <script
+        {/* <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(
               generateRestaurantJsonLd(restaurantData.getCmsRestaurantDetails),
             ),
           }}
-        />
+        /> */}
       </Head>
       <div className="flex flex-col min-h-screen overflow-hidden">
         {/* TODO: Need to fix the import for this component */}

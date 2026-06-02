@@ -13,6 +13,7 @@ import { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import RestaurantDetails from "./RestaurantDetails";
+import { generateMenuOnlyJsonLd } from "@/utils/jsonLdUtils";
 
 export const dynamic = "force-dynamic";
 
@@ -286,7 +287,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: pageTitle,
     description: metaDescription,
     alternates: {
-      canonical: "/",
+      canonical: "/menu",
     },
     metadataBase: new URL("https://" + website),
     openGraph: {
@@ -314,6 +315,20 @@ async function CheckMeCustomer(): Promise<boolean> {
   } catch (error) {
     console.error(error);
     return false; // in case of error, return false
+  }
+}
+
+async function getRestaurantCategories() {
+  try {
+    const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+    const itemsResponse = await sdk.getCustomerCategoriesAndItems(
+      {},
+      { cookie: cookieVal },
+    );
+    return itemsResponse?.getCustomerCategoriesAndItems || null;
+  } catch (error) {
+    console.error("Failed to fetch restaurant categories:", error);
+    return null;
   }
 }
 
@@ -386,10 +401,10 @@ async function Page({
     }
   }
 
-  const [restaurant, loyaltyRule, loyaltyOffers, isLoggedIn] =
+  const [restaurant, categories, loyaltyRule, loyaltyOffers, isLoggedIn] =
     await Promise.all([
       getRestaurantDetails(),
-      // getRestaurantCategories(),
+      getRestaurantCategories(),
       getLoyaltyRule(),
       getLoyaltyOffers(),
       CheckMeCustomer(),
@@ -399,15 +414,31 @@ async function Page({
     return <InActiveMenu />;
   }
 
+  let jsonLd = null;
+  if (categories) {
+    jsonLd = generateMenuOnlyJsonLd(
+      restaurant.name,
+      categories as CustomerCategoryItem[],
+    );
+  }
+
   return (
-    <RestaurantDetails
-      restaurant={restaurant}
-      // categories={categories}
-      loyaltyRule={loyaltyRule ?? null}
-      loyaltyOffers={loyaltyOffers ?? null}
-      mismatch={mismatch}
-      isLoggedIn={isLoggedIn}
-    />
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <RestaurantDetails
+        restaurant={restaurant}
+        categories={(categories ?? []) as CustomerCategoryItem[]}
+        loyaltyRule={loyaltyRule ?? null}
+        loyaltyOffers={loyaltyOffers ?? null}
+        mismatch={mismatch}
+        isLoggedIn={isLoggedIn}
+      />
+    </>
   );
 }
 

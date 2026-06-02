@@ -117,9 +117,9 @@ const Gallery: React.FC<IGallery> = ({
         whileInView="show"
         viewport={{ once: true }}
       >
-        <h1 className="md:text-[60px] md:leading-[55px] text-3xl font-secondary xsm:mb-5 mb-2 text-bg1">
+        <h2 className="md:text-[60px] md:leading-[55px] text-3xl font-secondary xsm:mb-5 mb-2 text-bg1">
           {sectionTitle}
-        </h1>
+        </h2>
         <p className="md:text-xl text-base font-primary custom-lg:max-w-[680px] max-w-screen text-bg1 mb-3 md:mb-5">
           {sectionContent}
         </p>

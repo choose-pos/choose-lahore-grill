@@ -44,7 +44,7 @@ import { OrderTypeData } from "@/store/orderType";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
-  // categories: CustomerCategoryItem[];
+  categories: CustomerCategoryItem[];
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   loyaltyOffers: RestaurantRedeemOffers | null;
   mismatch: boolean | null;
@@ -53,7 +53,7 @@ interface RestaurantDetailsProps {
 
 export default function RestaurantDetails({
   restaurant,
-  // categories,
+  categories,
   loyaltyOffers,
   loyaltyRule,
   mismatch,
@@ -361,6 +361,13 @@ RestaurantDetailsProps) {
   }, [restaurant, setRestaurantData]);
 
   useEffect(() => {
+    const hasSearch = searchQuery.trim().length > 0;
+    const hasFilters = categoryType && categoryType.length > 0;
+
+    if (!hasSearch && !hasFilters) {
+      setFilteredCategories(categories);
+      return;
+    }
     const getRestaurantCategories = async () => {
       try {
         setLoading(true);
@@ -368,7 +375,7 @@ RestaurantDetailsProps) {
           ItemOptionSelected: categoryType,
           searchText: searchQuery,
         });
-        const categories: CustomerCategoryItem[] =
+        const categoriesData: CustomerCategoryItem[] =
           itemsResponse.getCustomerCategoriesAndItems.map((category) => ({
             _id: category._id,
             name: category.name,
@@ -396,7 +403,7 @@ RestaurantDetailsProps) {
             createdAt: new Date(category.createdAt),
             updatedAt: new Date(category.updatedAt),
           }));
-        setFilteredCategories(categories);
+        setFilteredCategories(categoriesData);
         setLoading(false);
       } catch (err) {
         console.log("Failed to fetch restaurant categories", err);
@@ -406,7 +413,7 @@ RestaurantDetailsProps) {
     };
 
     getRestaurantCategories();
-  }, [restaurant, categoryType, searchQuery, fetchTrigger]);
+  }, [restaurant, categoryType, searchQuery, fetchTrigger, categories]);
 
   // Intersection Observer for category tracking
   useEffect(() => {
@@ -654,11 +661,11 @@ RestaurantDetailsProps) {
       <main className="h-auto bg-white py-3 z-20 shrink-0">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center max-w-8xl mx-auto px-6 md:px-20 lg:px-28">
           <div>
-            <h2 className="md:text-3xl text-2xl mb-1 font-heading-oo">
+            <h1 className="md:text-3xl text-2xl mb-1 font-heading-oo">
               <span className="font-heading-oo font-semibold">
                 {restaurant.name}
               </span>
-            </h2>
+            </h1>
             <div className="text-sm sm:text-base font-body-oo font-normal">
               <p>{restaurant.address?.addressLine1}</p>
             </div>

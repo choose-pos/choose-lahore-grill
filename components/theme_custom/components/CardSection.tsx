@@ -131,9 +131,9 @@ const FrameSection: React.FC<IFrameSection> = ({
         viewport={{ once: true }}
         className="lg:ml-10 ml-0 lg:items-start items-center mt-8 lg:mt-0"
       >
-        <h1 className="font-secondary text-4xl md:text-[60px] md:leading-[55px] text-black lg:max-w-[438px] mb-3 md:mb-5">
+        <h2 className="font-secondary text-4xl md:text-[60px] md:leading-[55px] text-black lg:max-w-[438px] mb-3 md:mb-5">
           {frameSectionTitle}
-        </h1>
+        </h2>
         <Link href="/our-story">
           <p className="flex items-center font-secondary xsm:text-3xl text-xl text-black font-bold cursor-pointer group">
             <span className="transition-all duration-300 ease-in-out">

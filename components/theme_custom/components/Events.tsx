@@ -64,9 +64,9 @@ const Events: React.FC<IEvents> = ({ eventReel, eventContent, eventTitle }) => {
         whileInView="show"
         viewport={{ once: true }}
       >
-        <h1 className="md:text-[60px] md:leading-[55px] text-3xl font-secondary xsm:mb-5 mb-2 text-bg1">
+        <h2 className="md:text-[60px] md:leading-[55px] text-3xl font-secondary xsm:mb-5 mb-2 text-bg1">
           {eventTitle}
-        </h1>
+        </h2>
         <p className="text-base md:text-xl font-primary custom-lg:max-w-[680px] max-w-sreen text-bg1 mb-3 md:mb-5">
           {eventContent}
         </p>
