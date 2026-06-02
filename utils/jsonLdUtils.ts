@@ -97,3 +97,46 @@ export const generateRestaurantJsonLd = (restaurantData: Restaurant) => {
     ),
   };
 };
+
+export interface MenuLdItem {
+  name: string;
+  desc?: string | null;
+  image?: string | null;
+  price: number;
+}
+
+export interface MenuLdCategory {
+  name: string;
+  desc?: string | null;
+  items: MenuLdItem[];
+}
+
+export const generateMenuOnlyJsonLd = (
+  restaurantName: string,
+  categories: MenuLdCategory[],
+) => {
+  const menuSections = categories.map((category) => ({
+    "@type": "MenuSection",
+    name: category.name,
+    description: category.desc || undefined,
+    hasMenuItem: category.items.map((item) => ({
+      "@type": "MenuItem",
+      name: item.name,
+      description: item.desc || undefined,
+      image: item.image || undefined,
+      offers: {
+        "@type": "Offer",
+        price: item.price.toFixed(2),
+        priceCurrency: "USD",
+      },
+    })),
+  }));
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Menu",
+    name: `${restaurantName} Menu`,
+    description: `Online ordering menu for ${restaurantName}`,
+    hasMenuSection: menuSections,
+  };
+};

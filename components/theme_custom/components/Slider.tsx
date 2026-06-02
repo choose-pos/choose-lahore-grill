@@ -60,9 +60,9 @@ const LunchSection: React.FC<IOfferSection> = ({
         whileInView="show"
         viewport={{ once: true }}
       >
-        <h1 className="md:text-[60px] md:leading-[55px] text-4xl font-secondary mb-2 md:mb-5 text-bg1">
+        <h2 className="md:text-[60px] md:leading-[55px] text-4xl font-secondary mb-2 md:mb-5 text-bg1">
           {offerSectionTitle}
-        </h1>
+        </h2>
         <p className="text-base md:text-xl font-primary custom-lg:max-w-[680px] max-w-sreen text-bg1 md:mb-3 mb-2">
           {offerSectionContent}
         </p>
