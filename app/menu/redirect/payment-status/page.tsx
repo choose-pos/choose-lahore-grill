@@ -48,6 +48,7 @@ const PaymentStatusPage = () => {
   const pi = searchParams.get("payment_intent");
   const piCs = searchParams.get("payment_intent_client_secret");
   const feedbackType = searchParams.get("feedbackType");
+  const isPhoneOrder = searchParams.get("phone-order") === "true";
   const [message, setMessage] = useState(null);
   const { setCartCountInfo, setCartData } = useCartStore();
   const [paymentFailed, setPaymentFailed] = useState(false);
@@ -71,8 +72,6 @@ const PaymentStatusPage = () => {
 
   // Check if we should show only feedback form
   const isChooseFeedbackOnly = feedbackType?.toLowerCase() === "choose";
-
-  const isPhoneOrder = searchParams.get("phone-order") === "true";
 
   // UseEffects
   useEffect(() => {
@@ -746,6 +745,7 @@ const PaymentStatusPage = () => {
                   Your order is already placed. Here is your order receipt.
                 </div>
               ) : null}
+
               <div className="text-center mb-4">
                 <h3 className="text-xl md:text-2xl font-subheading-oo font-semibold">
                   {selectedOrder.restaurantInfo.name}
@@ -870,17 +870,106 @@ const PaymentStatusPage = () => {
                         ).toFixed(2)}
                       </span>
                     </div>
-                    {item.modifierGroups.map((group, groupIndex) => (
-                      <div key={groupIndex} className="ml-2 text-gray-600">
-                        {group.selectedModifiers.map((modifier, modIndex) => (
-                          <div key={modIndex} className="grid grid-cols-12">
-                            <span className="col-span-6">
-                              {modifier.modifierName} x {modifier.qty}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                    {(() => {
+                      const PORTION_RE = /^---(.+?)---(.*)/i;
+                      const normalizePortionLabel = (raw: string) => {
+                        const s = raw.trim().toLowerCase();
+                        if (s === "whole") return "whole";
+                        if (s === "1st half") return "1half";
+                        if (s === "2nd half") return "2half";
+                        return s.replace(/\s+/g, "");
+                      };
+                      const portionMap: Record<string, string[]> = {};
+                      const normalMods: {
+                        name: string;
+                        qty: number;
+                        nestedNames: string[];
+                      }[] = [];
+                      item.modifierGroups.forEach((group) => {
+                        group.selectedModifiers.forEach((modifier) => {
+                          const nestedNames = (
+                            modifier.selectedNestedGroups ?? []
+                          ).flatMap((nmgSel) =>
+                            nmgSel.selectedNestedModifiers.map((nm) =>
+                              nm.qty > 1
+                                ? `${nm.nestedModifierName} x${nm.qty}`
+                                : nm.nestedModifierName,
+                            ),
+                          );
+                          const portionMatch =
+                            modifier.modifierName.match(PORTION_RE);
+                          if (portionMatch) {
+                            const label = normalizePortionLabel(
+                              portionMatch[1],
+                            );
+                            const inlineName = portionMatch[2].trim();
+                            const toppings = inlineName
+                              ? [
+                                  inlineName +
+                                    (modifier.qty > 1
+                                      ? ` x${modifier.qty}`
+                                      : ""),
+                                ]
+                              : nestedNames;
+                            portionMap[label] = [
+                              ...(portionMap[label] ?? []),
+                              ...toppings,
+                            ];
+                          } else {
+                            normalMods.push({
+                              name: modifier.modifierName,
+                              qty: modifier.qty,
+                              nestedNames,
+                            });
+                          }
+                        });
+                      });
+                      const portionOrder = ["whole", "1half", "2half"];
+                      const portionDisplayLabel: Record<string, string> = {
+                        whole: "Whole",
+                        "1half": "1st Half",
+                        "2half": "2nd Half",
+                      };
+                      const filteredPortions = portionOrder.filter(
+                        (k) => portionMap[k]?.length,
+                      );
+                      return (
+                        <div className="ml-2 text-gray-600">
+                          {normalMods.map((mod, i) => (
+                            <div key={i} className="grid grid-cols-12">
+                              <span className="col-span-9">
+                                {mod.qty > 1
+                                  ? `${mod.name} x ${mod.qty}`
+                                  : mod.name}
+                                {mod.nestedNames.length > 0 && (
+                                  <span className="text-gray-400 ml-1">
+                                    ({mod.nestedNames.join(", ")})
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                          {filteredPortions.length > 0 && (
+                            <div
+                              className={
+                                normalMods.length > 0 ? "mt-1" : undefined
+                              }
+                            >
+                              {filteredPortions.map((k) => (
+                                <div key={k} className="grid grid-cols-12">
+                                  <span className="col-span-9">
+                                    <strong className="text-black">
+                                      {portionDisplayLabel[k] ?? k}:
+                                    </strong>{" "}
+                                    {portionMap[k].join(", ")}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {item.itemRemarks && (
                       <p className="text-gray-600  text-[12px] max-w-[160px] sm:max-w-[200px]">
                         Remarks: {item.itemRemarks}

@@ -14,10 +14,20 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import RenderContent from "../partners/renderContent";
 
-// New interface for modifier selection with quantity
+interface NestedModifierSelection {
+  id: string;
+  quantity: number;
+}
+
+interface NestedGroupSelection {
+  nmgId: string;
+  selectedNestedModifiers: NestedModifierSelection[];
+}
+
 interface ModifierSelection {
   id: string;
   quantity: number;
+  selectedNestedGroups?: NestedGroupSelection[];
 }
 
 interface SelectedModifiersState {
@@ -77,7 +87,7 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
   const calculateTotalPrice = () => {
     if (!categoryItem) return;
     const cartItem = cartData.find((item) => item.itemId === categoryItem.id);
-    const quantity = cartItem ? cartItem.qty : 1; // Default to 0 if not found
+    const quantity = cartItem ? cartItem.qty : 1;
     let total = categoryItem.price * quantity;
     Object.entries(selectedModifiers).forEach(([groupId, selections]) => {
       const group = categoryItem.modifierGroups?.find((g) => g.id === groupId);
@@ -85,13 +95,38 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
         selections.forEach((selection) => {
           const modifier = group.modifiers.find((m) => m.id === selection.id);
           if (modifier) {
+            let baseUnit = 0;
             if (group.pricingType === PriceTypeEnum.IndividualPrice) {
-              total += modifier.price * selection.quantity * quantity;
+              baseUnit = modifier.price;
             } else if (group.pricingType === PriceTypeEnum.SamePrice) {
-              total += (group?.price ?? 0) * selection.quantity * quantity;
-            } else {
-              return;
+              baseUnit = group.price ?? 0;
             }
+
+            let nestedUnit = 0;
+            selection.selectedNestedGroups?.forEach((nmgSel) => {
+              const nmg = modifier.nestedModifierGroups?.find(
+                (nmg) => nmg.id === nmgSel.nmgId,
+              );
+              if (nmg) {
+                if (nmg.pricingType === PriceTypeEnum.SamePrice) {
+                  nestedUnit +=
+                    (nmg.price ?? 0) *
+                    nmgSel.selectedNestedModifiers.reduce(
+                      (t, nm) => t + nm.quantity,
+                      0,
+                    );
+                } else if (nmg.pricingType === PriceTypeEnum.IndividualPrice) {
+                  nmgSel.selectedNestedModifiers.forEach((nmSel) => {
+                    const nm = nmg.nestedModifiers.find(
+                      (nm) => nm.id === nmSel.id,
+                    );
+                    if (nm) nestedUnit += nm.price * nmSel.quantity;
+                  });
+                }
+              }
+            });
+
+            total += (baseUnit + nestedUnit) * selection.quantity * quantity;
           }
         });
       }
@@ -123,27 +158,36 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
   }, [item.itemId]);
 
   const initializeSelectedModifiers = (
-    categoryItem: ItemWithModifiersResponse
+    categoryItem: ItemWithModifiersResponse,
   ) => {
     const initialModifiers: SelectedModifiersState = {};
     categoryItem.modifierGroups?.forEach((group) => {
       const selectedModsInGroup = item.modifierGroups?.find(
-        (g) => g.name === group.name
+        (g) => g.name === group.name,
       )?.selectedModifiers;
       initialModifiers[group.id] = group.modifiers
         .filter((mod) =>
           selectedModsInGroup?.some(
-            (selectedMod) => selectedMod.mid.name === mod.name
-          )
+            (selectedMod) => selectedMod.mid.name === mod.name,
+          ),
         )
         .map((mod) => {
-          // Find the matching modifier in the cart to get its quantity
           const cartModifier = selectedModsInGroup?.find(
-            (selectedMod) => selectedMod.mid._id === mod.id
+            (selectedMod) => selectedMod.mid._id === mod.id,
           );
           return {
             id: mod.id,
             quantity: cartModifier?.qty || 1,
+            selectedNestedGroups:
+              cartModifier?.selectedNestedGroups?.map((nmgSel) => ({
+                nmgId: nmgSel.nmgId._id,
+                selectedNestedModifiers: nmgSel.selectedNestedModifiers.map(
+                  (nm) => ({
+                    id: nm.nmid._id,
+                    quantity: nm.qty,
+                  }),
+                ),
+              })) || [],
           };
         });
     });
@@ -153,19 +197,19 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
   const handleModifierChange = (
     groupId: string,
     modifierId: string,
-    isMultiSelect: boolean
+    isMultiSelect: boolean,
   ) => {
     setSelectedModifiers((prev) => {
       const updated = { ...prev };
       if (isMultiSelect) {
         const currentSelections = updated[groupId] || [];
         const group = categoryItem?.modifierGroups?.find(
-          (g) => g.id === groupId
+          (g) => g.id === groupId,
         );
 
         if (currentSelections.some((s) => s.id === modifierId)) {
           updated[groupId] = currentSelections.filter(
-            (s) => s.id !== modifierId
+            (s) => s.id !== modifierId,
           );
         } else {
           if (
@@ -194,7 +238,7 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
   const handleModifierQuantityChange = (
     groupId: string,
     modifierId: string,
-    delta: number
+    delta: number,
   ) => {
     setSelectedModifiers((prev) => {
       const updated = { ...prev };
@@ -204,10 +248,10 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
       if (modifierIndex !== -1) {
         const newQuantity = Math.max(
           1,
-          selections[modifierIndex].quantity + delta
+          selections[modifierIndex].quantity + delta,
         );
         updated[groupId] = selections.map((s, i) =>
-          i === modifierIndex ? { ...s, quantity: newQuantity } : s
+          i === modifierIndex ? { ...s, quantity: newQuantity } : s,
         );
       }
 
@@ -223,6 +267,46 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
     });
   };
 
+  const handleNestedConfirm = (
+    groupId: string,
+    modifierId: string,
+    nestedGroups: NestedGroupSelection[],
+  ) => {
+    setSelectedModifiers((prev) => {
+      const updated = { ...prev };
+      const currentSelections = updated[groupId] || [];
+      const group = categoryItem?.modifierGroups?.find((g) => g.id === groupId);
+      const existingIndex = currentSelections.findIndex(
+        (s) => s.id === modifierId,
+      );
+
+      if (existingIndex >= 0) {
+        updated[groupId] = currentSelections.map((s, i) =>
+          i === existingIndex
+            ? { ...s, selectedNestedGroups: nestedGroups }
+            : s,
+        );
+      } else {
+        const newSelection: ModifierSelection = {
+          id: modifierId,
+          quantity: 1,
+          selectedNestedGroups: nestedGroups,
+        };
+        if (!group?.multiSelect) {
+          updated[groupId] = [newSelection];
+        } else {
+          if (
+            !group.maxSelections ||
+            currentSelections.length < group.maxSelections
+          ) {
+            updated[groupId] = [...currentSelections, newSelection];
+          }
+        }
+      }
+      return updated;
+    });
+  };
+
   const validateSelection = () => {
     const errors: string[] = [];
     categoryItem?.modifierGroups?.forEach((group) => {
@@ -232,15 +316,32 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
         errors.push(
           `Please select at least ${group.minSelections || 1} option(s) for ${
             group.name
-          }`
+          }`,
         );
       }
 
       if (group.maxSelections && selections.length > group.maxSelections) {
         errors.push(
-          `You can only select up to ${group.maxSelections} option(s) for ${group.name}`
+          `You can only select up to ${group.maxSelections} option(s) for ${group.name}`,
         );
       }
+
+      selections.forEach((selection) => {
+        const modifier = group.modifiers.find((m) => m.id === selection.id);
+        modifier?.nestedModifierGroups?.forEach((nmg) => {
+          if (!nmg.optional) {
+            const nmgSel = selection.selectedNestedGroups?.find(
+              (s) => s.nmgId === nmg.id,
+            );
+            const count = nmgSel?.selectedNestedModifiers.length ?? 0;
+            if (count < (nmg.minSelections || 1)) {
+              errors.push(
+                `Please select at least ${nmg.minSelections || 1} option(s) for ${nmg.name} under ${modifier.name}`,
+              );
+            }
+          }
+        });
+      });
     });
     setValidationErrors(errors);
     return errors.length === 0;
@@ -272,6 +373,26 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
                   _id: mod.mid._id,
                   price: mod.mid.price,
                 },
+                selectedNestedGroups: mod.selectedNestedGroups?.map(
+                  (nmgSel) => ({
+                    nmgId: {
+                      name: nmgSel.nmgId.name,
+                      pricingType: nmgSel.nmgId.pricingType,
+                      price: nmgSel.nmgId.price,
+                      _id: nmgSel.nmgId._id,
+                    },
+                    selectedNestedModifiers: nmgSel.selectedNestedModifiers.map(
+                      (nm) => ({
+                        qty: nm.qty,
+                        nmid: {
+                          name: nm.nmid.name,
+                          price: nm.nmid.price,
+                          _id: nm.nmid._id,
+                        },
+                      }),
+                    ),
+                  }),
+                ),
               })),
             })) || [],
         }));
@@ -301,7 +422,18 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
               (selection) => ({
                 mid: selection.id,
                 qty: selection.quantity,
-              })
+                selectedNestedGroups: selection.selectedNestedGroups?.map(
+                  (nmgSel) => ({
+                    nmgId: nmgSel.nmgId,
+                    selectedNestedModifiers: nmgSel.selectedNestedModifiers.map(
+                      (nmSel) => ({
+                        nmid: nmSel.id,
+                        qty: nmSel.quantity,
+                      }),
+                    ),
+                  }),
+                ),
+              }),
             ),
           })) || [],
       };
@@ -331,7 +463,6 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
     const selection = selections.find((s) => s.id === modifierId);
     return selection?.quantity || 0;
   };
-
 
   return (
     <motion.div
@@ -387,6 +518,7 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
               clearModifierSelection={clearModifierSelection}
               handleModifierChange={handleModifierChange}
               handleModifierQuantityChange={handleModifierQuantityChange}
+              handleNestedConfirm={handleNestedConfirm}
               getModifierQuantity={getModifierQuantity}
               validationErrors={validationErrors}
               specialRequest={specialRequest}

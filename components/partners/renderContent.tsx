@@ -1,22 +1,27 @@
 import ItemOptions from "@/components/partners/ItemOptions";
+import NestedModifierSheet from "@/components/partners/NestedModifierSheet";
+import type { NestedGroupSelection } from "@/components/partners/NestedModifierSheet";
 import { Env } from "@/env";
 import {
   ItemOptionsEnum,
   ItemWithModifiersResponse,
+  ModifierInfoResponse,
   PriceTypeEnum,
 } from "@/generated/graphql";
 import { isContrastOkay } from "@/utils/isContrastOkay";
+import { AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import React, { useState } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 import spicyImage from "../../assets/spicy-solid.svg";
 import Leaf from "../../assets/vegan-solid.svg";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 
 interface ModifierSelection {
   id: string;
   quantity: number;
+  selectedNestedGroups?: NestedGroupSelection[];
 }
 
 interface SelectedModifiersState {
@@ -35,6 +40,11 @@ interface RenderContentProps {
     groupId: string,
     modifierId: string,
     delta: number,
+  ) => void;
+  handleNestedConfirm: (
+    groupId: string,
+    modifierId: string,
+    nestedGroups: NestedGroupSelection[],
   ) => void;
   clearModifierSelection: (groupId: string) => void;
   getModifierQuantity: (groupId: string, modifierId: string) => number;
@@ -57,6 +67,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
   selectedModifiers,
   handleModifierChange,
   handleModifierQuantityChange,
+  handleNestedConfirm,
   clearModifierSelection,
   getModifierQuantity,
   quantity,
@@ -73,10 +84,14 @@ const RenderContent: React.FC<RenderContentProps> = ({
   addToCartLoading,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [nestedSheetState, setNestedSheetState] = useState<{
+    groupId: string;
+    modifier: ModifierInfoResponse;
+  } | null>(null);
+
   const MAX_PREVIEW_LENGTH = 32;
   const MAX_PREVIEW_LENGTH_DESKTOP = 160;
 
-  // Determine if we need to show read more/less
   const needsReadMore =
     categoryItem.desc &&
     categoryItem.desc.length >
@@ -88,6 +103,87 @@ const RenderContent: React.FC<RenderContentProps> = ({
           isMobile ? MAX_PREVIEW_LENGTH : MAX_PREVIEW_LENGTH_DESKTOP,
         )}...`
       : categoryItem.desc;
+
+  const isNestedModifierValidlySelected = (
+    groupId: string,
+    modifier: ModifierInfoResponse,
+  ): boolean => {
+    const selection = selectedModifiers[groupId]?.find(
+      (s) => s.id === modifier.id,
+    );
+    if (!selection) return false;
+    if (!modifier.nestedModifierGroups?.length) return true;
+    return modifier.nestedModifierGroups.every((nmg) => {
+      if (nmg.optional) return true;
+      const nmgSel = selection.selectedNestedGroups?.find(
+        (s) => s.nmgId === nmg.id,
+      );
+      return (
+        (nmgSel?.selectedNestedModifiers.length ?? 0) >=
+        (nmg.minSelections || 1)
+      );
+    });
+  };
+
+  const getNestedPriceTotal = (
+    groupId: string,
+    modifier: ModifierInfoResponse,
+  ): number => {
+    const selection = selectedModifiers[groupId]?.find(
+      (s) => s.id === modifier.id,
+    );
+    if (!selection?.selectedNestedGroups?.length) return 0;
+    return selection.selectedNestedGroups.reduce((total, nmgSel) => {
+      const nmg = modifier.nestedModifierGroups?.find(
+        (nmg) => nmg.id === nmgSel.nmgId,
+      );
+      if (!nmg) return total;
+      switch (nmg.pricingType) {
+        case PriceTypeEnum.SamePrice:
+          return (
+            total +
+            (nmg.price ?? 0) *
+              nmgSel.selectedNestedModifiers.reduce(
+                (t, nm) => t + nm.quantity,
+                0,
+              )
+          );
+        case PriceTypeEnum.IndividualPrice:
+          return (
+            total +
+            nmgSel.selectedNestedModifiers.reduce((t, nmSel) => {
+              const nm = nmg.nestedModifiers.find((nm) => nm.id === nmSel.id);
+              return t + (nm?.price ?? 0) * nmSel.quantity;
+            }, 0)
+          );
+        default:
+          return total;
+      }
+    }, 0);
+  };
+
+  const getNestedSelectionSummary = (
+    groupId: string,
+    modifier: ModifierInfoResponse,
+  ): string => {
+    const selection = selectedModifiers[groupId]?.find(
+      (s) => s.id === modifier.id,
+    );
+    if (!selection?.selectedNestedGroups?.length) return "";
+    const names: string[] = [];
+    selection.selectedNestedGroups.forEach((nmgSel) => {
+      const nmg = modifier.nestedModifierGroups?.find(
+        (nmg) => nmg.id === nmgSel.nmgId,
+      );
+      if (nmg) {
+        nmgSel.selectedNestedModifiers.forEach((nmSel) => {
+          const nm = nmg.nestedModifiers.find((nm) => nm.id === nmSel.id);
+          if (nm) names.push(nm.name);
+        });
+      }
+    });
+    return names.join(", ");
+  };
 
   return (
     <>
@@ -213,6 +309,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
             </div>
           </div>
         ) : null}
+
         {categoryItem.modifierGroups?.map((group, groupIndex) => (
           <div key={groupIndex} className="mb-3 sm:mb-4 rounded-lg">
             <div className="flex items-center justify-between px-6 sm:px-8 py-2">
@@ -220,15 +317,20 @@ const RenderContent: React.FC<RenderContentProps> = ({
                 <h3 className="text-xl sm:text-2xl font-semibold font-subheading-oo">
                   {group.name}
                 </h3>
-                <p className="text-xs sm:text-sm font-body-oo">
-                  {group.minSelections !== undefined && group.minSelections > 0
-                    ? group.minSelections === group.maxSelections
-                      ? `Select upto ${group.maxSelections} options`
-                      : `Select ${group.minSelections} to ${group.maxSelections} options`
-                    : group.maxSelections
-                      ? `Select up to ${group.maxSelections} options`
-                      : "Optional selections"}
-                </p>
+                {!group.modifiers.some(
+                  (m) => (m.nestedModifierGroups?.length ?? 0) > 0,
+                ) && (
+                  <p className="text-xs sm:text-sm font-body-oo">
+                    {group.minSelections !== undefined &&
+                    group.minSelections > 0
+                      ? group.minSelections === group.maxSelections
+                        ? `Select upto ${group.maxSelections} options`
+                        : `Select ${group.minSelections} to ${group.maxSelections} options`
+                      : group.maxSelections
+                        ? `Select up to ${group.maxSelections} options`
+                        : "Optional selections"}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
                 <span
@@ -256,6 +358,8 @@ const RenderContent: React.FC<RenderContentProps> = ({
 
             <div className="space-y-2 font-subheading-oo px-6 sm:px-8 bg-white py-4">
               {group.modifiers.map((modifier, modifierIndex) => {
+                const hasNested =
+                  (modifier.nestedModifierGroups?.length ?? 0) > 0;
                 const isSelected = selectedModifiers[group.id]?.some(
                   (s) => s.id === modifier.id,
                 );
@@ -270,189 +374,143 @@ const RenderContent: React.FC<RenderContentProps> = ({
                       selectedModifiers[group.id]?.length >=
                         group.maxSelections;
 
+                if (hasNested) {
+                  const isValidlySelected = isNestedModifierValidlySelected(
+                    group.id,
+                    modifier,
+                  );
+                  const summary = getNestedSelectionSummary(group.id, modifier);
+
+                  const nestedPriceTotal = getNestedPriceTotal(
+                    group.id,
+                    modifier,
+                  );
+
+                  return (
+                    <React.Fragment key={modifierIndex}>
+                      <div
+                        className="flex items-center justify-between p-1 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50"
+                        onClick={() =>
+                          setNestedSheetState({ groupId: group.id, modifier })
+                        }
+                      >
+                        <div className="flex items-center flex-grow gap-1.5 sm:gap-2">
+                          <input
+                            type="checkbox"
+                            checked={isValidlySelected}
+                            onChange={() => {}}
+                            className="accent-primary border-gray-300 w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none"
+                          />
+                          <span className="text-base md:text-lg font-body-oo font-normal">
+                            {modifier.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {nestedPriceTotal > 0 && (
+                            <span className="text-xs sm:text-sm font-body-oo font-medium text-gray-500">
+                              +${nestedPriceTotal.toFixed(2)}
+                            </span>
+                          )}
+                          <ChevronRight className="text-gray-400" size={18} />
+                        </div>
+                      </div>
+                      {summary && (
+                        <div className="ml-6 mt-0.5 mb-1 px-2.5 py-1.5 bg-gray-50 rounded-md text-xs font-body-oo text-gray-500 leading-relaxed">
+                          {summary}
+                        </div>
+                      )}
+                      {modifierIndex < group.modifiers.length - 1 && (
+                        <hr className="border border-t border-gray-100 my-1" />
+                      )}
+                    </React.Fragment>
+                  );
+                }
+
                 return (
                   <React.Fragment key={modifierIndex}>
                     <div
-                      className={`p-1 rounded-lg transition-all duration-200 ${
+                      className={`flex items-center justify-between p-1 rounded-lg transition-all duration-200 ${
                         isDisabled ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
-                      {/* Mobile Layout */}
-                      <div className="md:hidden">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type={
-                                group.maxSelections === 1 ? "radio" : "checkbox"
-                              }
-                              id={`modifier-${groupIndex}-${modifierIndex}`}
-                              name={`group-${groupIndex}`}
-                              checked={isSelected}
-                              onChange={(e) => {
-                                e.stopPropagation();
-
-                                handleModifierChange(
-                                  group.id,
-                                  modifier.id,
-                                  group.multiSelect,
-                                );
-                              }}
-                              className="accent-primary focus:ring-primary border-gray-300 w-3.5 h-3.5 cursor-pointer"
-                              disabled={isDisabled}
-                            />
-                            <label
-                              htmlFor={`modifier-${groupIndex}-${modifierIndex}`}
-                              className="cursor-pointer"
-                            >
-                              <span className="text-base font-body-oo font-normal">
-                                {modifier.name}
-                              </span>
-                            </label>
-                          </div>
-
-                          <div className="flex items-center">
+                      <div className="flex items-center flex-grow gap-1.5 sm:gap-2">
+                        <input
+                          type={
+                            group.maxSelections === 1 ? "radio" : "checkbox"
+                          }
+                          id={`modifier-${groupIndex}-${modifierIndex}`}
+                          name={`group-${groupIndex}`}
+                          checked={isSelected}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleModifierChange(
+                              group.id,
+                              modifier.id,
+                              group.multiSelect,
+                            );
+                          }}
+                          className="accent-primary focus:ring-primary border-gray-300 w-3.5 h-3.5 sm:w-4 sm:h-4 cursor-pointer"
+                          disabled={isDisabled}
+                        />
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor={`modifier-${groupIndex}-${modifierIndex}`}
+                            className="flex items-center gap-1 cursor-pointer"
+                          >
+                            <span className="text-base md:text-lg font-body-oo font-normal">
+                              {modifier.name}
+                            </span>
                             {group.pricingType ===
                             PriceTypeEnum.IndividualPrice ? (
-                              <span className="text-xs font-body-oo font-medium">
+                              <span className="text-xs sm:text-sm ml-2 font-body-oo font-medium">
                                 +${modifier.price.toFixed(2)}
                               </span>
                             ) : group.pricingType ===
                               PriceTypeEnum.SamePrice ? (
-                              <span className="text-xs font-body-oo font-medium">
+                              <span className="text-xs sm:text-sm ml-2 font-body-oo font-medium">
                                 +${group.price?.toFixed(2)}
                               </span>
                             ) : null}
-                          </div>
+                          </label>
                         </div>
-
-                        {isSelected &&
-                          group.allowMultiSelctSingleModsInGroup && (
-                            <div className="flex justify-end ">
-                              <div className="flex items-center gap-1 bg-white">
-                                <button
-                                  onClick={() =>
-                                    handleModifierQuantityChange(
-                                      group.id,
-                                      modifier.id,
-                                      -1,
-                                    )
-                                  }
-                                  className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
-                                  disabled={currentQuantity <= 1}
-                                >
-                                  <IoMdRemove size={16} />
-                                </button>
-
-                                <span className="mx-[1px] min-w-[20px] text-base text-center">
-                                  {currentQuantity}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    handleModifierQuantityChange(
-                                      group.id,
-                                      modifier.id,
-                                      1,
-                                    )
-                                  }
-                                  disabled={
-                                    !group.isMaxSelctSingleModsInGroupUnlimited &&
-                                    currentQuantity >=
-                                      group.maxSelctSingleModsInGroup
-                                  }
-                                  className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
-                                >
-                                  <IoMdAdd size={16} />
-                                </button>
-                              </div>
-                            </div>
-                          )}
                       </div>
 
-                      {/* Desktop Layout */}
-                      <div className="hidden md:flex items-center justify-between">
-                        <div className="flex items-center flex-grow gap-2">
-                          <input
-                            type={
-                              group.maxSelections === 1 ? "radio" : "checkbox"
-                            }
-                            id={`modifier-desktop-${groupIndex}-${modifierIndex}`}
-                            name={`group-desktop-${groupIndex}`}
-                            checked={isSelected}
-                            onChange={(e) => {
-                              e.stopPropagation();
-
-                              handleModifierChange(
+                      {isSelected && group.allowMultiSelctSingleModsInGroup && (
+                        <div className="flex items-center gap-1 ml-1 sm:ml-2 bg-white">
+                          <button
+                            onClick={() =>
+                              handleModifierQuantityChange(
                                 group.id,
                                 modifier.id,
-                                group.multiSelect,
-                              );
-                            }}
-                            className="accent-primary focus:ring-primary border-gray-300 w-4 h-4 cursor-pointer"
-                            disabled={isDisabled}
-                          />
-                          <div className="flex flex-col">
-                            <label
-                              htmlFor={`modifier-desktop-${groupIndex}-${modifierIndex}`}
-                              className="flex items-center gap-1 cursor-pointer"
-                            >
-                              <span className="text-lg font-body-oo font-normal">
-                                {modifier.name}
-                              </span>
-                              {group.pricingType ===
-                              PriceTypeEnum.IndividualPrice ? (
-                                <span className="text-sm ml-2 font-body-oo font-medium">
-                                  +${modifier.price.toFixed(2)}
-                                </span>
-                              ) : group.pricingType ===
-                                PriceTypeEnum.SamePrice ? (
-                                <span className="text-sm ml-2 font-body-oo font-medium">
-                                  +${group.price?.toFixed(2)}
-                                </span>
-                              ) : null}
-                            </label>
-                          </div>
+                                -1,
+                              )
+                            }
+                            className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                            disabled={currentQuantity <= 1}
+                          >
+                            <IoMdRemove size={16} />
+                          </button>
+                          <span className="mx-[1px] min-w-[20px] text-base text-center">
+                            {currentQuantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              handleModifierQuantityChange(
+                                group.id,
+                                modifier.id,
+                                1,
+                              )
+                            }
+                            disabled={
+                              !group.isMaxSelctSingleModsInGroupUnlimited &&
+                              currentQuantity >= group.maxSelctSingleModsInGroup
+                            }
+                            className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
+                          >
+                            <IoMdAdd size={16} />
+                          </button>
                         </div>
-
-                        {isSelected &&
-                          group.allowMultiSelctSingleModsInGroup && (
-                            <div className="flex items-center gap-1 ml-auto bg-white">
-                              <button
-                                onClick={() =>
-                                  handleModifierQuantityChange(
-                                    group.id,
-                                    modifier.id,
-                                    -1,
-                                  )
-                                }
-                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
-                                disabled={currentQuantity <= 1}
-                              >
-                                <IoMdRemove size={16} />
-                              </button>
-
-                              <span className="mx-[1px] min-w-[20px] text-base text-center">
-                                {currentQuantity}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleModifierQuantityChange(
-                                    group.id,
-                                    modifier.id,
-                                    1,
-                                  )
-                                }
-                                disabled={
-                                  !group.isMaxSelctSingleModsInGroupUnlimited &&
-                                  currentQuantity >=
-                                    group.maxSelctSingleModsInGroup
-                                }
-                                className="p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black disabled:bg-gray-200 disabled:cursor-not-allowed"
-                              >
-                                <IoMdAdd size={16} />
-                              </button>
-                            </div>
-                          )}
-                      </div>
+                      )}
                     </div>
                     {modifierIndex < group.modifiers.length - 1 && (
                       <hr className="border border-t border-gray-100 my-1" />
@@ -507,7 +565,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
 
       {isAvailable ? (
         <div
-          className={`flex  p-4 bg-white border-t sticky bottom-0 font-subheading-oo ${
+          className={`flex p-4 bg-white border-t sticky bottom-0 font-subheading-oo ${
             isEdit ? "justify-end items-center" : "justify-between items-center"
           }`}
         >
@@ -517,7 +575,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
                 onClick={() => handleQuantityChange(-1)}
                 className="sm:p-2 ml-3 p-[2px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
               >
-                <FiMinus className="" size={isMobile ? 16 : 18} />
+                <FiMinus size={isMobile ? 16 : 18} />
               </button>
               <span className="mx-2 min-w-[20px] text-base lg:text-lg text-center">
                 {quantity}
@@ -526,13 +584,13 @@ const RenderContent: React.FC<RenderContentProps> = ({
                 onClick={() => handleQuantityChange(1)}
                 className="sm:p-2 p-[2px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
               >
-                <FiPlus className="" size={isMobile ? 16 : 18} />
+                <FiPlus size={isMobile ? 16 : 18} />
               </button>
             </div>
           )}
           <button
             onClick={handleAddToCart}
-            className="bg-primary py-4 px-8 rounded-md font-semibold font-subheading-oo transition duration-300  sm:text-base shadow-md hover:shadow-lg text-sm disabled:opacity-45"
+            className="bg-primary py-4 px-8 rounded-md font-semibold font-subheading-oo transition duration-300 sm:text-base shadow-md hover:shadow-lg text-sm disabled:opacity-45"
             style={{
               color: isContrastOkay(
                 Env.NEXT_PUBLIC_PRIMARY_COLOR,
@@ -561,6 +619,32 @@ const RenderContent: React.FC<RenderContentProps> = ({
           </span>
         </div>
       )}
+
+      <AnimatePresence>
+        {nestedSheetState && (
+          <NestedModifierSheet
+            key="nested-sheet"
+            modifierName={nestedSheetState.modifier.name}
+            nestedModifierGroups={
+              nestedSheetState.modifier.nestedModifierGroups ?? []
+            }
+            initialSelections={
+              selectedModifiers[nestedSheetState.groupId]?.find(
+                (s) => s.id === nestedSheetState.modifier.id,
+              )?.selectedNestedGroups ?? []
+            }
+            onConfirm={(confirmedSelections) => {
+              handleNestedConfirm(
+                nestedSheetState.groupId,
+                nestedSheetState.modifier.id,
+                confirmedSelections,
+              );
+              setNestedSheetState(null);
+            }}
+            onCancel={() => setNestedSheetState(null)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

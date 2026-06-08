@@ -29,10 +29,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 
-// New interface for modifier selection with quantity
+interface NestedModifierSelection {
+  id: string;
+  quantity: number;
+}
+
+interface NestedGroupSelection {
+  nmgId: string;
+  selectedNestedModifiers: NestedModifierSelection[];
+}
+
 interface ModifierSelection {
   id: string;
   quantity: number;
+  selectedNestedGroups?: NestedGroupSelection[];
 }
 
 interface SelectedModifiersState {
@@ -58,7 +68,7 @@ const ItemModal = () => {
   const { setToastData } = ToastStore();
   const { cartDetails, setCartCountInfo, setCartDetails } = useCartStore();
   const modifierGroupRefs = useRef<{ [key: string]: HTMLDivElement | null }>(
-    {}
+    {},
   );
   const validationErrorRef = useRef<HTMLDivElement>(null);
   const {
@@ -92,7 +102,7 @@ const ItemModal = () => {
       });
 
       const dayAvailability = categoryItem?.availability?.find(
-        (time) => time.day === scheduleDateTimeLuxon.weekdayLong
+        (time) => time.day === scheduleDateTimeLuxon.weekdayLong,
       );
 
       if (!dayAvailability || !dayAvailability?.active) {
@@ -103,7 +113,7 @@ const ItemModal = () => {
       const checkIsAvailable = availabilityCheck(
         restaurantTimeZone,
         categoryItem?.availability ?? [],
-        new Date(scheduleDateTime ?? "")
+        new Date(scheduleDateTime ?? ""),
       );
 
       setIsAvailable(checkIsAvailable);
@@ -173,13 +183,38 @@ const ItemModal = () => {
         selections.forEach((selection) => {
           const modifier = group.modifiers.find((m) => m.id === selection.id);
           if (modifier) {
+            let baseUnit = 0;
             if (group.pricingType === PriceTypeEnum.IndividualPrice) {
-              total += modifier.price * selection.quantity * quantity;
+              baseUnit = modifier.price;
             } else if (group.pricingType === PriceTypeEnum.SamePrice) {
-              total += (group?.price ?? 0) * selection.quantity * quantity;
-            } else {
-              return;
+              baseUnit = group.price ?? 0;
             }
+
+            let nestedUnit = 0;
+            selection.selectedNestedGroups?.forEach((nmgSel) => {
+              const nmg = modifier.nestedModifierGroups?.find(
+                (nmg) => nmg.id === nmgSel.nmgId,
+              );
+              if (nmg) {
+                if (nmg.pricingType === PriceTypeEnum.SamePrice) {
+                  nestedUnit +=
+                    (nmg.price ?? 0) *
+                    nmgSel.selectedNestedModifiers.reduce(
+                      (t, nm) => t + nm.quantity,
+                      0,
+                    );
+                } else if (nmg.pricingType === PriceTypeEnum.IndividualPrice) {
+                  nmgSel.selectedNestedModifiers.forEach((nmSel) => {
+                    const nm = nmg.nestedModifiers.find(
+                      (nm) => nm.id === nmSel.id,
+                    );
+                    if (nm) nestedUnit += nm.price * nmSel.quantity;
+                  });
+                }
+              }
+            });
+
+            total += (baseUnit + nestedUnit) * selection.quantity * quantity;
           }
         });
       }
@@ -223,19 +258,19 @@ const ItemModal = () => {
   const handleModifierChange = (
     groupId: string,
     modifierId: string,
-    isMultiSelect: boolean
+    isMultiSelect: boolean,
   ) => {
     setSelectedModifiers((prev) => {
       const updated = { ...prev };
       if (isMultiSelect) {
         const currentSelections = updated[groupId] || [];
         const group = categoryItem?.modifierGroups?.find(
-          (g) => g.id === groupId
+          (g) => g.id === groupId,
         );
 
         if (currentSelections.some((s) => s.id === modifierId)) {
           updated[groupId] = currentSelections.filter(
-            (s) => s.id !== modifierId
+            (s) => s.id !== modifierId,
           );
         } else {
           if (
@@ -264,7 +299,7 @@ const ItemModal = () => {
   const handleModifierQuantityChange = (
     groupId: string,
     modifierId: string,
-    delta: number
+    delta: number,
   ) => {
     setSelectedModifiers((prev) => {
       const updated = { ...prev };
@@ -274,10 +309,10 @@ const ItemModal = () => {
       if (modifierIndex !== -1) {
         const newQuantity = Math.max(
           1,
-          selections[modifierIndex].quantity + delta
+          selections[modifierIndex].quantity + delta,
         );
         updated[groupId] = selections.map((s, i) =>
-          i === modifierIndex ? { ...s, quantity: newQuantity } : s
+          i === modifierIndex ? { ...s, quantity: newQuantity } : s,
         );
       }
 
@@ -289,6 +324,46 @@ const ItemModal = () => {
     setSelectedModifiers((prev) => {
       const updated = { ...prev };
       updated[groupId] = [];
+      return updated;
+    });
+  };
+
+  const handleNestedConfirm = (
+    groupId: string,
+    modifierId: string,
+    nestedGroups: NestedGroupSelection[],
+  ) => {
+    setSelectedModifiers((prev) => {
+      const updated = { ...prev };
+      const currentSelections = updated[groupId] || [];
+      const group = categoryItem?.modifierGroups?.find((g) => g.id === groupId);
+      const existingIndex = currentSelections.findIndex(
+        (s) => s.id === modifierId,
+      );
+
+      if (existingIndex >= 0) {
+        updated[groupId] = currentSelections.map((s, i) =>
+          i === existingIndex
+            ? { ...s, selectedNestedGroups: nestedGroups }
+            : s,
+        );
+      } else {
+        const newSelection: ModifierSelection = {
+          id: modifierId,
+          quantity: 1,
+          selectedNestedGroups: nestedGroups,
+        };
+        if (!group?.multiSelect) {
+          updated[groupId] = [newSelection];
+        } else {
+          if (
+            !group.maxSelections ||
+            currentSelections.length < group.maxSelections
+          ) {
+            updated[groupId] = [...currentSelections, newSelection];
+          }
+        }
+      }
       return updated;
     });
   };
@@ -306,7 +381,6 @@ const ItemModal = () => {
         } option(s) for ${group.name}`;
         errors.push(errorMessage);
 
-        // Store the first missing required group for scrolling
         if (!firstMissingRequiredGroup) {
           firstMissingRequiredGroup = group.id;
         }
@@ -314,9 +388,29 @@ const ItemModal = () => {
 
       if (group.maxSelections && selections.length > group.maxSelections) {
         errors.push(
-          `You can only select up to ${group.maxSelections} option(s) for ${group.name}`
+          `You can only select up to ${group.maxSelections} option(s) for ${group.name}`,
         );
       }
+
+      selections.forEach((selection) => {
+        const modifier = group.modifiers.find((m) => m.id === selection.id);
+        modifier?.nestedModifierGroups?.forEach((nmg) => {
+          if (!nmg.optional) {
+            const nmgSel = selection.selectedNestedGroups?.find(
+              (s) => s.nmgId === nmg.id,
+            );
+            const count = nmgSel?.selectedNestedModifiers.length ?? 0;
+            if (count < (nmg.minSelections || 1)) {
+              errors.push(
+                `Please select at least ${nmg.minSelections || 1} option(s) for ${nmg.name} under ${modifier.name}`,
+              );
+              if (!firstMissingRequiredGroup) {
+                firstMissingRequiredGroup = group.id;
+              }
+            }
+          }
+        });
+      });
     });
 
     setValidationErrors(errors);
@@ -348,17 +442,28 @@ const ItemModal = () => {
 
   const formatCartItem = (): CartItemInput[] => {
     const formattedModifiers: CartModifierGroupsInput[] = Object.entries(
-      selectedModifiers
+      selectedModifiers,
     )
       .map(([groupId, selections]) => {
         const group = categoryItem?.modifierGroups?.find(
-          (g) => g.id === groupId
+          (g) => g.id === groupId,
         );
         if (!group) return null;
 
         const selectedModifiersInput = selections.map((selection) => ({
           mid: selection.id,
           qty: selection.quantity,
+          selectedNestedGroups: selection.selectedNestedGroups?.map(
+            (nmgSel) => ({
+              nmgId: nmgSel.nmgId,
+              selectedNestedModifiers: nmgSel.selectedNestedModifiers.map(
+                (nmSel) => ({
+                  nmid: nmSel.id,
+                  qty: nmSel.quantity,
+                }),
+              ),
+            }),
+          ),
         }));
 
         return {
@@ -410,7 +515,7 @@ const ItemModal = () => {
             if (res2?.CartDetails) {
               // Check if we have a free item
               const currentFreeItem = extractFreeDiscountItemDetails(
-                res2.CartDetails.discountString ?? ""
+                res2.CartDetails.discountString ?? "",
               );
 
               // Set cart count including free item if it exists
@@ -531,78 +636,79 @@ const ItemModal = () => {
       onClick={closeModal}
       className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-[2px] flex justify-center items-end sm:items-center z-50"
     >
-          <motion.div
-            key="modal-content"
+      <motion.div
+        key="modal-content"
         initial={{ y: "100%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+        animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative bg-white rounded-t-md sm:rounded-md overflow-hidden shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] md:max-h-[90vh]"
-          >
-            {!loading && categoryItem && (
-            <div className="absolute top-[3px] right-[3px] z-[50]">
-              <button
-                onClick={closeModal}
-                className="text-white bg-black bg-opacity-50 rounded-full p-2.5 hover:bg-opacity-70 transition-all duration-300 !z-50 mt-1 mr-2"
-              >
-                <IoMdClose size={20} />
-              </button>
-            </div>
-          )}
-          <div className="overflow-y-scroll scrollbar-hide flex-1">
-            {(loading || !categoryItem) && !error ? (
-              <div className="animate-pulse">
-                {/* Image shimmer */}
-                <div className="h-[300px] bg-gray-200 w-full rounded-t-md" />
-                {/* Title + price shimmer */}
-                <div className="px-6 sm:px-8 py-4 border-b border-gray-200">
-                  <div className="h-7 bg-gray-200 rounded-md w-2/3 mb-3" />
-                  <div className="h-5 bg-gray-200 rounded-md w-1/4" />
-                </div>
-                {/* Description shimmer */}
-                <div className="px-6 sm:px-8 py-4">
-                  <div className="h-4 bg-gray-200 rounded-md w-1/4 mb-2" />
-                  <div className="h-4 bg-gray-200 rounded-md w-full mb-1" />
-                  <div className="h-4 bg-gray-200 rounded-md w-3/4" />
-                </div>
-                {/* Modifier group shimmer */}
-                <div className="px-6 sm:px-8 py-4 border-t border-gray-100">
-                  <div className="h-5 bg-gray-200 rounded-md w-1/3 mb-4" />
-                  <div className="space-y-3">
-                    <div className="h-10 bg-gray-200 rounded-md w-full" />
-                    <div className="h-10 bg-gray-200 rounded-md w-full" />
-                    <div className="h-10 bg-gray-200 rounded-md w-full" />
-                  </div>
+        onClick={(e) => e.stopPropagation()}
+        className="relative bg-white rounded-t-md sm:rounded-md overflow-hidden shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] md:max-h-[90vh]"
+      >
+        {!loading && categoryItem && (
+          <div className="absolute top-[3px] right-[3px] z-[50]">
+            <button
+              onClick={closeModal}
+              className="text-white bg-black bg-opacity-50 rounded-full p-2.5 hover:bg-opacity-70 transition-all duration-300 !z-50 mt-1 mr-2"
+            >
+              <IoMdClose size={20} />
+            </button>
+          </div>
+        )}
+        <div className="overflow-y-scroll scrollbar-hide flex-1">
+          {(loading || !categoryItem) && !error ? (
+            <div className="animate-pulse">
+              {/* Image shimmer */}
+              <div className="h-[300px] bg-gray-200 w-full rounded-t-md" />
+              {/* Title + price shimmer */}
+              <div className="px-6 sm:px-8 py-4 border-b border-gray-200">
+                <div className="h-7 bg-gray-200 rounded-md w-2/3 mb-3" />
+                <div className="h-5 bg-gray-200 rounded-md w-1/4" />
+              </div>
+              {/* Description shimmer */}
+              <div className="px-6 sm:px-8 py-4">
+                <div className="h-4 bg-gray-200 rounded-md w-1/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded-md w-full mb-1" />
+                <div className="h-4 bg-gray-200 rounded-md w-3/4" />
+              </div>
+              {/* Modifier group shimmer */}
+              <div className="px-6 sm:px-8 py-4 border-t border-gray-100">
+                <div className="h-5 bg-gray-200 rounded-md w-1/3 mb-4" />
+                <div className="space-y-3">
+                  <div className="h-10 bg-gray-200 rounded-md w-full" />
+                  <div className="h-10 bg-gray-200 rounded-md w-full" />
+                  <div className="h-10 bg-gray-200 rounded-md w-full" />
                 </div>
               </div>
-            ) : (
-              <>
-                {!categoryItem ? null : (
-                  <RenderContent
-                    categoryItem={categoryItem}
-                    clearModifierSelection={clearModifierSelection}
-                    handleModifierChange={handleModifierChange}
-                    handleModifierQuantityChange={handleModifierQuantityChange}
-                    getModifierQuantity={getModifierQuantity}
-                    quantity={quantity}
-                    handleQuantityChange={handleQuantityChange}
-                    validationErrors={validationErrors}
-                    validationErrorRef={validationErrorRef}
-                    specialRequest={specialRequest}
-                    setSpecialRequest={setSpecialRequest}
-                    totalPrice={totalPrice}
-                    handleAddToCart={handleAddToCart}
-                    isAvailable={isAvailable}
-                    isMobile={isMobile}
-                    selectedModifiers={selectedModifiers}
-                    addToCartLoading={addToCartLoading}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        </motion.div>
+            </div>
+          ) : (
+            <>
+              {!categoryItem ? null : (
+                <RenderContent
+                  categoryItem={categoryItem}
+                  clearModifierSelection={clearModifierSelection}
+                  handleModifierChange={handleModifierChange}
+                  handleModifierQuantityChange={handleModifierQuantityChange}
+                  handleNestedConfirm={handleNestedConfirm}
+                  getModifierQuantity={getModifierQuantity}
+                  quantity={quantity}
+                  handleQuantityChange={handleQuantityChange}
+                  validationErrors={validationErrors}
+                  validationErrorRef={validationErrorRef}
+                  specialRequest={specialRequest}
+                  setSpecialRequest={setSpecialRequest}
+                  totalPrice={totalPrice}
+                  handleAddToCart={handleAddToCart}
+                  isAvailable={isAvailable}
+                  isMobile={isMobile}
+                  selectedModifiers={selectedModifiers}
+                  addToCartLoading={addToCartLoading}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </motion.div>
     </motion.div>
   );
 };

@@ -236,10 +236,36 @@ export type CartModifiers = {
   _id: Scalars['ID']['output'];
   mid: Modifier;
   qty: Scalars['Float']['output'];
+  selectedNestedGroups: Array<CartNestedModifierGroups>;
 };
 
 export type CartModifiersInput = {
   mid: Scalars['ID']['input'];
+  qty?: Scalars['Float']['input'];
+  selectedNestedGroups?: InputMaybe<Array<CartNestedModifierGroupsInput>>;
+};
+
+export type CartNestedModifierGroups = {
+  __typename?: 'CartNestedModifierGroups';
+  _id: Scalars['ID']['output'];
+  nmgId: NestedModifierGroup;
+  selectedNestedModifiers: Array<CartNestedModifiers>;
+};
+
+export type CartNestedModifierGroupsInput = {
+  nmgId: Scalars['ID']['input'];
+  selectedNestedModifiers?: Array<CartNestedModifiersInput>;
+};
+
+export type CartNestedModifiers = {
+  __typename?: 'CartNestedModifiers';
+  _id: Scalars['ID']['output'];
+  nmid: NestedModifier;
+  qty: Scalars['Float']['output'];
+};
+
+export type CartNestedModifiersInput = {
+  nmid: Scalars['ID']['input'];
   qty?: Scalars['Float']['input'];
 };
 
@@ -1285,6 +1311,7 @@ export type Modifier = {
   isItem: Scalars['Boolean']['output'];
   modifierGroup?: Maybe<Array<ModifierGroup>>;
   name: Scalars['String']['output'];
+  nestedModifierGroup: Array<NestedModifierGroupInfo>;
   posId: Scalars['String']['output'];
   preSelect: Scalars['Boolean']['output'];
   price: Scalars['Float']['output'];
@@ -1368,6 +1395,7 @@ export type ModifierInfoResponse = {
   id: Scalars['String']['output'];
   isItem: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
+  nestedModifierGroups?: Maybe<Array<NestedModifierGroupResponse>>;
   preSelect: Scalars['Boolean']['output'];
   price: Scalars['Float']['output'];
 };
@@ -1506,6 +1534,104 @@ export type MutationVerifyGiftCardOtpArgs = {
   phone: Scalars['String']['input'];
 };
 
+export type NestedModifier = {
+  __typename?: 'NestedModifier';
+  _id: Scalars['ID']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTimeISO']['output'];
+  desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
+  isItem: Scalars['Boolean']['output'];
+  modifierGroup?: Maybe<Array<NestedModifierGroup>>;
+  name: Scalars['String']['output'];
+  posId: Scalars['String']['output'];
+  preSelect: Scalars['Boolean']['output'];
+  price: Scalars['Float']['output'];
+  restaurantId: Restaurant;
+  updatedAt: Scalars['DateTimeISO']['output'];
+  updatedBy?: Maybe<User>;
+  user: User;
+};
+
+export type NestedModifierGroup = {
+  __typename?: 'NestedModifierGroup';
+  _id: Scalars['ID']['output'];
+  allowMultiSelctSingleModsInGroup: Scalars['Boolean']['output'];
+  archivedBy?: Maybe<User>;
+  archivedReason?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTimeISO']['output'];
+  desc?: Maybe<Scalars['String']['output']>;
+  isArchived?: Maybe<Scalars['Boolean']['output']>;
+  isMaxSelctSingleModsInGroupUnlimited: Scalars['Boolean']['output'];
+  maxSelctSingleModsInGroup: Scalars['Float']['output'];
+  maxSelections: Scalars['Float']['output'];
+  minSelections: Scalars['Float']['output'];
+  modifier?: Maybe<Array<Modifier>>;
+  multiSelect: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  nestedModifiers: Array<NestedModifierInfo>;
+  optional: Scalars['Boolean']['output'];
+  posId?: Maybe<Scalars['String']['output']>;
+  price?: Maybe<Scalars['Float']['output']>;
+  pricingType: PriceTypeEnum;
+  restaurantId: Restaurant;
+  updatedAt: Scalars['DateTimeISO']['output'];
+  updatedBy?: Maybe<User>;
+  user: User;
+};
+
+export type NestedModifierGroupInfo = {
+  __typename?: 'NestedModifierGroupInfo';
+  _id: NestedModifierGroup;
+  id: Scalars['String']['output'];
+  masterStatus: StatusEnum;
+  name: Scalars['String']['output'];
+  order: Scalars['Float']['output'];
+  pricingType: PriceTypeEnum;
+};
+
+export type NestedModifierGroupResponse = {
+  __typename?: 'NestedModifierGroupResponse';
+  allowMultiSelctSingleModsInGroup: Scalars['Boolean']['output'];
+  desc?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  isMaxSelctSingleModsInGroupUnlimited: Scalars['Boolean']['output'];
+  maxSelctSingleModsInGroup: Scalars['Float']['output'];
+  maxSelections: Scalars['Float']['output'];
+  minSelections: Scalars['Float']['output'];
+  multiSelect: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  nestedModifiers: Array<NestedModifierInfoResponse>;
+  optional: Scalars['Boolean']['output'];
+  order: Scalars['Float']['output'];
+  price?: Maybe<Scalars['Float']['output']>;
+  pricingType: PriceTypeEnum;
+};
+
+export type NestedModifierInfo = {
+  __typename?: 'NestedModifierInfo';
+  _id: NestedModifier;
+  desc?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  isItem: Scalars['Boolean']['output'];
+  masterStatus: StatusEnum;
+  name: Scalars['String']['output'];
+  order: Scalars['Float']['output'];
+  preSelect: Scalars['Boolean']['output'];
+  price: Scalars['Float']['output'];
+};
+
+export type NestedModifierInfoResponse = {
+  __typename?: 'NestedModifierInfoResponse';
+  desc?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  isItem: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  preSelect: Scalars['Boolean']['output'];
+  price: Scalars['Float']['output'];
+};
+
 /** Channel used to send a phone order notification */
 export enum NotificationChannel {
   Email = 'Email',
@@ -1630,6 +1756,24 @@ export type OrderModifiers = {
   modifierPrice: Scalars['Float']['output'];
   qty: Scalars['Float']['output'];
   selectedModifier: Modifier;
+  selectedNestedGroups: Array<OrderNestedModifierGroups>;
+};
+
+export type OrderNestedModifierGroups = {
+  __typename?: 'OrderNestedModifierGroups';
+  nmgId: NestedModifierGroup;
+  nmgName: Scalars['String']['output'];
+  price?: Maybe<Scalars['Float']['output']>;
+  pricingType: PriceTypeEnum;
+  selectedNestedModifiers: Array<OrderNestedModifiers>;
+};
+
+export type OrderNestedModifiers = {
+  __typename?: 'OrderNestedModifiers';
+  nestedModifierName: Scalars['String']['output'];
+  nestedModifierPrice: Scalars['Float']['output'];
+  qty: Scalars['Float']['output'];
+  selectedNestedModifier: NestedModifier;
 };
 
 export type OrderPlacedInfo = {
@@ -2663,7 +2807,7 @@ export type ClearCartMutation = { __typename?: 'Mutation', clearCart: boolean };
 export type FetchCartItemsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FetchCartItemsQuery = { __typename?: 'Query', fetchCartItems: { __typename?: 'CustomerCart', message?: string | null, cartData: Array<{ __typename?: 'CartItem', _id: string, qty: number, remarks?: string | null, itemId: { __typename?: 'Item', image?: string | null, _id: string, name: string, price: number, priceOptions: Array<{ __typename?: 'PriceOptions', menuType: MenuTypeEnum, price: number }> }, modifierGroups: Array<{ __typename?: 'CartModifierGroups', mgId: { __typename?: 'ModifierGroup', name: string, pricingType: PriceTypeEnum, price?: number | null, _id: string }, selectedModifiers: Array<{ __typename?: 'CartModifiers', qty: number, mid: { __typename?: 'Modifier', name: string, price: number, _id: string } }> }> }> } };
+export type FetchCartItemsQuery = { __typename?: 'Query', fetchCartItems: { __typename?: 'CustomerCart', message?: string | null, cartData: Array<{ __typename?: 'CartItem', _id: string, qty: number, remarks?: string | null, itemId: { __typename?: 'Item', image?: string | null, _id: string, name: string, price: number, priceOptions: Array<{ __typename?: 'PriceOptions', menuType: MenuTypeEnum, price: number }> }, modifierGroups: Array<{ __typename?: 'CartModifierGroups', mgId: { __typename?: 'ModifierGroup', name: string, pricingType: PriceTypeEnum, price?: number | null, _id: string }, selectedModifiers: Array<{ __typename?: 'CartModifiers', qty: number, mid: { __typename?: 'Modifier', name: string, price: number, _id: string }, selectedNestedGroups: Array<{ __typename?: 'CartNestedModifierGroups', nmgId: { __typename?: 'NestedModifierGroup', name: string, pricingType: PriceTypeEnum, price?: number | null, _id: string }, selectedNestedModifiers: Array<{ __typename?: 'CartNestedModifiers', qty: number, nmid: { __typename?: 'NestedModifier', name: string, price: number, _id: string } }> }> }> }> }> } };
 
 export type UpdateCartDetailsMutationVariables = Exact<{
   input: UpdateCartDetailsInput;
@@ -2845,7 +2989,7 @@ export type FetchOrderByIdQueryVariables = Exact<{
 }>;
 
 
-export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, appliedGiftCard?: { __typename?: 'GiftCardRedeemData', giftCardCode: string, amountUsed: number } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, pricingType: PriceTypeEnum, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
+export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, appliedGiftCard?: { __typename?: 'GiftCardRedeemData', giftCardCode: string, amountUsed: number } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, pricingType: PriceTypeEnum, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number, selectedNestedGroups: Array<{ __typename?: 'OrderNestedModifierGroups', nmgName: string, selectedNestedModifiers: Array<{ __typename?: 'OrderNestedModifiers', nestedModifierName: string, nestedModifierPrice: number, qty: number }> }> }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
 
 export type CreateCheckoutPaymentIntentQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2970,7 +3114,7 @@ export type GetCustomerItemQueryVariables = Exact<{
 }>;
 
 
-export type GetCustomerItemQuery = { __typename?: 'Query', getCustomerItem?: { __typename?: 'ItemWithModifiersResponse', id: string, name: string, desc?: string | null, price: number, image?: string | null, upSellItems?: Array<{ __typename?: 'upSellReturnItem', itemId: string, name: string, desc?: string | null, price: number, image?: string | null }> | null, options: Array<{ __typename?: 'Options', displayName: string, _id: string, type: ItemOptionsEnum, desc: string, status: boolean }>, availability?: Array<{ __typename?: 'Availability', _id: string, day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, modifierGroups: Array<{ __typename?: 'ModifierGroupResponse', id: string, name: string, optional: boolean, multiSelect: boolean, desc?: string | null, price?: number | null, minSelections: number, maxSelections: number, pricingType: PriceTypeEnum, order: number, allowMultiSelctSingleModsInGroup: boolean, maxSelctSingleModsInGroup: number, isMaxSelctSingleModsInGroupUnlimited: boolean, modifiers: Array<{ __typename?: 'ModifierInfoResponse', id: string, name: string, desc?: string | null, preSelect: boolean, price: number, isItem: boolean }> }> } | null };
+export type GetCustomerItemQuery = { __typename?: 'Query', getCustomerItem?: { __typename?: 'ItemWithModifiersResponse', id: string, name: string, desc?: string | null, price: number, image?: string | null, upSellItems?: Array<{ __typename?: 'upSellReturnItem', itemId: string, name: string, desc?: string | null, price: number, image?: string | null }> | null, options: Array<{ __typename?: 'Options', displayName: string, _id: string, type: ItemOptionsEnum, desc: string, status: boolean }>, availability?: Array<{ __typename?: 'Availability', _id: string, day: string, active: boolean, hours: Array<{ __typename?: 'Hours', start: string, end: string }> }> | null, modifierGroups: Array<{ __typename?: 'ModifierGroupResponse', id: string, name: string, optional: boolean, multiSelect: boolean, desc?: string | null, price?: number | null, minSelections: number, maxSelections: number, pricingType: PriceTypeEnum, order: number, allowMultiSelctSingleModsInGroup: boolean, maxSelctSingleModsInGroup: number, isMaxSelctSingleModsInGroupUnlimited: boolean, modifiers: Array<{ __typename?: 'ModifierInfoResponse', id: string, name: string, desc?: string | null, preSelect: boolean, price: number, isItem: boolean, nestedModifierGroups?: Array<{ __typename?: 'NestedModifierGroupResponse', id: string, name: string, desc?: string | null, optional: boolean, multiSelect: boolean, minSelections: number, maxSelections: number, pricingType: PriceTypeEnum, price?: number | null, order: number, allowMultiSelctSingleModsInGroup: boolean, isMaxSelctSingleModsInGroupUnlimited: boolean, maxSelctSingleModsInGroup: number, nestedModifiers: Array<{ __typename?: 'NestedModifierInfoResponse', id: string, name: string, desc?: string | null, price: number, preSelect: boolean, isItem: boolean }> }> | null }> }> } | null };
 
 export type MeCustomerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3081,6 +3225,22 @@ export const FetchCartItemsDocument = gql`
             name
             price
             _id
+          }
+          selectedNestedGroups {
+            nmgId {
+              name
+              pricingType
+              price
+              _id
+            }
+            selectedNestedModifiers {
+              qty
+              nmid {
+                name
+                price
+                _id
+              }
+            }
           }
         }
       }
@@ -3714,6 +3874,14 @@ export const FetchOrderByIdDocument = gql`
           modifierName
           modifierPrice
           qty
+          selectedNestedGroups {
+            nmgName
+            selectedNestedModifiers {
+              nestedModifierName
+              nestedModifierPrice
+              qty
+            }
+          }
         }
       }
     }
@@ -4099,6 +4267,29 @@ export const GetCustomerItemDocument = gql`
         preSelect
         price
         isItem
+        nestedModifierGroups {
+          id
+          name
+          desc
+          optional
+          multiSelect
+          minSelections
+          maxSelections
+          pricingType
+          price
+          order
+          allowMultiSelctSingleModsInGroup
+          isMaxSelctSingleModsInGroupUnlimited
+          maxSelctSingleModsInGroup
+          nestedModifiers {
+            id
+            name
+            desc
+            price
+            preSelect
+            isItem
+          }
+        }
       }
     }
   }

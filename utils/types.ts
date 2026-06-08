@@ -56,7 +56,7 @@ export interface CustomerRestaurant {
     scheduleOrders?: boolean | null;
     showItemFilters?: boolean | null;
   };
-     processingConfig?: {
+  processingConfig?: {
     feePercent?: number | null;
     maxFeeAmount?: number | null;
   };
@@ -195,6 +195,22 @@ export interface GroupedCartItem {
         _id: string;
       };
       qty: number;
+      selectedNestedGroups?: {
+        nmgId: {
+          name: string;
+          pricingType: PriceTypeEnum;
+          price?: number | null;
+          _id: string;
+        };
+        selectedNestedModifiers: {
+          nmid: {
+            name: string;
+            price: number;
+            _id: string;
+          };
+          qty: number;
+        }[];
+      }[];
     }[];
   }[];
 }
