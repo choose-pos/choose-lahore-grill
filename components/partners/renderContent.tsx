@@ -178,7 +178,7 @@ const RenderContent: React.FC<RenderContentProps> = ({
       if (nmg) {
         nmgSel.selectedNestedModifiers.forEach((nmSel) => {
           const nm = nmg.nestedModifiers.find((nm) => nm.id === nmSel.id);
-          if (nm) names.push(nm.name);
+          if (nm) names.push(nmSel.quantity > 1 ? `${nm.name} x${nmSel.quantity}` : nm.name);
         });
       }
     });
@@ -625,20 +625,36 @@ const RenderContent: React.FC<RenderContentProps> = ({
           <NestedModifierSheet
             key="nested-sheet"
             modifierName={nestedSheetState.modifier.name}
-            nestedModifierGroups={
-              nestedSheetState.modifier.nestedModifierGroups ?? []
-            }
+            nestedModifierGroups={nestedSheetState.modifier.nestedModifierGroups ?? []}
             initialSelections={
               selectedModifiers[nestedSheetState.groupId]?.find(
                 (s) => s.id === nestedSheetState.modifier.id,
               )?.selectedNestedGroups ?? []
             }
             onConfirm={(confirmedSelections) => {
-              handleNestedConfirm(
-                nestedSheetState.groupId,
-                nestedSheetState.modifier.id,
-                confirmedSelections,
+              const allEmpty = confirmedSelections.every(
+                (gs) => gs.selectedNestedModifiers.length === 0,
               );
+              if (allEmpty) {
+                const isCurrentlySelected = selectedModifiers[
+                  nestedSheetState.groupId
+                ]?.some((s) => s.id === nestedSheetState.modifier.id);
+                if (isCurrentlySelected) {
+                  // Always pass true so handleModifierChange takes the filter-out
+                  // path, regardless of the group's multiSelect setting
+                  handleModifierChange(
+                    nestedSheetState.groupId,
+                    nestedSheetState.modifier.id,
+                    true,
+                  );
+                }
+              } else {
+                handleNestedConfirm(
+                  nestedSheetState.groupId,
+                  nestedSheetState.modifier.id,
+                  confirmedSelections,
+                );
+              }
               setNestedSheetState(null);
             }}
             onCancel={() => setNestedSheetState(null)}

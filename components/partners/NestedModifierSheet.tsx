@@ -6,7 +6,7 @@ import {
 } from "@/generated/graphql";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 
 interface NestedModifierSelection {
@@ -34,15 +34,20 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const [localSelections, setLocalSelections] = useState<
-    NestedGroupSelection[]
-  >(() =>
+  const [localSelections, setLocalSelections] = useState<NestedGroupSelection[]>(() =>
     nestedModifierGroups.map((nmg) => {
       const existing = initialSelections.find((s) => s.nmgId === nmg.id);
       return existing ?? { nmgId: nmg.id, selectedNestedModifiers: [] };
-    }),
+    })
   );
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const validationErrorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (validationErrors.length > 0 && validationErrorRef.current) {
+      validationErrorRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [validationErrors]);
 
   const getGroupSelection = (nmgId: string): NestedGroupSelection =>
     localSelections.find((s) => s.nmgId === nmgId) ?? {
@@ -61,30 +66,23 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
     setLocalSelections((prev) =>
       prev.map((gs) => {
         if (gs.nmgId !== nmg.id) return gs;
-        const alreadySelected = gs.selectedNestedModifiers.some(
-          (s) => s.id === nmId,
-        );
+        const alreadySelected = gs.selectedNestedModifiers.some((s) => s.id === nmId);
 
         if (nmg.maxSelections === 1) {
           return {
             ...gs,
-            selectedNestedModifiers: alreadySelected
-              ? []
-              : [{ id: nmId, quantity: 1 }],
+            selectedNestedModifiers: alreadySelected ? [] : [{ id: nmId, quantity: 1 }],
           };
         } else {
           if (alreadySelected) {
             return {
               ...gs,
               selectedNestedModifiers: gs.selectedNestedModifiers.filter(
-                (s) => s.id !== nmId,
+                (s) => s.id !== nmId
               ),
             };
           } else {
-            if (
-              nmg.maxSelections &&
-              gs.selectedNestedModifiers.length >= nmg.maxSelections
-            ) {
+            if (nmg.maxSelections && gs.selectedNestedModifiers.length >= nmg.maxSelections) {
               return gs;
             }
             return {
@@ -96,7 +94,7 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
             };
           }
         }
-      }),
+      })
     );
   };
 
@@ -105,7 +103,7 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
     nmId: string,
     delta: number,
     max: number,
-    unlimited: boolean,
+    unlimited: boolean
   ) => {
     setLocalSelections((prev) =>
       prev.map((gs) => {
@@ -121,7 +119,7 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
             };
           }),
         };
-      }),
+      })
     );
   };
 
@@ -129,16 +127,21 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
     const errors: string[] = [];
     nestedModifierGroups.forEach((nmg) => {
       const gs = getGroupSelection(nmg.id);
-      if (
-        !nmg.optional &&
-        gs.selectedNestedModifiers.length < (nmg.minSelections || 1)
-      ) {
+      if (!nmg.optional && gs.selectedNestedModifiers.length < (nmg.minSelections || 1)) {
         errors.push(
-          `Please select at least ${nmg.minSelections || 1} option(s) for ${nmg.name}`,
+          `Please select at least ${nmg.minSelections || 1} option(s) for ${nmg.name}`
         );
       }
     });
     return errors;
+  };
+
+  const handleClearGroup = (nmgId: string) => {
+    setLocalSelections((prev) =>
+      prev.map((gs) =>
+        gs.nmgId === nmgId ? { ...gs, selectedNestedModifiers: [] } : gs
+      )
+    );
   };
 
   const handleConfirm = () => {
@@ -204,17 +207,27 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
                           : "Optional selections"}
                     </p>
                   </div>
-                  <span
-                    className={`text-xs sm:text-sm px-1.5 sm:px-2 py-0.5 rounded-md font-subheading-oo ${
-                      !nmg.optional
-                        ? isSatisfied
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {!nmg.optional ? "Required" : "Optional"}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span
+                      className={`text-xs sm:text-sm px-1.5 sm:px-2 py-0.5 rounded-md font-subheading-oo ${
+                        !nmg.optional
+                          ? isSatisfied
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {!nmg.optional ? "Required" : "Optional"}
+                    </span>
+                    {gs.selectedNestedModifiers.length > 0 && (
+                      <button
+                        onClick={() => handleClearGroup(nmg.id)}
+                        className="text-xs sm:text-sm font-heading-oo hover:underline"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2 font-subheading-oo px-6 sm:px-8 bg-white py-4">
@@ -328,7 +341,7 @@ const NestedModifierSheet: React.FC<NestedModifierSheetProps> = ({
           })}
 
           {validationErrors.length > 0 && (
-            <div className="px-6 sm:px-8 pb-4">
+            <div ref={validationErrorRef} className="px-6 sm:px-8 pb-4">
               <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-lg">
                 <ul className="list-disc list-inside text-xs sm:text-sm space-y-1 font-body-oo">
                   {validationErrors.map((err, i) => (

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { getCartId } from "@/app/actions/cookies";
@@ -958,10 +959,8 @@ const PaymentStatusPage = () => {
                               {filteredPortions.map((k) => (
                                 <div key={k} className="grid grid-cols-12">
                                   <span className="col-span-9">
-                                    <strong className="text-black">
-                                      {portionDisplayLabel[k] ?? k}:
-                                    </strong>{" "}
-                                    {portionMap[k].join(", ")}
+                                    {portionDisplayLabel[k] ?? k}
+                                    <span className="text-gray-400 ml-1">({portionMap[k].join(", ")})</span>
                                   </span>
                                 </div>
                               ))}
@@ -1087,7 +1086,9 @@ const PaymentStatusPage = () => {
                 ) : (
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
+                    <span>
+                      ${selectedOrder?.finalAmount?.toFixed(2)}
+                    </span>
                   </div>
                 )}
 
