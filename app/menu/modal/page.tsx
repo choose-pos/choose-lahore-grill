@@ -29,10 +29,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 
-// New interface for modifier selection with quantity
+interface NestedModifierSelection {
+  id: string;
+  quantity: number;
+}
+
+interface NestedGroupSelection {
+  nmgId: string;
+  selectedNestedModifiers: NestedModifierSelection[];
+}
+
 interface ModifierSelection {
   id: string;
   quantity: number;
+  selectedNestedGroups?: NestedGroupSelection[];
 }
 
 interface SelectedModifiersState {
@@ -173,13 +183,36 @@ const ItemModal = () => {
         selections.forEach((selection) => {
           const modifier = group.modifiers.find((m) => m.id === selection.id);
           if (modifier) {
+            let baseUnit = 0;
             if (group.pricingType === PriceTypeEnum.IndividualPrice) {
-              total += modifier.price * selection.quantity * quantity;
+              baseUnit = modifier.price;
             } else if (group.pricingType === PriceTypeEnum.SamePrice) {
-              total += (group?.price ?? 0) * selection.quantity * quantity;
-            } else {
-              return;
+              baseUnit = group.price ?? 0;
             }
+
+            let nestedUnit = 0;
+            selection.selectedNestedGroups?.forEach((nmgSel) => {
+              const nmg = modifier.nestedModifierGroups?.find(
+                (nmg) => nmg.id === nmgSel.nmgId
+              );
+              if (nmg) {
+                if (nmg.pricingType === PriceTypeEnum.SamePrice) {
+                  nestedUnit +=
+                    (nmg.price ?? 0) *
+                    nmgSel.selectedNestedModifiers.reduce(
+                      (t, nm) => t + nm.quantity,
+                      0
+                    );
+                } else if (nmg.pricingType === PriceTypeEnum.IndividualPrice) {
+                  nmgSel.selectedNestedModifiers.forEach((nmSel) => {
+                    const nm = nmg.nestedModifiers.find((nm) => nm.id === nmSel.id);
+                    if (nm) nestedUnit += nm.price * nmSel.quantity;
+                  });
+                }
+              }
+            });
+
+            total += (baseUnit + nestedUnit) * selection.quantity * quantity;
           }
         });
       }
@@ -223,7 +256,7 @@ const ItemModal = () => {
   const handleModifierChange = (
     groupId: string,
     modifierId: string,
-    isMultiSelect: boolean
+    isMultiSelect: boolean,
   ) => {
     setSelectedModifiers((prev) => {
       const updated = { ...prev };
@@ -293,6 +326,39 @@ const ItemModal = () => {
     });
   };
 
+  const handleNestedConfirm = (
+    groupId: string,
+    modifierId: string,
+    nestedGroups: NestedGroupSelection[]
+  ) => {
+    setSelectedModifiers((prev) => {
+      const updated = { ...prev };
+      const currentSelections = updated[groupId] || [];
+      const group = categoryItem?.modifierGroups?.find((g) => g.id === groupId);
+      const existingIndex = currentSelections.findIndex((s) => s.id === modifierId);
+
+      if (existingIndex >= 0) {
+        updated[groupId] = currentSelections.map((s, i) =>
+          i === existingIndex ? { ...s, selectedNestedGroups: nestedGroups } : s
+        );
+      } else {
+        const newSelection: ModifierSelection = {
+          id: modifierId,
+          quantity: 1,
+          selectedNestedGroups: nestedGroups,
+        };
+        if (!group?.multiSelect) {
+          updated[groupId] = [newSelection];
+        } else {
+          if (!group.maxSelections || currentSelections.length < group.maxSelections) {
+            updated[groupId] = [...currentSelections, newSelection];
+          }
+        }
+      }
+      return updated;
+    });
+  };
+
   const validateSelection = () => {
     const errors: string[] = [];
     let firstMissingRequiredGroup: string | null = null;
@@ -306,7 +372,6 @@ const ItemModal = () => {
         } option(s) for ${group.name}`;
         errors.push(errorMessage);
 
-        // Store the first missing required group for scrolling
         if (!firstMissingRequiredGroup) {
           firstMissingRequiredGroup = group.id;
         }
@@ -317,30 +382,40 @@ const ItemModal = () => {
           `You can only select up to ${group.maxSelections} option(s) for ${group.name}`
         );
       }
+
+      selections.forEach((selection) => {
+        const modifier = group.modifiers.find((m) => m.id === selection.id);
+        modifier?.nestedModifierGroups?.forEach((nmg) => {
+          if (!nmg.optional) {
+            const nmgSel = selection.selectedNestedGroups?.find(
+              (s) => s.nmgId === nmg.id
+            );
+            const count = nmgSel?.selectedNestedModifiers.length ?? 0;
+            if (count < (nmg.minSelections || 1)) {
+              errors.push(
+                `Please select at least ${nmg.minSelections || 1} option(s) for ${nmg.name} under ${modifier.name}`
+              );
+              if (!firstMissingRequiredGroup) {
+                firstMissingRequiredGroup = group.id;
+              }
+            }
+          }
+        });
+      });
     });
 
     setValidationErrors(errors);
 
-    // Scroll to the error message div if there are errors
-    if (errors.length > 0 && validationErrorRef.current) {
-      validationErrorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-
-      window.scrollBy(0, -50);
-    }
-
-    // Scroll to the first missing required group as a fallback
-    if (firstMissingRequiredGroup) {
-      const groupElement = modifierGroupRefs.current[firstMissingRequiredGroup];
-      if (groupElement) {
-        groupElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-        window.scrollBy(0, 100);
-      }
+    if (errors.length > 0) {
+      // Defer scroll until React has re-rendered the error div
+      setTimeout(() => {
+        if (validationErrorRef.current) {
+          validationErrorRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 50);
     }
 
     return errors.length === 0;
@@ -359,6 +434,13 @@ const ItemModal = () => {
         const selectedModifiersInput = selections.map((selection) => ({
           mid: selection.id,
           qty: selection.quantity,
+          selectedNestedGroups: selection.selectedNestedGroups?.map((nmgSel) => ({
+            nmgId: nmgSel.nmgId,
+            selectedNestedModifiers: nmgSel.selectedNestedModifiers.map((nmSel) => ({
+              nmid: nmSel.id,
+              qty: nmSel.quantity,
+            })),
+          })),
         }));
 
         return {
@@ -584,6 +666,7 @@ const ItemModal = () => {
                     clearModifierSelection={clearModifierSelection}
                     handleModifierChange={handleModifierChange}
                     handleModifierQuantityChange={handleModifierQuantityChange}
+                    handleNestedConfirm={handleNestedConfirm}
                     getModifierQuantity={getModifierQuantity}
                     quantity={quantity}
                     handleQuantityChange={handleQuantityChange}

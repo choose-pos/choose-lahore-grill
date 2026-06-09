@@ -23,6 +23,35 @@ const CheckoutOrderSummary = () => {
   const [showOrderItems, setShowOrderItems] = useState(false);
 
   // Handler / Functions
+  const getNestedContribution = (
+    selectedMod: NonNullable<
+      NonNullable<
+        GroupedCartItem["modifierGroups"]
+      >[number]["selectedModifiers"]
+    >[number],
+  ): number => {
+    return (selectedMod.selectedNestedGroups ?? []).reduce((acc, nmgSel) => {
+      switch (nmgSel.nmgId.pricingType) {
+        case PriceTypeEnum.SamePrice:
+          return (
+            acc +
+            (nmgSel.nmgId.price ?? 0) *
+              nmgSel.selectedNestedModifiers.reduce((t, nm) => t + nm.qty, 0)
+          );
+        case PriceTypeEnum.IndividualPrice:
+          return (
+            acc +
+            nmgSel.selectedNestedModifiers.reduce(
+              (t, nm) => t + nm.nmid.price * nm.qty,
+              0,
+            )
+          );
+        default:
+          return acc;
+      }
+    }, 0);
+  };
+
   const calculateItemPrice = (item: GroupedCartItem): string => {
     const modifierPrice =
       item.modifierGroups?.reduce((modAcc, mod) => {
@@ -30,24 +59,33 @@ const CheckoutOrderSummary = () => {
 
         switch (mod.pricingType) {
           case PriceTypeEnum.SamePrice:
-            // Calculate total quantity of all selected modifiers
-            const totalQuantity =
-              mod.selectedModifiers?.reduce(
-                (qtyAcc, selectedMod) => qtyAcc + selectedMod.qty,
-                0
-              ) ?? 0;
-            // Multiply base price by total quantity
-            groupTotal = (mod.price ?? 0) * totalQuantity;
+            groupTotal =
+              mod.selectedModifiers?.reduce((acc, selectedMod) => {
+                return (
+                  acc +
+                  ((mod.price ?? 0) + getNestedContribution(selectedMod)) *
+                    selectedMod.qty
+                );
+              }, 0) ?? 0;
             break;
           case PriceTypeEnum.IndividualPrice:
             groupTotal =
-              mod.selectedModifiers?.reduce(
-                (selectedAcc, selectedMod) =>
-                  selectedAcc + selectedMod.mid.price * selectedMod.qty,
-                0
-              ) ?? 0;
+              mod.selectedModifiers?.reduce((acc, selectedMod) => {
+                return (
+                  acc +
+                  (selectedMod.mid.price + getNestedContribution(selectedMod)) *
+                    selectedMod.qty
+                );
+              }, 0) ?? 0;
             break;
           case PriceTypeEnum.FreeOfCharge:
+            groupTotal =
+              mod.selectedModifiers?.reduce((acc, selectedMod) => {
+                return (
+                  acc + getNestedContribution(selectedMod) * selectedMod.qty
+                );
+              }, 0) ?? 0;
+            break;
           default:
             groupTotal = 0;
         }
@@ -113,7 +151,7 @@ const CheckoutOrderSummary = () => {
               </div>
 
               {/* Items list */}
-              <div className="flex flex-col overflow-y-auto divide-y divide-gray-100 scrollbar-hide">
+              <div className="flex flex-col scrollbar-hide overflow-y-auto divide-y divide-gray-100">
                 {/* Free item */}
                 {freeItemInCart && (
                   <div className="py-3 flex items-center gap-3">
@@ -168,18 +206,96 @@ const CheckoutOrderSummary = () => {
                       </div>
 
                       {/* Modifiers */}
-                      {(item.modifierGroups?.length ?? 0) > 0 && (
-                        <p className="text-sm text-gray-400 font-body-oo mt-0.5 leading-snug">
-                          {item.modifierGroups
-                            ?.flatMap(
-                              (mg) =>
-                                mg.selectedModifiers?.map(
-                                  (m) => `${m.mid.name} x ${m.qty}`,
-                                ) ?? [],
-                            )
-                            .join(", ")}
-                        </p>
-                      )}
+                      {(item.modifierGroups?.length ?? 0) > 0 &&
+                        (() => {
+                          const PORTION_RE = /^---(.+?)---(.*)/i;
+                          const normalizePortionLabel = (raw: string) => {
+                            const s = raw.trim().toLowerCase();
+                            if (s === "whole") return "whole";
+                            if (s === "1st half") return "1half";
+                            if (s === "2nd half") return "2half";
+                            return s.replace(/\s+/g, "");
+                          };
+                          const portionMap: Record<string, string[]> = {};
+                          const normalParts: string[] = [];
+                          (item.modifierGroups ?? []).forEach((mg) => {
+                            (mg.selectedModifiers ?? []).forEach((m) => {
+                              const nestedNames = (
+                                m.selectedNestedGroups ?? []
+                              ).flatMap((nmgSel) =>
+                                nmgSel.selectedNestedModifiers.map((nm) =>
+                                  nm.qty > 1
+                                    ? `${nm.nmid.name} x${nm.qty}`
+                                    : nm.nmid.name,
+                                ),
+                              );
+                              const portionMatch = m.mid.name.match(PORTION_RE);
+                              if (portionMatch) {
+                                const label = normalizePortionLabel(
+                                  portionMatch[1],
+                                );
+                                const inlineName = portionMatch[2].trim();
+                                const toppings = inlineName
+                                  ? [
+                                      inlineName +
+                                        (m.qty > 1 ? ` x${m.qty}` : ""),
+                                    ]
+                                  : nestedNames;
+                                portionMap[label] = [
+                                  ...(portionMap[label] ?? []),
+                                  ...toppings,
+                                ];
+                              } else {
+                                const base =
+                                  m.qty > 1
+                                    ? `${m.mid.name} x ${m.qty}`
+                                    : m.mid.name;
+                                normalParts.push(
+                                  nestedNames.length > 0
+                                    ? `${base} (${nestedNames.join(", ")})`
+                                    : base,
+                                );
+                              }
+                            });
+                          });
+                          const portionOrder = ["whole", "1half", "2half"];
+                          const portionDisplayLabel: Record<string, string> = {
+                            whole: "Whole",
+                            "1half": "1st Half",
+                            "2half": "2nd Half",
+                          };
+                          const filteredPortions = portionOrder.filter(
+                            (k) => portionMap[k]?.length,
+                          );
+                          if (
+                            normalParts.length === 0 &&
+                            filteredPortions.length === 0
+                          )
+                            return null;
+                          return (
+                            <div className="text-sm text-gray-400 font-body-oo mt-0.5 leading-snug">
+                              {normalParts.length > 0 && (
+                                <p>{normalParts.join(", ")}</p>
+                              )}
+                              {filteredPortions.length > 0 && (
+                                <div
+                                  className={
+                                    normalParts.length > 0 ? "mt-1" : undefined
+                                  }
+                                >
+                                  {filteredPortions.map((k) => (
+                                    <p key={k}>
+                                      <strong className="text-black">
+                                        {portionDisplayLabel[k] ?? k}:
+                                      </strong>{" "}
+                                      {portionMap[k].join(", ")}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                       {/* Remarks */}
                       {item.remarks && (

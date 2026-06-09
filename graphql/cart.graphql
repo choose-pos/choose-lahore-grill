@@ -54,6 +54,22 @@ query FetchCartItems {
             price
             _id
           }
+          selectedNestedGroups {
+            nmgId {
+              name
+              pricingType
+              price
+              _id
+            }
+            selectedNestedModifiers {
+              qty
+              nmid {
+                name
+                price
+                _id
+              }
+            }
+          }
         }
       }
     }

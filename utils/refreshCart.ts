@@ -35,6 +35,22 @@ export const refreshCart = async (): Promise<RefreshCartResult> => {
                 _id: mod.mid._id,
                 price: mod.mid.price,
               },
+              selectedNestedGroups: mod.selectedNestedGroups?.map((nmgSel) => ({
+                nmgId: {
+                  name: nmgSel.nmgId.name,
+                  pricingType: nmgSel.nmgId.pricingType,
+                  price: nmgSel.nmgId.price,
+                  _id: nmgSel.nmgId._id,
+                },
+                selectedNestedModifiers: nmgSel.selectedNestedModifiers.map((nm) => ({
+                  qty: nm.qty,
+                  nmid: {
+                    name: nm.nmid.name,
+                    price: nm.nmid.price,
+                    _id: nm.nmid._id,
+                  },
+                })),
+              })),
             })),
           })) || [],
       }));

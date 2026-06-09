@@ -161,6 +161,14 @@ query fetchOrderById($id: ID!) {
           modifierName
           modifierPrice
           qty
+          selectedNestedGroups {
+            nmgName
+            selectedNestedModifiers {
+              nestedModifierName
+              nestedModifierPrice
+              qty
+            }
+          }
         }
       }
     }

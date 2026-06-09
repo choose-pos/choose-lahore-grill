@@ -196,6 +196,29 @@ query getCustomerItem($id: String!) {
         preSelect
         price
         isItem
+        nestedModifierGroups {
+          id
+          name
+          desc
+          optional
+          multiSelect
+          minSelections
+          maxSelections
+          pricingType
+          price
+          order
+          allowMultiSelctSingleModsInGroup
+          isMaxSelctSingleModsInGroupUnlimited
+          maxSelctSingleModsInGroup
+          nestedModifiers {
+            id
+            name
+            desc
+            price
+            preSelect
+            isItem
+          }
+        }
       }
     }
   }

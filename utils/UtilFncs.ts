@@ -2,7 +2,7 @@
 
 import { LoyaltyRedeemType, PriceTypeEnum } from "@/generated/graphql";
 import { FetchCartDetails } from "./types";
-import { ModifierGroup } from "@/components/account/TabBar";
+import { Modifier, ModifierGroup } from "@/components/account/TabBar";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const extractErrorMessage = (error: any): string => {
@@ -21,21 +21,8 @@ export const extractErrorMessage = (error: any): string => {
   }
 };
 
-export const formatGiftCardCode = (c: string) => {
-  let maskedCode = c;
-  const parts = c.split("-");
-  if (parts.length === 2) {
-    const prefix = parts[0];
-    const suffix = parts[1];
-    const visiblePart = suffix.substring(0, 2);
-    const maskedPart = "X".repeat(suffix.length - 2);
-    maskedCode = `${prefix}-${visiblePart}${maskedPart}`;
-  }
-  return maskedCode;
-};
-
 export const extractFreeDiscountItemDetails = (
-  message: string
+  message: string,
 ): { name: string; price: string } | null => {
   // Regex for the first type of message: "You got Mango Smoothie worth $4.75 for free"
   const pattern1 = /^You got (.+) worth \$([\d,]+(?:\.\d{1,2})?) for free$/;
@@ -119,7 +106,7 @@ export function formatUSAPhoneNumber(phoneNumber: number | string): string {
 export function isRewardApplied(
   points: number,
   type: LoyaltyRedeemType,
-  cartDetails: FetchCartDetails | null
+  cartDetails: FetchCartDetails | null,
 ): boolean {
   if (!cartDetails) return false;
   return (
@@ -127,8 +114,6 @@ export function isRewardApplied(
     cartDetails.loyaltyType === type
   );
 }
-
-
 
 export function setCookie(name: string, value: string, ttlSeconds: number) {
   const d = new Date();
@@ -143,27 +128,38 @@ export function getCookie(name: string): string | null {
   return null;
 }
 
-export const calculateTotalModifiersPrice = (
-  modifierGroups: ModifierGroup[]
-): number => {
+const getOrderNestedContribution = (modifier: Modifier): number =>
+  (modifier.selectedNestedGroups ?? []).reduce((acc, nmgSel) =>
+    acc + nmgSel.selectedNestedModifiers.reduce(
+      (t, nm) => t + nm.nestedModifierPrice * nm.qty, 0
+    ), 0);
+
+export const calculateTotalModifiersPrice = (modifierGroups: ModifierGroup[]): number => {
   return modifierGroups.reduce((total, group) => {
-    switch (group.pricingType) {
-      case PriceTypeEnum.SamePrice:
-        return total + (group?.price ?? 0) * group.selectedModifiers.length;
-
-      case PriceTypeEnum.IndividualPrice:
-        return (
-          total +
-          group.selectedModifiers.reduce((groupTotal, modifier) => {
-            return groupTotal + modifier.modifierPrice * modifier.qty;
-          }, 0)
-        );
-
-      case PriceTypeEnum.FreeOfCharge:
-        return total;
-
-      default:
-        return total;
-    }
+    return total + group.selectedModifiers.reduce((modTotal, modifier) => {
+      const nestedTotal = (modifier.selectedNestedGroups ?? []).reduce(
+        (nestedSum, nestedGroup) =>
+          nestedSum +
+          nestedGroup.selectedNestedModifiers.reduce(
+            (nmSum, nm) => nmSum + nm.nestedModifierPrice * nm.qty,
+            0,
+          ),
+        0,
+      );
+      return modTotal + modifier.modifierPrice * modifier.qty + nestedTotal;
+    }, 0);
   }, 0);
+};
+
+export const formatGiftCardCode = (c: string) => {
+  let maskedCode = c;
+  const parts = c.split("-");
+  if (parts.length === 2) {
+    const prefix = parts[0];
+    const suffix = parts[1];
+    const visiblePart = suffix.substring(0, 2);
+    const maskedPart = "X".repeat(suffix.length - 2);
+    maskedCode = `${prefix}-${visiblePart}${maskedPart}`;
+  }
+  return maskedCode;
 };

@@ -47,6 +47,35 @@ const CartItems = ({
   >({});
 
   // Handlers
+  const getNestedContribution = (
+    selectedMod: NonNullable<
+      NonNullable<
+        GroupedCartItem["modifierGroups"]
+      >[number]["selectedModifiers"]
+    >[number],
+  ): number => {
+    return (selectedMod.selectedNestedGroups ?? []).reduce((acc, nmgSel) => {
+      switch (nmgSel.nmgId.pricingType) {
+        case PriceTypeEnum.SamePrice:
+          return (
+            acc +
+            (nmgSel.nmgId.price ?? 0) *
+              nmgSel.selectedNestedModifiers.reduce((t, nm) => t + nm.qty, 0)
+          );
+        case PriceTypeEnum.IndividualPrice:
+          return (
+            acc +
+            nmgSel.selectedNestedModifiers.reduce(
+              (t, nm) => t + nm.nmid.price * nm.qty,
+              0,
+            )
+          );
+        default:
+          return acc;
+      }
+    }, 0);
+  };
+
   const calculateItemPrice = (item: GroupedCartItem): string => {
     const modifierPrice =
       item.modifierGroups?.reduce((modAcc, mod) => {
@@ -54,24 +83,33 @@ const CartItems = ({
 
         switch (mod.pricingType) {
           case PriceTypeEnum.SamePrice:
-            // Calculate total quantity of all selected modifiers
-            const totalQuantity =
-              mod.selectedModifiers?.reduce(
-                (qtyAcc, selectedMod) => qtyAcc + selectedMod.qty,
-                0,
-              ) ?? 0;
-            // Multiply base price by total quantity
-            groupTotal = (mod.price ?? 0) * totalQuantity;
+            groupTotal =
+              mod.selectedModifiers?.reduce((acc, selectedMod) => {
+                return (
+                  acc +
+                  ((mod.price ?? 0) + getNestedContribution(selectedMod)) *
+                    selectedMod.qty
+                );
+              }, 0) ?? 0;
             break;
           case PriceTypeEnum.IndividualPrice:
             groupTotal =
-              mod.selectedModifiers?.reduce(
-                (selectedAcc, selectedMod) =>
-                  selectedAcc + selectedMod.mid.price * selectedMod.qty,
-                0,
-              ) ?? 0;
+              mod.selectedModifiers?.reduce((acc, selectedMod) => {
+                return (
+                  acc +
+                  (selectedMod.mid.price + getNestedContribution(selectedMod)) *
+                    selectedMod.qty
+                );
+              }, 0) ?? 0;
             break;
           case PriceTypeEnum.FreeOfCharge:
+            groupTotal =
+              mod.selectedModifiers?.reduce((acc, selectedMod) => {
+                return (
+                  acc + getNestedContribution(selectedMod) * selectedMod.qty
+                );
+              }, 0) ?? 0;
+            break;
           default:
             groupTotal = 0;
         }
@@ -189,7 +227,6 @@ const CartItems = ({
       <div className="w-full flex flex-col overflow-y-scroll h-auto px-6 max-h-[40vh] ios-scroll-fix ">
         {freeItemInCart ? (
           <div className="mb-6 bg-white border-b border-gray-200 pb-6 pt-2">
-            {" "}
             <div className="w-full flex justify-between items-start space-x-2">
               <div className="flex items-start gap-4">
                 {freeItemImage ? (
@@ -203,7 +240,6 @@ const CartItems = ({
                   </div>
                 ) : null}
                 <h3 className="font-semibold font-subheading-oo text-base md:text-lg lg:text-xl">
-                  {" "}
                   {freeItemInCart.name}
                 </h3>
               </div>
@@ -238,7 +274,6 @@ const CartItems = ({
               {
                 item.itemImage ? (
                   <div className="w-16 h-16 relative self-start flex-shrink-0">
-                    {" "}
                     <Image
                       src={item.itemImage}
                       alt={item.itemName}
@@ -259,7 +294,6 @@ const CartItems = ({
                 <div className="flex justify-between items-start">
                   <div className="flex-grow pr-4">
                     <h3 className="font-semibold font-subheading-oo text-base md:text-lg">
-                      {" "}
                       {item.itemName}
                     </h3>
                   </div>
@@ -285,33 +319,110 @@ const CartItems = ({
                 </div>
 
                 {/* Modifier groups */}
-                {item.modifierGroups && item.modifierGroups.length > 0 && (
-                  <p className="font-body-oo font-normal text-sm text-textGrayColor">
-                    {item.modifierGroups
-                      .flatMap(
-                        (mg) =>
-                          mg.selectedModifiers
-                            ?.filter((m) => m.mid.name)
-                            .map((m) => `${m.mid.name} x ${m.qty}`) ?? [],
-                      )
-                      .join(", ")}
-                  </p>
-                )}
+                {item.modifierGroups &&
+                  item.modifierGroups.length > 0 &&
+                  (() => {
+                    const PORTION_RE = /^---(.+?)---(.*)/i;
+                    const normalizePortionLabel = (raw: string) => {
+                      const s = raw.trim().toLowerCase();
+                      if (s === "whole") return "whole";
+                      if (s === "1st half") return "1half";
+                      if (s === "2nd half") return "2half";
+                      return s.replace(/\s+/g, "");
+                    };
+                    const portionMap: Record<string, string[]> = {};
+                    const normalParts: string[] = [];
+                    item.modifierGroups.forEach((mg) => {
+                      (mg.selectedModifiers ?? [])
+                        .filter((m) => m.mid.name)
+                        .forEach((m) => {
+                          const nestedNames = (
+                            m.selectedNestedGroups ?? []
+                          ).flatMap((nmgSel) =>
+                            nmgSel.selectedNestedModifiers.map((nm) =>
+                              nm.qty > 1
+                                ? `${nm.nmid.name} x${nm.qty}`
+                                : nm.nmid.name,
+                            ),
+                          );
+                          const portionMatch = m.mid.name.match(PORTION_RE);
+                          if (portionMatch) {
+                            const label = normalizePortionLabel(
+                              portionMatch[1],
+                            );
+                            const inlineName = portionMatch[2].trim();
+                            const toppings = inlineName
+                              ? [inlineName + (m.qty > 1 ? ` x${m.qty}` : "")]
+                              : nestedNames;
+                            portionMap[label] = [
+                              ...(portionMap[label] ?? []),
+                              ...toppings,
+                            ];
+                          } else {
+                            const base =
+                              m.qty > 1
+                                ? `${m.mid.name} x ${m.qty}`
+                                : m.mid.name;
+                            normalParts.push(
+                              nestedNames.length > 0
+                                ? `${base} (${nestedNames.join(", ")})`
+                                : base,
+                            );
+                          }
+                        });
+                    });
+                    const portionOrder = ["whole", "1half", "2half"];
+                    const portionDisplayLabel: Record<string, string> = {
+                      whole: "Whole",
+                      "1half": "1st Half",
+                      "2half": "2nd Half",
+                    };
+                    const filteredPortions = portionOrder.filter(
+                      (k) => portionMap[k]?.length,
+                    );
+                    if (
+                      normalParts.length === 0 &&
+                      filteredPortions.length === 0
+                    )
+                      return null;
+                    return (
+                      <div className="font-body-oo font-normal text-sm text-textGrayColor">
+                        {normalParts.length > 0 && (
+                          <p>{normalParts.join(", ")}</p>
+                        )}
+                        {filteredPortions.length > 0 && (
+                          <div
+                            className={
+                              normalParts.length > 0 ? "mt-1" : undefined
+                            }
+                          >
+                            {filteredPortions.map((k) => (
+                              <p key={k}>
+                                <strong className="text-black">
+                                  {portionDisplayLabel[k] ?? k}:
+                                </strong>{" "}
+                                {portionMap[k].join(", ")}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                 {/* Remarks */}
                 {item.remarks && (
                   <p className="lg:mt-1 text-sm font-extralight capitalize font-body-oo italic">
-                    {" "}
                     {item.remarks}
                   </p>
                 )}
 
                 {/* Bottom section with price and quantity controls */}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center ">
                   <div className="flex items-center bg-white p-1 w-fit">
                     <button
                       onClick={() => handleDecreaseQuantity(item._id)}
-                      className="sm:p-1 p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                      className="sm:p-0.5 p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
                       disabled={loadingItems[item._id]?.loading ?? false}
                     >
                       {(loadingItems[item._id]?.loading ?? false) &&
@@ -333,7 +444,7 @@ const CartItems = ({
                     </span>
                     <button
                       onClick={() => handleIncreaseQuantity(item._id)}
-                      className="sm:p-1 p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
+                      className="sm:p-0.5 p-[1px] hover:bg-gray-100 transition-colors duration-200 rounded-full border-[1px] border-black"
                       disabled={loadingItems[item._id]?.loading ?? false}
                     >
                       {(loadingItems[item._id]?.loading ?? false) &&
@@ -353,7 +464,6 @@ const CartItems = ({
                   </div>
 
                   <p className="lg:text-xl md:text-lg text-base font-subheading-oo font-semibold">
-                    {" "}
                     ${calculateItemPrice(item)}
                   </p>
                 </div>
