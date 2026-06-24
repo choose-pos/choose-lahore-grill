@@ -168,6 +168,8 @@ const CartPage = ({
         const cartCount0 = cartCountReq.fetchCartCount;
         const cartStore0 = cartStoreReq.fetchCartDetails;
 
+        let promoWasRemoved = false;
+
         if (!checkDeliveryAvailable.checkDeliveryAvailable && cartCount0 > 0) {
           // Only remove if a discount-type promo is applied (not a free item promo)
           const hasFreeItem0 = !!extractFreeDiscountItemDetails(
@@ -181,12 +183,10 @@ const CartPage = ({
 
           if (!isOnlyLoyaltyFreeItem) {
             if (hasDiscountPromo0) {
+              promoWasRemoved = true;
               sdk
                 .updateCartDetails({
-                  input: {
-                    amounts: { discountAmount: 0 },
-                    discountString: null,
-                  },
+                  input: { amounts: { discountAmount: 0 }, discountString: null },
                 })
                 .catch(() => {});
               setToastData({
@@ -241,20 +241,20 @@ const CartPage = ({
             delivery: cartStore.delivery,
             amounts: {
               subTotalAmount: cartStore.amounts.subTotalAmount,
-              discountAmount: cartStore.amounts.discountAmount,
-              discountPercent: cartStore.amounts.discountPercent,
-              discountUpto: cartStore.amounts.discountUpto,
+              discountAmount: promoWasRemoved ? 0 : cartStore.amounts.discountAmount,
+              discountPercent: promoWasRemoved ? null : cartStore.amounts.discountPercent,
+              discountUpto: promoWasRemoved ? null : cartStore.amounts.discountUpto,
               tipPercent: cartStore.amounts.tipPercent,
             },
             pickUpDateAndTime: cartStore.pickUpDateAndTime,
             deliveryDateAndTime: cartStore.deliveryDateAndTime,
-            discountString: cartStore.discountString,
-            discountCode: cartStore.discountCode ?? "",
+            discountString: promoWasRemoved ? null : cartStore.discountString,
+            discountCode: promoWasRemoved ? "" : (cartStore.discountCode ?? ""),
             giftCardCode: cartStore.giftCardCode ?? null,
             giftCardDiscountAmount: cartStore.giftCardDiscountAmount ?? null,
             loyaltyRedeemPoints: cartStore.loyaltyRedeemPoints ?? 0,
             loyaltyType: cartStore.loyaltyType ?? LoyaltyRedeemType.Discount,
-            discountItemImage: cartStore.discountItemImage ?? null,
+            discountItemImage: promoWasRemoved ? null : (cartStore.discountItemImage ?? null),
           };
           setCartDetails(groupedCart);
 
@@ -280,8 +280,7 @@ const CartPage = ({
           if (cartCount === 0 && !freeItemObj) {
             setSpecialRemarks("");
             const prevDiscountString = cartDetails?.discountString ?? "";
-            const hadFreeItemPromo =
-              !!extractFreeDiscountItemDetails(prevDiscountString);
+            const hadFreeItemPromo = !!extractFreeDiscountItemDetails(prevDiscountString);
 
             // Loyalty free item redemptions should not show this error
             const wasLoyaltyFreeItem =

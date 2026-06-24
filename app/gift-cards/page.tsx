@@ -3,12 +3,59 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cookieKeys } from "@/constants";
 import { Env } from "@/env";
+import { Metadata } from "next";
+import { generateGiftCardJsonLd } from "@/utils/jsonLdUtils";
 import { getCmsSectionIdHash, groupHoursByDays } from "@/utils/theme-utils";
 import Footer from "@/components/theme_custom/components/Footer";
 import Navbar from "@/components/theme_custom/components/Navbar";
 import GiftCardPurchasePage from "@/components/giftCard/GiftCardPurchasePage";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+  const [cmsData, restaurantData] = await Promise.all([
+    sdk.GetCmsDetails({}, { cookie: cookieVal }),
+    sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
+  ]);
+
+  if (!cmsData?.getCmsDetails || !restaurantData?.getCmsRestaurantDetails) {
+    return {
+      title: "Gift Cards | Restaurant",
+      description:
+        "Purchase a gift card and give the gift of great food to friends and family.",
+    };
+  }
+
+  const { domainConfig } = cmsData.getCmsDetails;
+  const { website } = domainConfig;
+  const { name, brandingLogo } = restaurantData.getCmsRestaurantDetails;
+
+  const pageTitle = `eGift Cards | ${name}`;
+  const metaDescription = `Purchase an eGift Card from ${name}. Give the gift of great food to friends and family.`;
+
+  return {
+    title: pageTitle,
+    description: metaDescription,
+    alternates: {
+      canonical: "/gift-cards",
+    },
+    metadataBase: new URL("https://" + website),
+    openGraph: {
+      title: pageTitle,
+      description: metaDescription,
+      url: new URL("https://" + website + "/gift-cards"),
+      images: [
+        {
+          url: brandingLogo ?? "",
+          width: 1200,
+          height: 630,
+          alt: `${name} gift card`,
+        },
+      ],
+    },
+  };
+}
 
 async function getStripeId() {
   try {
@@ -131,8 +178,39 @@ export default async function GiftCardsPage() {
   const giftCardEnabledData: boolean =
     giftCardEnabled?.getGiftCardEnabled || false;
 
+  const jsonLd = rDetails
+    ? generateGiftCardJsonLd(
+        {
+          _id: "",
+          name: rDetails.name,
+          brandingLogo: rDetails.brandingLogo ?? null,
+          email: rDetails.email,
+          phone: rDetails.phone,
+          address: rDetails.address
+            ? {
+                addressLine1: rDetails.address.addressLine1 ?? "",
+                city: rDetails.address.city ?? "",
+                zipcode: rDetails.address.zipcode ?? 0,
+                state: { stateName: rDetails.address.state?.stateName ?? "" },
+                coordinate: rDetails.address.coordinate ?? null,
+              }
+            : null,
+          availability: rDetails.availability ?? null,
+          socialInfo: rDetails.socialInfo ?? null,
+        },
+        cmsData?.getCmsDetails?.domainConfig?.website ?? "",
+      )
+    : null;
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <div className="flex flex-col min-h-screen bg-white">
       {rDetails && (
         <Navbar
           navItems={navItems}
@@ -175,5 +253,6 @@ export default async function GiftCardsPage() {
         />
       )}
     </div>
+    </>
   );
 }
