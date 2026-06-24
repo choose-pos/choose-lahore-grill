@@ -1,4 +1,5 @@
 import { sdk } from "@/utils/graphqlClient";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cookieKeys } from "@/constants";
@@ -12,11 +13,17 @@ import GiftCardPurchasePage from "@/components/giftCard/GiftCardPurchasePage";
 
 export const dynamic = "force-dynamic";
 
+const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+
+const getCmsData = cache(() => sdk.GetCmsDetails({}, { cookie: cookieVal }));
+const getRestaurantData = cache(() =>
+  sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
+);
+
 export async function generateMetadata(): Promise<Metadata> {
-  const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
   const [cmsData, restaurantData] = await Promise.all([
-    sdk.GetCmsDetails({}, { cookie: cookieVal }),
-    sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
+    getCmsData(),
+    getRestaurantData(),
   ]);
 
   if (!cmsData?.getCmsDetails || !restaurantData?.getCmsRestaurantDetails) {
@@ -131,8 +138,6 @@ export default async function GiftCardsPage() {
   const cookieStore = await cookies();
   const serverIsLoggedIn = !!cookieStore.get("choose_ordering_at")?.value;
 
-  const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
-
   const [
     stripeId,
     feeConfig,
@@ -144,8 +149,8 @@ export default async function GiftCardsPage() {
   ] = await Promise.all([
     getStripeId(),
     getRestaurantFeeConfig(),
-    sdk.GetCmsDetails({}, { cookie: cookieVal }),
-    sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
+    getCmsData(),
+    getRestaurantData(),
     sdk.getCmsPromoNavItems({}, { cookie: cookieVal }),
     sdk.getGiftCardEnabled({}, { cookie: cookieVal }),
     getLoyaltyRule(),
