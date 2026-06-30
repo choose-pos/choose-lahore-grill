@@ -36,6 +36,7 @@ const Footer: React.FC<IFooterProps> = ({
     { name: "Events", link: "/event" },
     // { name: "Reservations", link: "/reservations" },
     { name: "Contact us", link: "/contact" },
+    { name: "Terms & Policies", link: "/terms-policies" },
     // { name: "Gallery", link: "/gallery" },
     // { name: "Blogs", link: "/blogs" },
   ];

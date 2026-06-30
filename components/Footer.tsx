@@ -34,6 +34,12 @@ const Footer: React.FC<FooterProps> = ({ isProfile }) => {
                 <FaInstagram className="h-4 w-4 sm:h-5 sm:w-5 cursor-pointer text-gray-700 hover:text-gray-900 transition-colors duration-200" />
               </Link>
             )}
+            <Link
+              href="/terms-policies"
+              className="text-xs text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline"
+            >
+              Terms & Policies
+            </Link>
           </div>
 
           <p className="text-sm lg:py-0 text-center">
