@@ -22,7 +22,6 @@ interface INavProps {
   email?: string;
   phone?: string;
   offerNavTitles?: { title: string; link: string }[];
-  giftCardEnabled: boolean;
 }
 
 const Navbar: React.FC<INavProps> = ({
@@ -31,9 +30,7 @@ const Navbar: React.FC<INavProps> = ({
   email,
   phone,
   offerNavTitles,
-  giftCardEnabled: _giftCardEnabled,
 }) => {
-  void _giftCardEnabled;
   const [isOpen, setIsOpen] = useState(false);
   const [showOffersMobileMenu, setShowOffersMobileMenu] = useState(false);
   const [showMoreMobileMenu, setShowMoreMobileMenu] = useState(false);

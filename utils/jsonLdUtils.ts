@@ -140,3 +140,44 @@ export const generateMenuOnlyJsonLd = (
     hasMenuSection: menuSections,
   };
 };
+
+
+export const generateGiftCardJsonLd = (
+  restaurantData: Restaurant,
+  website: string
+) => {
+  const { name, address, phone, brandingLogo } = restaurantData;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${name} eGift Card`,
+    description: `Purchase an eGift Card from ${name}. Give the gift of great food to friends and family.`,
+    image: brandingLogo ?? undefined,
+    brand: {
+      "@type": "Brand",
+      name: name,
+    },
+    offers: {
+      "@type": "Offer",
+      availability: "https://schema.org/InStock",
+      priceCurrency: "USD",
+      url: `https://${website}/gift-cards`,
+      seller: {
+        "@type": "Restaurant",
+        name: name,
+        telephone: phone,
+        address: address
+          ? {
+              "@type": "PostalAddress",
+              streetAddress: address.addressLine1,
+              addressLocality: address.city,
+              addressRegion: address.state.stateName,
+              postalCode: address.zipcode.toString(),
+            }
+          : undefined,
+      },
+    },
+  };
+};
+
