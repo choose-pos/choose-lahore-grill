@@ -301,6 +301,10 @@ const CartPage = ({
         }
       } catch (error) {
         console.log(error);
+        // // The load failed (e.g. CalculateFinalAmount threw for a broken cart),
+        // // so we no longer have trustworthy pricing. Clear it to fail safe and
+        // // keep Place Order disabled — even if a prior load left stale amounts.
+        setAmounts(null);
       } finally {
         setIsCartLoading(false);
       }
@@ -523,6 +527,9 @@ const CartPage = ({
     Math.max(0, total - (amounts?.giftCardAmt ?? 0)).toFixed(2),
   );
 
+  const cartNotOrderable =
+    !amounts || (cartData.length > 0 && !cartDetails?.amounts?.subTotalAmount);
+
   return (
     <div className="w-full h-full min-h-screen bg-white flex flex-col justify-between items-center">
       <div className="flex-1 w-full h-full relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
@@ -593,7 +600,7 @@ const CartPage = ({
               directly instead of third-party delivery apps
             </p>
             <button
-              disabled={actionLoading || isCartLoading}
+              disabled={actionLoading || isCartLoading || cartNotOrderable}
               onClick={() => {
                 if (amountToPay === 0 && !meCustomerData && !isOtpVerified) {
                   setShowGuestModal(true);
@@ -639,7 +646,7 @@ const CartPage = ({
             directly instead of third-party delivery apps
           </p>
           <button
-            disabled={actionLoading || isCartLoading}
+            disabled={actionLoading || isCartLoading || cartNotOrderable}
             onClick={() => {
               if (amountToPay === 0 && !meCustomerData && !isOtpVerified) {
                 setShowGuestModal(true);
