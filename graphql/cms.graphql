@@ -145,3 +145,7 @@ query GetCmsRestaurantDetails {
 mutation cmsContactUs($input: CmsContactInput!) {
   cmsContactUs(input: $input)
 }
+
+query GetBusinessName {
+  getBusinessName
+}

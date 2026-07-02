@@ -709,7 +709,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
           By joining, you agree to receive updates from {restaurantData?.name}{" "}
           and our technology partner Choose, and accept our{" "}
           <Link
-            href={"https://www.choosepos.com/terms-conditions"}
+            href={"/terms-policies"}
             passHref
             className="inline-block"
           >

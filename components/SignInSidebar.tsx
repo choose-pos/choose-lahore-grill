@@ -458,7 +458,7 @@ const SignInSidebar: React.FC<SignInSidebarProps> = ({
         <p className="text-xs text-gray-500">
           {`By signing up, you agree to receive promotional and transactional emails and SMS from ${restaurantData?.name} and our technology partner Choose, and consent to our`}{" "}
           <Link
-            href={"https://www.choosepos.com/terms-conditions"}
+            href={"/terms-policies"}
             passHref
             className="inline-block"
           >
