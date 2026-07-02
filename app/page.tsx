@@ -319,7 +319,6 @@ export default async function Home() {
       <div className="flex flex-col min-h-screen overflow-hidden">
         {/* TODO: Need to fix the import for this component */}
         <Navbar
-          giftCardEnabled={giftCardEnabledData ?? false}
           email={email}
           phone={phone}
           navItems={navItems}

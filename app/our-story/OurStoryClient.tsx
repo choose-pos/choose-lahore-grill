@@ -102,7 +102,6 @@ export default function OurStoryClient({
   return (
     <div>
       <Navbar
-        giftCardEnabled={giftCardEnabled}
         email={email}
         phone={phone}
         navItems={navItems}

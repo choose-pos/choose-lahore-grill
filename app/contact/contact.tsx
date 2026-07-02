@@ -37,7 +37,6 @@ export default function PartyClient({
   return (
     <div>
       <Navbar
-        giftCardEnabled={giftCardEnabled ?? false}
         email={email}
         phone={phone}
         navItems={navItems}

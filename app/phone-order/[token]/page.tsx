@@ -75,7 +75,6 @@ export default async function PhoneOrderTokenPage() {
         <Navbar
           navItems={navItems}
           logo={rDetails.brandingLogo ?? ""}
-          giftCardEnabled={giftCardEnabledData}
           offerNavTitles={promoNavItemsData.map((e) => ({
             title: e.navTitle,
             link: `/promotion/${e.link}`,

@@ -135,7 +135,6 @@ export default async function TermsPoliciesPage() {
   return (
     <div className="min-h-screen bg-bg3 text-bg1">
       <Navbar
-        giftCardEnabled={giftCardEnabled}
         email={restaurantData?.email}
         phone={restaurantData?.phone}
         navItems={navItems}

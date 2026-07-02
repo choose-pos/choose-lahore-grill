@@ -55,7 +55,6 @@ export default async function NotFound() {
     >
       <Navbar navItems={[]} 
       logo={brandingLogo ?? ""}
-      giftCardEnabled={false}
       offerNavTitles={[]} email={email} phone={phone} />
 
       

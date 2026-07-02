@@ -242,7 +242,6 @@ export default async function PromoPage({ params }: PromoPageProps) {
                 logo={brandingLogo ?? ""}
                 email={email}
                 phone={phone}
-                giftCardEnabled={giftCardEnabled ?? false}
                 offerNavTitles={promoNavItemsData.map((e) => {
                   return {
                     title: e.navTitle,
@@ -335,7 +334,6 @@ export default async function PromoPage({ params }: PromoPageProps) {
     return (
       <div className="flex flex-col min-h-screen bg-bgColor overflow-hidden">
         <Navbar
-          giftCardEnabled={false}
           navItems={navItems}
           email={email}
           phone={phone}

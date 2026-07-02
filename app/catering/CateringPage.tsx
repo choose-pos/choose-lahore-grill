@@ -42,7 +42,6 @@ export default function CateringPageClient({
   return (
     <div>
       <Navbar
-        giftCardEnabled={giftCardEnabled}
         email={email}
         phone={phone}
         navItems={navItems}
