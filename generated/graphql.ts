@@ -1069,6 +1069,7 @@ export type Item = {
   orderLimit?: Maybe<Scalars['Float']['output']>;
   orderLimitTracker?: Maybe<Scalars['Float']['output']>;
   posId?: Maybe<Scalars['String']['output']>;
+  posPrice?: Maybe<Scalars['Float']['output']>;
   posTag?: Maybe<Array<PosItemTag>>;
   price: Scalars['Float']['output'];
   priceOptions: Array<PriceOptions>;
@@ -1199,9 +1200,11 @@ export type LoyaltyPointsTransaction = {
   _id: Scalars['ID']['output'];
   createdAt: Scalars['DateTimeISO']['output'];
   customer?: Maybe<Customer>;
+  expiresAt?: Maybe<Scalars['DateTimeISO']['output']>;
   giftCard?: Maybe<Scalars['String']['output']>;
   order?: Maybe<Order>;
   points: Scalars['Float']['output'];
+  remainingPoints?: Maybe<Scalars['Float']['output']>;
   restaurant?: Maybe<Restaurant>;
   transactionType: TransactionType;
 };
@@ -1313,6 +1316,7 @@ export type Modifier = {
   name: Scalars['String']['output'];
   nestedModifierGroup: Array<NestedModifierGroupInfo>;
   posId: Scalars['String']['output'];
+  posPrice?: Maybe<Scalars['Float']['output']>;
   preSelect: Scalars['Boolean']['output'];
   price: Scalars['Float']['output'];
   restaurantId: Restaurant;
@@ -1340,6 +1344,7 @@ export type ModifierGroup = {
   name: Scalars['String']['output'];
   optional: Scalars['Boolean']['output'];
   posId?: Maybe<Scalars['String']['output']>;
+  posPrice?: Maybe<Scalars['Float']['output']>;
   price?: Maybe<Scalars['Float']['output']>;
   pricingType: PriceTypeEnum;
   restaurantId: Restaurant;
@@ -1546,6 +1551,7 @@ export type NestedModifier = {
   modifierGroup?: Maybe<Array<NestedModifierGroup>>;
   name: Scalars['String']['output'];
   posId: Scalars['String']['output'];
+  posPrice?: Maybe<Scalars['Float']['output']>;
   preSelect: Scalars['Boolean']['output'];
   price: Scalars['Float']['output'];
   restaurantId: Restaurant;
@@ -1573,6 +1579,7 @@ export type NestedModifierGroup = {
   nestedModifiers: Array<NestedModifierInfo>;
   optional: Scalars['Boolean']['output'];
   posId?: Maybe<Scalars['String']['output']>;
+  posPrice?: Maybe<Scalars['Float']['output']>;
   price?: Maybe<Scalars['Float']['output']>;
   pricingType: PriceTypeEnum;
   restaurantId: Restaurant;
@@ -1697,7 +1704,14 @@ export type Order = {
   placedAsGuestData?: Maybe<GuestData>;
   platformFeeAmount?: Maybe<Scalars['Float']['output']>;
   platformFeePercent: Scalars['Float']['output'];
+  posPushAttemptedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  posPushError?: Maybe<Scalars['String']['output']>;
+  posPushPlatform?: Maybe<IntegrationPlatformEnum>;
+  posPushStatus: PosPushStatus;
   preGrossUpAmount?: Maybe<Scalars['Float']['output']>;
+  printAttemptedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  printError?: Maybe<Scalars['String']['output']>;
+  printStatus: PrintStatus;
   queryRecord?: Maybe<Scalars['JSONObject']['output']>;
   refundAmount: Scalars['Float']['output'];
   refundLoyalty: Scalars['Float']['output'];
@@ -1756,7 +1770,7 @@ export type OrderModifiers = {
   modifierPrice: Scalars['Float']['output'];
   qty: Scalars['Float']['output'];
   selectedModifier: Modifier;
-  selectedNestedGroups: Array<OrderNestedModifierGroups>;
+  selectedNestedGroups?: Maybe<Array<OrderNestedModifierGroups>>;
 };
 
 export type OrderNestedModifierGroups = {
@@ -1843,7 +1857,14 @@ export type OrderWithTotals = {
   platformFeeAmount?: Maybe<Scalars['Float']['output']>;
   platformFeePercent: Scalars['Float']['output'];
   platformFees: Scalars['Float']['output'];
+  posPushAttemptedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  posPushError?: Maybe<Scalars['String']['output']>;
+  posPushPlatform?: Maybe<IntegrationPlatformEnum>;
+  posPushStatus: PosPushStatus;
   preGrossUpAmount?: Maybe<Scalars['Float']['output']>;
+  printAttemptedAt?: Maybe<Scalars['DateTimeISO']['output']>;
+  printError?: Maybe<Scalars['String']['output']>;
+  printStatus: PrintStatus;
   queryRecord?: Maybe<Scalars['JSONObject']['output']>;
   refundAmount: Scalars['Float']['output'];
   refundLoyalty: Scalars['Float']['output'];
@@ -2066,6 +2087,14 @@ export type PosItemTag = {
   name: Scalars['String']['output'];
 };
 
+/** Lifecycle of an order's push to a connected POS */
+export enum PosPushStatus {
+  Attempted = 'Attempted',
+  Failed = 'Failed',
+  NotAttempted = 'NotAttempted',
+  Pushed = 'Pushed'
+}
+
 export type PriceOptions = {
   __typename?: 'PriceOptions';
   menuType: MenuTypeEnum;
@@ -2077,6 +2106,14 @@ export enum PriceTypeEnum {
   FreeOfCharge = 'FreeOfCharge',
   IndividualPrice = 'IndividualPrice',
   SamePrice = 'SamePrice'
+}
+
+/** Lifecycle of an order's print */
+export enum PrintStatus {
+  Attempted = 'Attempted',
+  Failed = 'Failed',
+  NotAttempted = 'NotAttempted',
+  Printed = 'Printed'
 }
 
 export type ProcessingConfig = {
@@ -2218,6 +2255,7 @@ export type Query = {
   fetchRestaurantRedeemOffers: RestaurantRedeemOffers;
   fetchVisiblePromoCodes: VisibleOffersResult;
   getAllOwnedGiftCards: Array<OwnedGiftCardResult>;
+  getBusinessName?: Maybe<Scalars['String']['output']>;
   getCmsDetails?: Maybe<CmsRestaurant>;
   getCmsPromoNavItems: Array<PromoNavItem>;
   getCmsPromoPopUp?: Maybe<CmsPromoPopup>;
@@ -2571,6 +2609,7 @@ export type TimezoneData = {
 
 export enum TransactionType {
   Earn = 'EARN',
+  Expire = 'EXPIRE',
   Redeem = 'REDEEM',
   RefundLoyalty = 'REFUND_LOYALTY',
   ReversalEarn = 'REVERSAL_EARN',
@@ -2848,6 +2887,11 @@ export type CmsContactUsMutationVariables = Exact<{
 
 export type CmsContactUsMutation = { __typename?: 'Mutation', cmsContactUs: boolean };
 
+export type GetBusinessNameQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetBusinessNameQuery = { __typename?: 'Query', getBusinessName?: string | null };
+
 export type SendGiftCardOtpMutationVariables = Exact<{
   phone: Scalars['String']['input'];
 }>;
@@ -2989,7 +3033,7 @@ export type FetchOrderByIdQueryVariables = Exact<{
 }>;
 
 
-export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, appliedGiftCard?: { __typename?: 'GiftCardRedeemData', giftCardCode: string, amountUsed: number } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, pricingType: PriceTypeEnum, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number, selectedNestedGroups: Array<{ __typename?: 'OrderNestedModifierGroups', nmgName: string, selectedNestedModifiers: Array<{ __typename?: 'OrderNestedModifiers', nestedModifierName: string, nestedModifierPrice: number, qty: number }> }> }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
+export type FetchOrderByIdQuery = { __typename?: 'Query', fetchCustomerOrderById: { __typename?: 'OrderWithTotals', _id: string, orderId: string, orderType?: OrderType | null, taxPercent: number, specialRemark?: string | null, tipPercent?: number | null, tipAmount: number, thirdPartyTip: boolean, deliveryAmount?: number | null, refundAmount: number, paymentMethod?: string | null, createdAt: any, pickUpDateAndTime?: any | null, deliveryDateAndTime?: any | null, taxAmount: number, grossAmount: number, subTotalAmount: number, finalAmount: number, discountAmount: number, platformFees: number, status: OrderStatus, deliveryAddress?: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateId: string, stateName: string }, coordinate?: { __typename?: 'LocationCommon', coordinates: Array<number> } | null, place?: { __typename?: 'Places', placeId: string, displayName: string } | null } | null, appliedDiscount?: { __typename?: 'DiscountData', discountType: OrderDiscountType, discountAmount: number, loyaltyData?: { __typename?: 'LoyaltyRedeemData', loyaltyPointsRedeemed: number, redeemType: LoyaltyRedeemType, redeemItem?: { __typename?: 'RedeemItem', itemName: string, itemPrice: number, itemId: string } | null, redeemDiscount?: { __typename?: 'RedeemDiscount', discountType: string, discountValue?: number | null } | null } | null, promoData?: { __typename?: 'PromoCodeData', code: string, discountType: PromoDiscountType, discountValue?: number | null, discountItemId?: string | null, discountItemName?: string | null, uptoAmount?: number | null } | null } | null, appliedGiftCard?: { __typename?: 'GiftCardRedeemData', giftCardCode: string, amountUsed: number } | null, items: Array<{ __typename?: 'OrderItem', itemPrice: number, itemRemarks?: string | null, qty: number, itemName: string, modifierGroups: Array<{ __typename?: 'OrderModifierGroups', mgName: string, price?: number | null, pricingType: PriceTypeEnum, selectedModifiers: Array<{ __typename?: 'OrderModifiers', modifierName: string, modifierPrice: number, qty: number, selectedNestedGroups?: Array<{ __typename?: 'OrderNestedModifierGroups', nmgName: string, selectedNestedModifiers: Array<{ __typename?: 'OrderNestedModifiers', nestedModifierName: string, nestedModifierPrice: number, qty: number }> }> | null }> }> }>, guestData?: { __typename?: 'GuestData', phone: string } | null, customerInfo: { __typename?: 'CustomerReceiptInfo', name?: string | null, email?: string | null, phone?: string | null }, restaurantInfo: { __typename?: 'RestaurantReceiptInfo', name: string, email?: string | null, phone: string, address: { __typename?: 'AddressInfo', addressLine1: string, city: string, zipcode: number, state: { __typename?: 'StateData', stateName: string }, place?: { __typename?: 'Places', displayName: string } | null } }, loyaltyTransactions: Array<{ __typename?: 'LoyaltyTransactionSummary', transactionType: TransactionType, points: number }> } };
 
 export type CreateCheckoutPaymentIntentQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3458,6 +3502,11 @@ export const GetCmsRestaurantDetailsDocument = gql`
 export const CmsContactUsDocument = gql`
     mutation cmsContactUs($input: CmsContactInput!) {
   cmsContactUs(input: $input)
+}
+    `;
+export const GetBusinessNameDocument = gql`
+    query GetBusinessName {
+  getBusinessName
 }
     `;
 export const SendGiftCardOtpDocument = gql`
@@ -4395,6 +4444,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     cmsContactUs(variables: CmsContactUsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CmsContactUsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CmsContactUsMutation>(CmsContactUsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'cmsContactUs', 'mutation', variables);
+    },
+    GetBusinessName(variables?: GetBusinessNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetBusinessNameQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetBusinessNameQuery>(GetBusinessNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetBusinessName', 'query', variables);
     },
     SendGiftCardOtp(variables: SendGiftCardOtpMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SendGiftCardOtpMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SendGiftCardOtpMutation>(SendGiftCardOtpDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SendGiftCardOtp', 'mutation', variables);

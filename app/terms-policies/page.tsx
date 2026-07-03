@@ -24,18 +24,10 @@ type CmsRestaurant = NonNullable<
   GetCmsRestaurantDetailsQuery["getCmsRestaurantDetails"]
 >;
 
-const restaurantName = "Lahore Grill";
+
 const lastUpdated = "June 2026";
-const introText =
-  'Lahore Grill ("we," "us," "our") operates this website using the Choose online ordering platform, provided by Choose Technologies LLC ("Choose"). This page describes Lahore Grill\'s policies for orders placed through this website. For details on how your personal information is collected and used, see Choose\'s Privacy Policy and Terms & Conditions, linked at the bottom of this page.';
 const orderCancellationText =
   "You may edit or cancel your order at any time before completing payment at checkout. Once your order is confirmed and payment is processed, we begin preparing it right away, so we are unable to accept cancellations after that point.";
-const thirdPartyDeliveryPartnerText =
-  "Some delivery orders may be fulfilled by Uber Direct, an independent third-party delivery service integrated with our ordering platform. Lahore Grill is not responsible for delays, mishandling, or other issues once your order has been handed off to the delivery partner, but we're happy to help coordinate a resolution if something goes wrong — just contact us.";
-const rewardsProgramText =
-  "Lahore Grill offers a rewards program where you can earn points on qualifying purchases made through this website. Points accumulate at a rate of 10 points per $1 spent and can be redeemed for free menu items. Rewards points have no cash value, cannot be exchanged for cash, transferred to another account, or redeemed at other restaurants. We may modify, suspend, or discontinue the rewards program, or adjust point balances, at any time.";
-const alcoholText =
-  "If your order includes alcoholic beverages, you must be at least 21 years old, and you may be asked to show valid government-issued ID at pickup or delivery. We may refuse to provide alcohol, without refund for the affected items, if you or the recipient appear underage or intoxicated.";
 const privacyPlatformTermsText =
   "Orders placed through this website are processed using the Choose online ordering platform. Personal information you provide is collected and used in accordance with Choose's Privacy Policy below, and your use of the ordering platform is governed by Choose's Terms & Conditions.";
 
@@ -61,19 +53,22 @@ async function getPageData() {
   const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
 
   try {
-    const [cmsData, restaurantData, giftCardEnabled, promoNavItems] =
+    const [cmsData, restaurantData, giftCardEnabled, promoNavItems, businessNameRes] =
       await Promise.all([
         sdk.GetCmsDetails({}, { cookie: cookieVal }),
         sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
         sdk.getGiftCardEnabled({}, { cookie: cookieVal }),
         sdk.getCmsPromoNavItems({}, { cookie: cookieVal }),
+        sdk.GetBusinessName({}, { cookie: cookieVal }),
       ]);
+    const businessName = businessNameRes.getBusinessName ?? null;
 
     return {
       cmsData: cmsData.getCmsDetails,
       giftCardEnabled: giftCardEnabled.getGiftCardEnabled ?? false,
       offerNavItems: promoNavItems.getCmsPromoNavItems,
       restaurantData: restaurantData.getCmsRestaurantDetails,
+      businessName,
     };
   } catch (error) {
     console.error("Failed to fetch terms page data:", error);
@@ -83,6 +78,7 @@ async function getPageData() {
       giftCardEnabled: false,
       offerNavItems: null,
       restaurantData: null,
+      businessName: null,
     };
   }
 }
@@ -107,7 +103,7 @@ function Section({
 }
 
 export default async function TermsPoliciesPage() {
-  const { cmsData, giftCardEnabled, offerNavItems, restaurantData } =
+  const { cmsData, giftCardEnabled, offerNavItems, restaurantData, businessName } =
     await getPageData();
 
   const menuSection = cmsData?.menuSection;
@@ -126,6 +122,10 @@ export default async function TermsPoliciesPage() {
     });
   }
 
+  const displayBusinessName = businessName;
+  const introText = `${displayBusinessName} (${restaurantData?.name}) ("we," "us," "our") operates this website using the Choose online ordering platform, provided by Choose Technologies LLC ("Choose"). This page describes ${restaurantData?.name}'s policies for orders placed through this website. For details on how your personal information is collected and used, see Choose's Privacy Policy and Terms & Conditions, linked at the bottom of this page.`;
+  const thirdPartyDeliveryPartnerText = `All delivery orders will be fulfilled by Uber Direct, an independent third-party delivery service integrated with our ordering platform. ${restaurantData?.name} is not responsible for delays, mishandling, or other issues once your order has been handed off to the delivery partner, but we're happy to help coordinate a resolution if something goes wrong — just contact us.`;
+  const rewardsProgramText = `${restaurantData?.name} offers a rewards program where you can earn points on qualifying purchases made through this website. Points accumulate at a rate of 10 points per $1 spent and can be redeemed for free menu items. Rewards points have no cash value, cannot be exchanged for cash, transferred to another account, or redeemed at other restaurants. We may modify, suspend, or discontinue the rewards program, or adjust point balances, at any time.`;
   const address = formatAddress(restaurantData?.address ?? null);
   const phone = restaurantData?.phone
     ? formatUSAPhoneNumber(restaurantData.phone)
@@ -211,10 +211,6 @@ export default async function TermsPoliciesPage() {
                   }
                 </li>
                 <li>
-                  <strong>Delivery Instructions:</strong>{" "}
-                  {"You can add special delivery instructions during checkout."}
-                </li>
-                <li>
                   <strong>Third-Party Delivery Partner:</strong>{" "}
                   {thirdPartyDeliveryPartnerText}
                 </li>
@@ -228,7 +224,7 @@ export default async function TermsPoliciesPage() {
             <Section title="Email Communications">
               <p>
                 {
-                  'If you begin an order on our website but don\'t complete checkout, you may receive a follow-up email reminding you to complete your purchase. We may also send you promotional emails about offers, new menu items, or other updates. You can unsubscribe from these at any time by clicking "unsubscribe" in any marketing email, or by contacting us at '
+                  'If you begin an order on our website but don\'t complete checkout, you may receive a follow-up email reminding you to complete your purchase. We may also send you promotional emails about offers, new menu items, or other updates after you place an order. You can unsubscribe from these at any time by clicking "unsubscribe" in any marketing email, or by contacting us at '
                 }
                 {email}
                 {
@@ -237,13 +233,9 @@ export default async function TermsPoliciesPage() {
               </p>
             </Section>
 
-            <Section title="Alcohol">
-              <p>{alcoholText}</p>
-            </Section>
-
             <Section title="Contact Us">
               <address className="not-italic">
-                <strong className="text-bg1">Lahore Grill</strong>
+                <strong className="text-bg1">{restaurantData?.name}</strong>
                 <br />
                 {address}
                 <br />
@@ -275,7 +267,6 @@ export default async function TermsPoliciesPage() {
                   </Link>
                 </li>
               </ul>
-              <p className="pt-2 italic">Last updated: {lastUpdated}</p>
             </Section>
           </article>
         </div>
@@ -298,7 +289,7 @@ export default async function TermsPoliciesPage() {
           instagram: restaurantData?.socialInfo?.instagram,
           googleMapsLink: restaurantData?.socialInfo?.googleMapsLink,
         }}
-        restaurantName={restaurantData?.name ?? restaurantName}
+        restaurantName={restaurantData?.name ?? ""}
         brandingLogo={restaurantData?.brandingLogo ?? ""}
       />
     </div>

@@ -432,7 +432,7 @@ const CustomerVerification = ({
         <p className="text-xs font-body-oo text-gray-500">
           {`By verifying your OTP, you agree to receive promotional and transactional emails and SMS from ${restaurantData?.name} and our technology partner Choose, and accept our`}{" "}
           <Link
-            href={"https://www.choosepos.com/terms-conditions"}
+            href={"/terms-policies"}
             passHref
             className="inline-block"
           >
