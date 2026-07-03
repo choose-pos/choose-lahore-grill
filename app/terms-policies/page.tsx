@@ -24,7 +24,7 @@ type CmsRestaurant = NonNullable<
   GetCmsRestaurantDetailsQuery["getCmsRestaurantDetails"]
 >;
 
-const restaurantName = "Lahore Grill";
+
 const lastUpdated = "June 2026";
 const orderCancellationText =
   "You may edit or cancel your order at any time before completing payment at checkout. Once your order is confirmed and payment is processed, we begin preparing it right away, so we are unable to accept cancellations after that point.";
@@ -122,8 +122,8 @@ export default async function TermsPoliciesPage() {
     });
   }
 
-  const displayBusinessName = businessName ?? restaurantName;
-  const introText = `${displayBusinessName} (${restaurantData?.name ?? restaurantName}) ("we," "us," "our") operates this website using the Choose online ordering platform, provided by Choose Technologies LLC ("Choose"). This page describes ${restaurantData?.name}'s policies for orders placed through this website. For details on how your personal information is collected and used, see Choose's Privacy Policy and Terms & Conditions, linked at the bottom of this page.`;
+  const displayBusinessName = businessName;
+  const introText = `${displayBusinessName} (${restaurantData?.name}) ("we," "us," "our") operates this website using the Choose online ordering platform, provided by Choose Technologies LLC ("Choose"). This page describes ${restaurantData?.name}'s policies for orders placed through this website. For details on how your personal information is collected and used, see Choose's Privacy Policy and Terms & Conditions, linked at the bottom of this page.`;
   const thirdPartyDeliveryPartnerText = `All delivery orders will be fulfilled by Uber Direct, an independent third-party delivery service integrated with our ordering platform. ${restaurantData?.name} is not responsible for delays, mishandling, or other issues once your order has been handed off to the delivery partner, but we're happy to help coordinate a resolution if something goes wrong — just contact us.`;
   const rewardsProgramText = `${restaurantData?.name} offers a rewards program where you can earn points on qualifying purchases made through this website. Points accumulate at a rate of 10 points per $1 spent and can be redeemed for free menu items. Rewards points have no cash value, cannot be exchanged for cash, transferred to another account, or redeemed at other restaurants. We may modify, suspend, or discontinue the rewards program, or adjust point balances, at any time.`;
   const address = formatAddress(restaurantData?.address ?? null);
@@ -235,7 +235,7 @@ export default async function TermsPoliciesPage() {
 
             <Section title="Contact Us">
               <address className="not-italic">
-                <strong className="text-bg1">{displayBusinessName}</strong>
+                <strong className="text-bg1">{restaurantData?.name}</strong>
                 <br />
                 {address}
                 <br />
@@ -267,7 +267,6 @@ export default async function TermsPoliciesPage() {
                   </Link>
                 </li>
               </ul>
-              <p className="pt-2 italic">Last updated: {lastUpdated}</p>
             </Section>
           </article>
         </div>
@@ -290,7 +289,7 @@ export default async function TermsPoliciesPage() {
           instagram: restaurantData?.socialInfo?.instagram,
           googleMapsLink: restaurantData?.socialInfo?.googleMapsLink,
         }}
-        restaurantName={restaurantData?.name ?? restaurantName}
+        restaurantName={restaurantData?.name ?? ""}
         brandingLogo={restaurantData?.brandingLogo ?? ""}
       />
     </div>
