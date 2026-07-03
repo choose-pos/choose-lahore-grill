@@ -13,42 +13,30 @@ const Footer: React.FC<FooterProps> = ({ isProfile }) => {
 
   return (
     <div
-      className={`flex items-center justify-center w-full md:h-16 bg-gray-100 mt-auto font-subheading-oo `}
+      className={`flex items-center justify-center w-full py-6 bg-gray-100 mt-auto font-subheading-oo`}
     >
       <div
-        className={`max-w-8xl flex flex-col items-center justify-center w-full px-6 md:px-20 lg:px-28`}
+        className={`max-w-8xl flex flex-col w-full px-6 md:px-20 lg:px-28 gap-4`}
       >
-        {/* Footer Bottom Section */}
-        <div
-          className={`flex flex-col md:flex-row justify-between items-center w-full h-full gap-4 sm:gap-0 ${isProfile ? "md:pb-0 pb-5" : "md:pb-0 pb-5"}`}
-        >
+        {/* Top Row */}
+        <div className="flex justify-between items-center w-full">
           {/* Social Icons */}
-          <div className="flex items-center space-x-4 pt-2 md:pt-0">
-            {restaurantData?.socialInfo?.facebook && (
-              <Link target="_blank" href={restaurantData.socialInfo.facebook}>
-                <FaFacebook className="h-4 w-4 sm:h-5 sm:w-5 cursor-pointer text-gray-700 hover:text-gray-900 transition-colors duration-200" />
-              </Link>
-            )}
+          <div className="flex items-center space-x-4">
             {restaurantData?.socialInfo?.instagram && (
               <Link target="_blank" href={restaurantData.socialInfo.instagram}>
-                <FaInstagram className="h-4 w-4 sm:h-5 sm:w-5 cursor-pointer text-gray-700 hover:text-gray-900 transition-colors duration-200" />
+                <FaInstagram className="h-5 w-5 cursor-pointer text-black hover:opacity-85 transition-opacity" />
               </Link>
             )}
-            <Link
-              href="/terms-policies"
-              className="text-xs text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline"
-            >
-              Terms & Policies
-            </Link>
+            {restaurantData?.socialInfo?.facebook && (
+              <Link target="_blank" href={restaurantData.socialInfo.facebook}>
+                <FaFacebook className="h-5 w-5 cursor-pointer text-black hover:opacity-85 transition-opacity" />
+              </Link>
+            )}
           </div>
 
-          <p className="text-sm lg:py-0 text-center">
-            {restaurantData?.name} {new Date().getFullYear()} All Rights
-            Reserved
-          </p>
-
+          {/* Powered By */}
           <div className="flex items-center">
-            <span className="text-gray-700 text-xs sm:text-lg mr-2 font-subheading-oo">
+            <span className="text-black text-xs sm:text-sm mr-2 font-medium">
               Powered by
             </span>
             <Link
@@ -62,6 +50,22 @@ const Footer: React.FC<FooterProps> = ({ isProfile }) => {
               />
             </Link>
           </div>
+        </div>
+
+        {/* Divider Line */}
+        <hr className="w-full border-black/20" />
+
+        {/* Bottom Row */}
+        <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-2 sm:gap-0">
+          <Link
+            href="/terms-policies"
+            className="text-xs sm:text-sm text-black hover:underline underline-offset-4"
+          >
+            Terms & Policies
+          </Link>
+          <p className="text-xs sm:text-sm text-black text-center">
+            {restaurantData?.name} {new Date().getFullYear()} All Rights Reserved
+          </p>
         </div>
       </div>
     </div>
