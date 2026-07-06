@@ -320,7 +320,13 @@ async function CheckMeCustomer(): Promise<boolean> {
 
 async function getRestaurantCategories() {
   try {
-    const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+    // Forward the visitor's cart cookie so the API filters categories by
+    // the cart's scheduled time instead of "right now".
+    const cookieStore = await cookies();
+    const cartId = cookieStore.get(cookieKeys.cartCookie)?.value;
+    const cookieVal =
+      `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}` +
+      (cartId ? `; ${cookieKeys.cartCookie}=${cartId}` : "");
     const itemsResponse = await sdk.getCustomerCategoriesAndItems(
       {},
       { cookie: cookieVal },

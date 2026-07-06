@@ -364,7 +364,9 @@ RestaurantDetailsProps) {
     const hasSearch = searchQuery.trim().length > 0;
     const hasFilters = categoryType && categoryType.length > 0;
 
-    if (!hasSearch && !hasFilters) {
+    // fetchTrigger > 0 means the schedule changed after load, so the
+    // server-rendered `categories` prop is stale — refetch instead.
+    if (!hasSearch && !hasFilters && fetchTrigger === 0) {
       setFilteredCategories(categories);
       return;
     }
