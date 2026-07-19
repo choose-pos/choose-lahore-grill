@@ -161,16 +161,6 @@ const Modal: React.FC<{
   };
 
   useEffect(() => {
-    if (cartDetails?.delivery && cartDetails.delivery.place) {
-      setTempUserAddress(cartDetails.delivery as AddressInfoInput);
-      setSelectedDeliveryPlace({
-        label: cartDetails.delivery.place?.displayName,
-        value: cartDetails.delivery.place?.placeId,
-      });
-    }
-  }, [cartDetails]);
-
-  useEffect(() => {
     // Assuming there's only one restaurant, auto-select it when modal opens
     if (!showCalendar) {
       setShowCalendar(true);
