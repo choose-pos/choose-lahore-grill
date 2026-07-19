@@ -39,7 +39,7 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
     const { setToastData } = ToastStore();
 
     const { setCartCountInfo, setCartDetails, cartDetails } = useCartStore();
-    const { setShowMenu, clickState, setClickState, loadingItem } =
+    const { setShowMenu, setClickState, loadingItem } =
       useModalStore();
     const displayText =
       shouldShowMore && !isExpanded
@@ -101,7 +101,12 @@ const CategoryListing = forwardRef<HTMLDivElement, CategoryListingProps>(
               type: "error",
             });
           }
-          if (!isMobile) {
+          if (res.addToCart.message) {
+            setToastData({
+              type: "error",
+              message: res.addToCart.message,
+            });
+          } else if (!isMobile) {
             setToastData({
               type: "success",
               message: "Item added successfuly!",

@@ -14,7 +14,6 @@ import {
   extractErrorMessage,
   extractFreeDiscountItemDetails,
 } from "@/utils/UtilFncs";
-// import { convertToUTC } from "@/utils/formattedTime";
 import {
   convertNowToUtc,
   convertToUtcForTimeSlots,
@@ -26,14 +25,13 @@ import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { refreshCartDetails } from "@/utils/refreshCartDetails";
 import { Address, Availability } from "@/utils/types";
 import debounce from "lodash.debounce";
-// import moment from "moment";
 import { Env } from "@/env";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { fadeIn } from "@/utils/motion";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { FiCalendar, FiCheck, FiChevronLeft, FiClock } from "react-icons/fi";
+import {  FiChevronLeft } from "react-icons/fi";
 import { IoArrowForward, IoClose } from "react-icons/io5";
 import AsyncSelect from "react-select/async";
 import { useModalStore } from "../store/global";
@@ -42,18 +40,12 @@ import { sendAnalyticsEvent } from "@/hooks/useAnalytics";
 import { refreshCartCount } from "@/utils/getCartCountData";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
-import { LuMoveLeft, LuMoveRight } from "react-icons/lu";
-import { FaArrowRightArrowLeft } from "react-icons/fa6";
+import { LuMoveRight } from "react-icons/lu";
 
 type PlaceType = {
   label: string;
   value: string;
 };
-
-// type TimeOption = {
-//   label: string;
-//   value: string;
-// };
 
 const Modal: React.FC<{
   address: Address;
@@ -70,9 +62,7 @@ const Modal: React.FC<{
     timesList,
     clickState,
     setClickState,
-    loadingItem,
     setLoadingItem,
-    showMenu,
   } = useModalStore();
   const { setTempOrderType, tempOrderType } = OrderTypeData();
   const { setToastData } = ToastStore();
@@ -87,16 +77,9 @@ const Modal: React.FC<{
   } = useCartStore();
   const [showSchedule, setShowSchedule] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [showAllDates, setShowAllDates] = useState(false);
   const [distance, setDistance] = useState<number | null>(null);
-  const [restaurantClose, setRestaurantClose] = useState<boolean>(false);
-  const [selectedPickupPlace, setSelectedPickupPlace] =
-    useState<PlaceType | null>(null);
   const [selectedDeliveryPlace, setSelectedDeliveryPlace] =
     useState<PlaceType | null>(null);
-  // const [tempOrderType, setTempOrderType] = useState<OrderType>(
-  //   OrderType.Pickup
-  // );
   const [tempUserAddress, setTempUserAddress] =
     useState<AddressInfoInput | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -105,14 +88,22 @@ const Modal: React.FC<{
   const isDelivery = restaurantData?.deliveryConfig.provideDelivery;
   const isPickUp = restaurantData?.restaurantConfigs.pickup;
   const isScheduling = restaurantData?.restaurantConfigs.scheduleOrders;
+
   const [isDateScrollable, setIsDateScrollable] = useState(false);
   const dateScrollerRef = useRef<HTMLDivElement>(null);
   const [scrollDateDirection, setScrollDateDirection] = useState<
     "right" | "left"
   >("right");
 
-
-
+  useEffect(() => {
+    if (cartDetails?.delivery && cartDetails.delivery.place) {
+      setTempUserAddress(cartDetails.delivery as AddressInfoInput);
+      setSelectedDeliveryPlace({
+        label: cartDetails.delivery.place?.displayName,
+        value: cartDetails.delivery.place?.placeId,
+      });
+    }
+  }, [cartDetails]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -179,17 +170,6 @@ const Modal: React.FC<{
     }
   }, [cartDetails]);
 
-  // useEffect(() => {
-  //   if (!showMenu) {
-  //     document.body.classList.add("overflow-y-hidden");
-  //   } else {
-  //     document.body.classList.remove("overflow-y-hidden");
-  //   }
-  //   return () => {
-  //     document.body.classList.remove("overflow-y-hidden");
-  //   };
-  // }, [showMenu]);
-
   useEffect(() => {
     // Assuming there's only one restaurant, auto-select it when modal opens
     if (!showCalendar) {
@@ -206,13 +186,6 @@ const Modal: React.FC<{
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  // useEffect(()=> {
-  //   const updateCartSession = async () => {
-
-  //   }
-  //   updateCartSession()
-
-  // }, [orderData])
 
   const areAllValuesFilled = () => {
     if (cartDetails?.orderType === OrderType.Pickup) {
@@ -229,7 +202,7 @@ const Modal: React.FC<{
         const d = new Date(cartDetails.deliveryDateAndTime);
         if (new Date() > d) {
           return false;
-        }
+    }
       }
 
       return !!cartDetails?.delivery && !!cartDetails.deliveryDateAndTime;
@@ -242,7 +215,7 @@ const Modal: React.FC<{
     try {
       const res = await sdk.AddToCart({
         items: {
-          itemId: itemId ?? "",
+          itemId: itemId,
           qty: 1,
           categoryId: selectedCategoryId,
         },
@@ -288,7 +261,12 @@ const Modal: React.FC<{
             type: "error",
           });
         }
-        if (!isMobile) {
+        if (res.addToCart.message) {
+          setToastData({
+            type: "error",
+            message: res.addToCart.message,
+          });
+        } else if (!isMobile) {
           setToastData({
             type: "success",
             message: "Item added successfuly!",
@@ -327,55 +305,6 @@ const Modal: React.FC<{
 
   const debouncedLoadOptions = debounce(loadOptions, 800);
 
-  const handlePickupPlaceSelect = async (option: PlaceType | null) => {
-    setSelectedPickupPlace(option);
-    if (option) {
-      const d = await sdk.PlaceDetails({ placeId: option.value });
-
-      if (d.getPlaceDetails) {
-        const { latitude, longitude } = d.getPlaceDetails;
-        if (
-          address.coordinate?.coordinates[0] &&
-          address.coordinate?.coordinates[1]
-        ) {
-          const distance = getDistance(
-            latitude,
-            longitude,
-            address.coordinate.coordinates[0],
-            address.coordinate.coordinates[1],
-          );
-          setDistance(distance);
-        }
-      }
-    }
-  };
-
-  const handleLoyaltyRedeem = async (
-    points: number,
-    redeemType: LoyaltyRedeemType,
-  ) => {
-    try {
-      const res = await fetchWithAuth(() =>
-        sdk.validateLoyaltyRedemptionOnCart({
-          input: { loyaltyPointsRedeemed: points, redeemType },
-        }),
-      );
-
-      if (res.validateLoyaltyRedemptionOnCart) {
-        // Refresh cart details after applying loyalty
-        const updatedCart = await refreshCartDetails();
-        if (updatedCart?.CartDetails) {
-          setCartDetails(updatedCart.CartDetails);
-        }
-        router.push(`/menu/cart`);
-      }
-    } catch (error) {
-      setToastData({
-        type: "error",
-        message: extractErrorMessage(error),
-      });
-    }
-  };
 
   const handleDeliveryPlaceSelect = async (option: PlaceType | null) => {
     setSelectedDeliveryPlace(option);
@@ -416,6 +345,38 @@ const Modal: React.FC<{
 
         setTempUserAddress(updatedAddress as AddressInfoInput);
       }
+    }
+  };
+
+  const handleLoyaltyRedeem = async (
+    points: number,
+    redeemType: LoyaltyRedeemType,
+    itemRedemptionId?: string,
+  ) => {
+    try {
+      const res = await fetchWithAuth(() =>
+        sdk.validateLoyaltyRedemptionOnCart({
+          input: {
+            loyaltyPointsRedeemed: points,
+            redeemType,
+            itemRedemptionId,
+          },
+        }),
+      );
+
+      if (res.validateLoyaltyRedemptionOnCart) {
+        // Refresh cart details after applying loyalty
+        const updatedCart = await refreshCartDetails();
+        if (updatedCart?.CartDetails) {
+          setCartDetails(updatedCart.CartDetails);
+        }
+        router.push(`/menu/cart`);
+      }
+    } catch (error) {
+      setToastData({
+        type: "error",
+        message: extractErrorMessage(error),
+      });
     }
   };
 
@@ -504,7 +465,11 @@ const Modal: React.FC<{
         if (clickState.type === "add") {
           handleAddToCart(clickState.id);
         } else if (clickState.type === "loyalty") {
-          handleLoyaltyRedeem(clickState.points, clickState.redeemType);
+          handleLoyaltyRedeem(
+            clickState.points,
+            clickState.redeemType,
+            clickState.itemRedemptionId,
+          );
         } else {
           setSelectedItem(clickState.id);
         }
@@ -515,10 +480,14 @@ const Modal: React.FC<{
     } else {
       setShowMenu(true);
       if (clickState) {
-        if (clickState.type === "add") {
+      if (clickState.type === "add") {
           handleAddToCart(clickState.id);
         } else if (clickState.type === "loyalty") {
-          handleLoyaltyRedeem(clickState.points, clickState.redeemType);
+          handleLoyaltyRedeem(
+            clickState.points,
+            clickState.redeemType,
+            clickState.itemRedemptionId,
+          );
         } else {
           setSelectedItem(clickState.id);
         }
@@ -589,8 +558,17 @@ const Modal: React.FC<{
       });
 
       if (!isScheduling) {
-        const [dayLabel, , dayDate] = tempDeliveryDay.split(" ");
-        const selectedDate = restaurantNowLuxon.set({ day: Number(dayDate) });
+
+       const monthMap: Record<string, number> = {
+          Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+          Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12,
+        };
+        const [, monthStr, dayDate] = tempDeliveryDay.split(" ");
+        const month = monthMap[monthStr] ?? restaurantNowLuxon.month;
+        let selectedDate = restaurantNowLuxon.set({ month, day: Number(dayDate) });
+        if (selectedDate < restaurantNowLuxon.startOf("day")) {
+          selectedDate = selectedDate.plus({ years: 1 });
+        }
 
         const dayName = selectedDate.weekdayLong ?? "";
         const availability = avl.find(
@@ -623,7 +601,6 @@ const Modal: React.FC<{
 
           if (restaurantNowLuxon > lastOrderingTime) {
             setTimesList([]);
-            setRestaurantClose(true);
             return;
           }
         }
@@ -717,13 +694,6 @@ const Modal: React.FC<{
                   <h3 className="sm:text-2xl text-xl font-semibold font-subheading-oo mb-2 sm:mb-4 text-gray-900 ">
                     Pickup Details
                   </h3>
-                  {/* <AsyncSelect
-                    loadOptions={debouncedLoadOptions}
-                    onChange={handlePickupPlaceSelect}
-                    value={selectedPickupPlace}
-                    placeholder="Find the closest location for your order"
-                    className="mb-4"
-                  /> */}
                   <div className="rounded-lg sm:mt-4 mt-4 flex justify-between items-center">
                     <div>
                       <p className="font-semibold text-gray-900 font-subheading-oo">
@@ -875,7 +845,7 @@ const Modal: React.FC<{
                 className="sm:mr-2 mr-1 mb-[2px] sm:mb-0"
                 size={24}
               />
-              <span className="text-base font-subheading-oo sm:text-lg font-medium">
+              <span className="text-base sm:text-lg font-medium font-subheading-oo">
                 Back
               </span>
             </button>
@@ -915,12 +885,11 @@ const Modal: React.FC<{
                     ? daysList.map((day) => (
                         <button
                           key={day.label}
-                          className={`flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-medium transition-all duration-200 border 
-                            ${
-                              tempDeliveryDay === day.label
-                                ? "bg-primary border-primary shadow-md"
-                                : "bg-white border-gray-200 hover:bg-gray-50"
-                            }`}
+                          className={`flex flex-col items-start justify-center p-3 sm:px-4 min-w-[120px] rounded-md text-sm md:text-base font-body-oo font-medium transition-all duration-200 border ${
+                            tempDeliveryDay === day.label
+                              ? "bg-primary border-primary shadow-md"
+                              : "bg-white border-gray-200 hover:bg-gray-50"
+                          }`}
                           style={{
                             color:
                               tempDeliveryDay === day.label
@@ -971,9 +940,8 @@ const Modal: React.FC<{
                 </div>
               </div>
 
-              <div className="flex flex-col mb-6 flex-grow overflow-y-auto pr-2">
-                {" "}
-                {timesList.length === 0 && restaurantClose ? (
+              <div className="flex flex-col  mb-6 flex-grow overflow-y-auto pr-2">
+                {timesList.length === 0 ? (
                   <div className="w-full justify-center flex items-center">
                     <p className="text-lg font-subheading-oo md:text-xl mt-10 text-center">
                       Restaurant is closed for today!
@@ -1009,7 +977,7 @@ const Modal: React.FC<{
                           className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
                         <div
-                          className={`w-5 h-5  border flex items-center justify-center transition-colors duration-200 pointer-events-none ${
+                          className={`w-5 h-5 border flex items-center justify-center transition-colors duration-200 pointer-events-none ${
                             tempDeliveryTime === time
                               ? "border-primary"
                               : "border-gray-300 peer-hover:border-gray-400"

@@ -145,12 +145,18 @@ const LoyaltyOffer: React.FC<OffersScreenProps> = ({
     stopAutoScroll();
     setLoadingOfferId(offerId);
 
+    // For item offers, offerId is the LoyaltyItemRedemption _id — forward it so
+    // the right item is redeemed when several items share a points threshold.
+    const itemRedemptionId =
+      offerType === LoyaltyRedeemType.Item ? offerId : undefined;
+
     try {
       const res = await fetchWithAuth(() =>
         sdk.validateLoyaltyRedemptionOnCart({
           input: {
             loyaltyPointsRedeemed: pointsRequired,
             redeemType: offerType,
+            itemRedemptionId,
           },
         })
       );
@@ -159,6 +165,7 @@ const LoyaltyOffer: React.FC<OffersScreenProps> = ({
         loyaltyInput: {
           loyaltyPointsRedeemed: pointsRequired,
           redeemType: offerType,
+          itemRedemptionId,
         },
         promoCode: null,
       });

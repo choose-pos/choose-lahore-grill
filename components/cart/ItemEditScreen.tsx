@@ -163,12 +163,12 @@ const ItemEditScreen: React.FC<ItemEditScreenProps> = ({
     const initialModifiers: SelectedModifiersState = {};
     categoryItem.modifierGroups?.forEach((group) => {
       const selectedModsInGroup = item.modifierGroups?.find(
-        (g) => g.name === group.name,
+        (g) => g._id === group.id,
       )?.selectedModifiers;
       initialModifiers[group.id] = group.modifiers
         .filter((mod) =>
           selectedModsInGroup?.some(
-            (selectedMod) => selectedMod.mid.name === mod.name,
+            (selectedMod) => selectedMod.mid._id === mod.id,
           ),
         )
         .map((mod) => {

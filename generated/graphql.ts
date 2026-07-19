@@ -38,6 +38,12 @@ export type AccountPreferenceInput = {
   sms: Scalars['Boolean']['input'];
 };
 
+export type AddToCartResult = {
+  __typename?: 'AddToCartResult';
+  addedItemId: Scalars['String']['output'];
+  message?: Maybe<Scalars['String']['output']>;
+};
+
 export type AddressInfo = {
   __typename?: 'AddressInfo';
   _id: Scalars['ID']['output'];
@@ -189,6 +195,7 @@ export type Cart = {
   items: Array<CartItem>;
   itemsHash: Scalars['String']['output'];
   itemsUpdatedAt: Scalars['DateTimeISO']['output'];
+  loyaltyItemId?: Maybe<Scalars['ID']['output']>;
   loyaltyRedeemPoints?: Maybe<Scalars['Float']['output']>;
   loyaltyType?: Maybe<LoyaltyRedeemType>;
   orderType?: Maybe<OrderType>;
@@ -267,6 +274,13 @@ export type CartNestedModifiers = {
 export type CartNestedModifiersInput = {
   nmid: Scalars['ID']['input'];
   qty?: Scalars['Float']['input'];
+};
+
+export type CartSyncResult = {
+  __typename?: 'CartSyncResult';
+  changed: Scalars['Boolean']['output'];
+  message?: Maybe<Scalars['String']['output']>;
+  requiresReview: Scalars['Boolean']['output'];
 };
 
 export type Category = {
@@ -1169,6 +1183,7 @@ export type LoyaltyConfig = {
 };
 
 export type LoyaltyInput = {
+  itemRedemptionId?: InputMaybe<Scalars['String']['input']>;
   loyaltyPointsRedeemed: Scalars['Float']['input'];
   redeemType: LoyaltyRedeemType;
 };
@@ -1407,7 +1422,7 @@ export type ModifierInfoResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addToCart: Scalars['String']['output'];
+  addToCart: AddToCartResult;
   applyDiscountCode: ApplyDiscountCodeResult;
   clearCart: Scalars['Boolean']['output'];
   cmsContactUs: Scalars['Boolean']['output'];
@@ -1423,6 +1438,7 @@ export type Mutation = {
   sendGiftCardOtp: Scalars['Boolean']['output'];
   submitChooseOrderingFeedback: ChooseOrderingReviewFeedBack;
   submitRestaurantFeedback: RestaurantOrderingFeedBack;
+  syncCart: CartSyncResult;
   updateCartDetails: Scalars['Boolean']['output'];
   updateCartItem: Scalars['Boolean']['output'];
   updateCustomerDetails: Customer;
@@ -2408,11 +2424,13 @@ export type Restaurant = {
   __typename?: 'Restaurant';
   _id: Scalars['ID']['output'];
   address?: Maybe<AddressInfo>;
+  alertConfig?: Maybe<RestaurantAlertConfig>;
   automation?: Maybe<RestaurantAutomation>;
   availability?: Maybe<Array<Availability>>;
   beverageCategory?: Maybe<Array<BeverageCategory>>;
   brandingLogo?: Maybe<Scalars['String']['output']>;
   category?: Maybe<Array<RestaurantCategory>>;
+  choosePriceUpdated?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['DateTimeISO']['output'];
   cuisine?: Maybe<Array<CuisineData>>;
   deliveryConfig?: Maybe<DeliveryConfig>;
@@ -2442,6 +2460,14 @@ export type Restaurant = {
   updatedBy?: Maybe<User>;
   user: User;
   website?: Maybe<Scalars['String']['output']>;
+};
+
+export type RestaurantAlertConfig = {
+  __typename?: 'RestaurantAlertConfig';
+  deviceOffline: Scalars['Boolean']['output'];
+  emails: Array<Scalars['String']['output']>;
+  phoneNumbers: Array<Scalars['String']['output']>;
+  scheduledOrderPlaced: Scalars['Boolean']['output'];
 };
 
 export type RestaurantAutomation = {
@@ -2808,7 +2834,7 @@ export type AddToCartMutationVariables = Exact<{
 }>;
 
 
-export type AddToCartMutation = { __typename?: 'Mutation', addToCart: string };
+export type AddToCartMutation = { __typename?: 'Mutation', addToCart: { __typename?: 'AddToCartResult', addedItemId: string, message?: string | null } };
 
 export type DeleteCartItemMutationVariables = Exact<{
   id: Scalars['String']['input'];
@@ -2837,6 +2863,11 @@ export type UpdateCartItemMutationVariables = Exact<{
 
 
 export type UpdateCartItemMutation = { __typename?: 'Mutation', updateCartItem: boolean };
+
+export type SyncCartMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SyncCartMutation = { __typename?: 'Mutation', syncCart: { __typename?: 'CartSyncResult', changed: boolean, requiresReview: boolean, message?: string | null } };
 
 export type ClearCartMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -2982,6 +3013,11 @@ export type FetchLoyaltyCustomerRulesQueryVariables = Exact<{ [key: string]: nev
 
 
 export type FetchLoyaltyCustomerRulesQuery = { __typename?: 'Query', fetchLoyaltyCustomerRules: { __typename?: 'LoyaltyRules', signUpRewardActive: boolean, signUpRewardValue: number, onOrderRewardActive: boolean, onOrderRewardValue: number, onBirthdayRewardActive: boolean, onBirthdayRewardValue: number, programName: string, programDesc: string } };
+
+export type FetchLoyaltyPointsTransactionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type FetchLoyaltyPointsTransactionsQuery = { __typename?: 'Query', fetchLoyaltyPointsTransactions: Array<{ __typename?: 'LoyaltyPointsTransaction', _id: string, transactionType: TransactionType, points: number, createdAt: any, expiresAt?: any | null, order?: { __typename?: 'Order', _id: string } | null }> };
 
 export type FetchRestaurantRedeemOffersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3209,7 +3245,10 @@ export type CustomerLogoutQuery = { __typename?: 'Query', customerLogout: boolea
 
 export const AddToCartDocument = gql`
     mutation AddToCart($items: [CartItemInput!]!) {
-  addToCart(items: $items)
+  addToCart(items: $items) {
+    addedItemId
+    message
+  }
 }
     `;
 export const DeleteCartItemDocument = gql`
@@ -3230,6 +3269,15 @@ export const DecreaseItemQtyDocument = gql`
 export const UpdateCartItemDocument = gql`
     mutation UpdateCartItem($input: UpdateCartItemInput!) {
   updateCartItem(input: $input)
+}
+    `;
+export const SyncCartDocument = gql`
+    mutation SyncCart {
+  syncCart {
+    changed
+    requiresReview
+    message
+  }
 }
     `;
 export const ClearCartDocument = gql`
@@ -3721,6 +3769,20 @@ export const FetchLoyaltyCustomerRulesDocument = gql`
     onBirthdayRewardValue
     programName
     programDesc
+  }
+}
+    `;
+export const FetchLoyaltyPointsTransactionsDocument = gql`
+    query fetchLoyaltyPointsTransactions {
+  fetchLoyaltyPointsTransactions {
+    _id
+    transactionType
+    points
+    createdAt
+    expiresAt
+    order {
+      _id
+    }
   }
 }
     `;
@@ -4418,6 +4480,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     UpdateCartItem(variables: UpdateCartItemMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UpdateCartItemMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateCartItemMutation>(UpdateCartItemDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateCartItem', 'mutation', variables);
     },
+    SyncCart(variables?: SyncCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SyncCartMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SyncCartMutation>(SyncCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SyncCart', 'mutation', variables);
+    },
     ClearCart(variables?: ClearCartMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ClearCartMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ClearCartMutation>(ClearCartDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ClearCart', 'mutation', variables);
     },
@@ -4489,6 +4554,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     fetchLoyaltyCustomerRules(variables?: FetchLoyaltyCustomerRulesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FetchLoyaltyCustomerRulesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FetchLoyaltyCustomerRulesQuery>(FetchLoyaltyCustomerRulesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'fetchLoyaltyCustomerRules', 'query', variables);
+    },
+    fetchLoyaltyPointsTransactions(variables?: FetchLoyaltyPointsTransactionsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FetchLoyaltyPointsTransactionsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FetchLoyaltyPointsTransactionsQuery>(FetchLoyaltyPointsTransactionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'fetchLoyaltyPointsTransactions', 'query', variables);
     },
     fetchRestaurantRedeemOffers(variables?: FetchRestaurantRedeemOffersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FetchRestaurantRedeemOffersQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FetchRestaurantRedeemOffersQuery>(FetchRestaurantRedeemOffersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'fetchRestaurantRedeemOffers', 'query', variables);

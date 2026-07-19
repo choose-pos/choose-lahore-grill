@@ -7,8 +7,61 @@ import { getCmsSectionIdHash, groupHoursByDays } from "@/utils/theme-utils";
 import Footer from "@/components/theme_custom/components/Footer";
 import Navbar from "@/components/theme_custom/components/Navbar";
 import GiftCardPurchasePage from "@/components/giftCard/GiftCardPurchasePage";
+import { cache } from "react";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+const cookieVal = `${cookieKeys.restaurantCookie}=${Env.NEXT_PUBLIC_RESTAURANT_ID}`;
+
+const getCmsData = cache(() => sdk.GetCmsDetails({}, { cookie: cookieVal }));
+const getRestaurantData = cache(() =>
+  sdk.GetCmsRestaurantDetails({}, { cookie: cookieVal }),
+);
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [cmsData, restaurantData] = await Promise.all([
+    getCmsData(),
+    getRestaurantData(),
+  ]);
+
+  if (!cmsData?.getCmsDetails || !restaurantData?.getCmsRestaurantDetails) {
+    return {
+      title: "Restaurant Gift Cards",
+      description:
+        "Purchase a gift card and give the gift of great food to friends and family.",
+    };
+  }
+
+  const { domainConfig } = cmsData.getCmsDetails;
+  const { website } = domainConfig;
+  const { name, brandingLogo } = restaurantData.getCmsRestaurantDetails;
+
+  const pageTitle = `Restaurant Gift Cards`;
+  const metaDescription = `Purchase an eGift Card from ${name}. Give the gift of great food to friends and family.`;
+
+  return {
+    title: pageTitle,
+    description: metaDescription,
+    alternates: {
+      canonical: "/gift-cards",
+    },
+    metadataBase: new URL("https://" + website),
+    openGraph: {
+      title: pageTitle,
+      description: metaDescription,
+      url: new URL("https://" + website + "/gift-cards"),
+      images: [
+        {
+          url: brandingLogo ?? "",
+          width: 1200,
+          height: 630,
+          alt: `${name} gift card`,
+        },
+      ],
+    },
+  };
+}
 
 async function getStripeId() {
   try {

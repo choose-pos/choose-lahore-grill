@@ -365,7 +365,30 @@ const ItemModal = () => {
 
     categoryItem?.modifierGroups?.forEach((group) => {
       const selections = selectedModifiers[group.id] || [];
+      const hasNestedModifiers = group.modifiers.some(
+        (m) => (m.nestedModifierGroups?.length ?? 0) > 0
+      );
 
+      if (hasNestedModifiers) {
+        if (!group.optional) {
+          const validCount = group.modifiers.filter((mod) => {
+            const sel = selections.find((s) => s.id === mod.id);
+            if (!sel) return false;
+            if (!mod.nestedModifierGroups?.length) return true;
+            return mod.nestedModifierGroups.every((nmg) => {
+              if (nmg.optional) return true;
+              const nmgSel = sel.selectedNestedGroups?.find((s) => s.nmgId === nmg.id);
+              return (nmgSel?.selectedNestedModifiers.length ?? 0) >= (nmg.minSelections || 1);
+            });
+          }).length;
+          if (validCount < (group.minSelections || 1)) {
+            errors.push(`Please select option(s) for ${group.name}`);
+            if (!firstMissingRequiredGroup) {
+              firstMissingRequiredGroup = group.id;
+            }
+          }
+        }
+      } else {
       if (!group.optional && selections.length < (group.minSelections || 1)) {
         const errorMessage = `Please select at least ${
           group.minSelections || 1
@@ -402,6 +425,7 @@ const ItemModal = () => {
           }
         });
       });
+    }
     });
 
     setValidationErrors(errors);
@@ -509,7 +533,12 @@ const ItemModal = () => {
             });
           }
           closeModal();
-          if (!isMobile) {
+          if (res.addToCart.message) {
+            setToastData({
+              type: "error",
+              message: res.addToCart.message,
+            });
+          } else if (!isMobile) {
             setToastData({
               type: "success",
               message: "Item added successfuly!",

@@ -12,7 +12,11 @@ import ToastStore from "@/store/toast";
 import { getOrCreateUserHash } from "@/utils/analytics";
 import { fetchWithAuth, sdk } from "@/utils/graphqlClient";
 import { markMetaPixelPurchasePending } from "@/utils/metaPixel";
-import { extractErrorMessage } from "@/utils/UtilFncs";
+import {
+  extractErrorMessage,
+  isCartPriceMismatchError,
+  stripCartMismatchSentinel,
+} from "@/utils/UtilFncs";
 import {
   PaymentElement,
   useElements,
@@ -55,13 +59,13 @@ const CheckoutStripeForm = forwardRef<
     ref,
   ) => {
     // Configs
-    const {} = useRouter();
+    const { push } = useRouter();
     const stripe = useStripe();
     const elements = useElements();
 
     // Stores
     const { setToastData } = ToastStore();
-    const { cartData, cartDetails, specialRemarks } =
+    const { cartData, cartDetails, specialRemarks, setCartNotice } =
       useCartStore();
     const { meCustomerData } = meCustomerStore();
     const { customerData } = CustomerDataStore();
@@ -238,14 +242,22 @@ const CheckoutStripeForm = forwardRef<
           setToastData({ message: resp.createOrder.message, type: "success" });
         }
       } catch (err) {
-        refreshData();
-
-        if (extractErrorMessage(err) == "TypeError: Failed to fetch")
+        if (isCartPriceMismatchError(err)) {
+          setCartNotice({
+            message: stripCartMismatchSentinel(extractErrorMessage(err)),
+            target: "cart",
+          });
+          push("/menu/cart");
+        } else if (extractErrorMessage(err) == "TypeError: Failed to fetch") {
+          refreshData();
           setPlaceOrderErrorMessage(
             "Something went wrong, please try again later.",
           );
-        else {
-          setPlaceOrderErrorMessage(extractErrorMessage(err));
+        } else {
+          refreshData();
+          setPlaceOrderErrorMessage(
+            stripCartMismatchSentinel(extractErrorMessage(err)),
+          );
         }
       } finally {
         setPlaceOrderLoading(false);

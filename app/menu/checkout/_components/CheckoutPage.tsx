@@ -67,6 +67,7 @@ const CheckoutPage = ({
     setSpecialRemarks,
     setTotalAmount,
     setFreeItemImage,
+    setCartNotice,
   } = useCartStore();
   const { meCustomerData, setMeCustomerData } = meCustomerStore();
 
@@ -123,8 +124,8 @@ const CheckoutPage = ({
     if (phoneOrderPrefill?.specialRemark) {
       setSpecialRemarks(phoneOrderPrefill.specialRemark);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   useEffect(() => {
     // Fetching customer details if loggedin
@@ -150,6 +151,18 @@ const CheckoutPage = ({
   useEffect(() => {
     // Fetching cart details and setting in store
     const fetchCartDets = async () => {
+      let syncMessage: string | null = null;
+      let syncRequiresReview = false;
+      try {
+        const res = await sdk.SyncCart();
+        if (res.syncCart?.changed) {
+          syncMessage = res.syncCart.message ?? null;
+          syncRequiresReview = res.syncCart.requiresReview ?? false;
+        }
+      } catch (syncError) {
+        console.log("Cart sync failed on checkout load:", syncError);
+      }
+
       try {
         const [cartCountReq, cartStoreReq, cartItemsReq, cartTotalReq] =
           await Promise.all([
@@ -214,10 +227,28 @@ const CheckoutPage = ({
             loyaltyType: cartStore.loyaltyType,
           });
 
-          // If cart count is 0, redirect to menu page
           if (cartCount === 0) {
             setSpecialRemarks("");
+            setCartNotice(
+              syncMessage ? { message: syncMessage, target: "menu" } : null,
+            );
             replace("/menu");
+            return;
+          }
+
+          if (syncMessage) {
+            if (syncRequiresReview) {
+              setCartNotice({ message: syncMessage, target: "cart" });
+              push("/menu/cart");
+            } else {
+              setPlaceOrderError(syncMessage);
+              setTimeout(() => {
+                errorRef.current?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }, 100);
+            }
           }
         }
       } catch (error) {

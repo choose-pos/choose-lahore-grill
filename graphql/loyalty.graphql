@@ -20,6 +20,19 @@ query fetchLoyaltyCustomerRules {
   }
 }
 
+query fetchLoyaltyPointsTransactions {
+  fetchLoyaltyPointsTransactions {
+    _id
+    transactionType
+    points
+    createdAt
+    expiresAt
+    order {
+      _id
+    }
+  }
+}
+
 query fetchRestaurantRedeemOffers {
   fetchRestaurantRedeemOffers {
     pointsRedemptions {

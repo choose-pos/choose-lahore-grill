@@ -44,19 +44,22 @@ import { LoyaltyRedeemType } from "@/generated/graphql";
 
 import { Env } from "@/env";
 import { useCartStore } from "@/store/cart";
+import { useModalStore } from "@/store/global";
 import meCustomerStore, { CustomerNew } from "@/store/meCustomer";
 import { convertToRestoTimezone } from "@/utils/formattedTime";
+import LoyaltyPointHistory from "./LoyaltyPointHistory";
+import { OrderDetailsModal } from "./OrderDetailsModal";
 import { refreshCartCount } from "@/utils/getCartCountData";
 import { isContrastOkay } from "@/utils/isContrastOkay";
 import { refreshCartDetails } from "@/utils/refreshCartDetails";
-import { getYear } from "date-fns";
+import { format, getYear } from "date-fns";
+import { DatePicker } from "@/components/ui/date-picker";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiX } from "react-icons/fi";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import Icon from "../../assets/StarIcon2.svg";
-import { DatePicker } from "../ui/date-picker";
 
 interface TabProps {
   onTabChange: (tab: string) => void;
@@ -166,8 +169,10 @@ export const RewardsContent: React.FC<RewardsProps> = ({
   const { setToastData } = ToastStore();
   const router = useRouter();
   const { cartDetails, setCartDetails, cartCountInfo } = useCartStore();
+  const { setShowMenu, setClickState } = useModalStore();
 
   const [cartCount, setCartCount] = useState<number>(0);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -187,13 +192,45 @@ export const RewardsContent: React.FC<RewardsProps> = ({
     fetch();
   }, []);
 
-  const handleSave = async (points: number, type: any) => {
+  const isOrderTypeAndScheduleSet = (): boolean => {
+    if (!cartDetails?.orderType) return false;
+
+    const scheduleTime =
+      cartDetails.orderType === OrderType.Pickup
+        ? cartDetails.pickUpDateAndTime
+        : cartDetails.deliveryDateAndTime;
+
+    if (!scheduleTime) return false;
+
+    // Schedule time has expired
+    if (new Date() > new Date(scheduleTime)) return false;
+
+    return true;
+  };
+
+  const handleSave = async (
+    points: number,
+    type: any,
+    itemRedemptionId?: string,
+  ) => {
+    if (!isOrderTypeAndScheduleSet()) {
+      setClickState({
+        type: "loyalty",
+        points,
+        redeemType: type,
+        itemRedemptionId,
+      });
+      setShowMenu(false);
+      return;
+    }
+
     try {
       const res = await fetchWithAuth(() =>
         sdk.validateLoyaltyRedemptionOnCart({
           input: {
             loyaltyPointsRedeemed: points,
             redeemType: type,
+            itemRedemptionId,
           },
         }),
       );
@@ -242,6 +279,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
         await handleSave(
           points,
           type === "item" ? LoyaltyRedeemType.Item : LoyaltyRedeemType.Discount,
+          type === "item" ? reward.itemRedemptionId : undefined,
         );
       } finally {
         setIsCurrentLoading(false);
@@ -366,6 +404,7 @@ export const RewardsContent: React.FC<RewardsProps> = ({
                       ? LoyaltyRedeemType.Item
                       : LoyaltyRedeemType.Discount,
                     cartDetails,
+                    reward.itemName,
                   ) ? (
                     <>
                       <span>View cart</span>
@@ -401,6 +440,8 @@ export const RewardsContent: React.FC<RewardsProps> = ({
   const allRewards = [
     ...(offers?.itemRedemptions ?? []).map((reward) => ({
       key: reward._id,
+      itemRedemptionId: reward._id,
+      itemName: reward.item.name,
       title: `Free ${reward.item.name} for ${reward.pointsThreshold} ${name}`,
       points: reward.pointsThreshold,
       type: "item",
@@ -430,6 +471,12 @@ export const RewardsContent: React.FC<RewardsProps> = ({
               {desc}
             </p>
           </div>
+          <button
+            onClick={() => setShowHistory(true)}
+            className="mt-2 text-sm font-semibold text-gray-800 underline underline-offset-2 hover:opacity-80 font-body-oo"
+          >
+            View points history
+          </button>
         </div>
         <div className="flex items-center rounded-md px-4 sm:px-6 py-2 sm:py-3 shadow-inner bg-bgGray w-full sm:w-auto justify-center">
           <Image
@@ -465,6 +512,12 @@ export const RewardsContent: React.FC<RewardsProps> = ({
           </div>
         )}
       </div>
+
+      <LoyaltyPointHistory
+        open={showHistory}
+        onClose={() => setShowHistory(false)}
+        pointsName={name}
+      />
     </div>
   );
 };
@@ -484,11 +537,13 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
   const { restaurantData } = RestaurantStore();
   const { setToastData } = ToastStore();
   const [dob, setDob] = useState<string>("");
+  const [dobLocked, setDobLocked] = useState<boolean>(false);
 
   // Initialize DOB from customer data when component mounts
   useEffect(() => {
     if (customerData?.dob) {
       setDob(customerData.dob);
+      setDobLocked(true);
     }
   }, [customerData]);
 
@@ -534,6 +589,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
       setProfile(apiResp.meCustomer);
       if (apiResp.meCustomer.dob) {
         setDob(apiResp.meCustomer.dob);
+        setDobLocked(true);
       }
     } catch (error: any) {
       const err = extractErrorMessage(error);
@@ -559,12 +615,17 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
           sms: profile.accountPreferences?.sms ?? false,
           email: profile.accountPreferences?.email ?? false,
         },
-        dob: dob.length === 0 ? null : dob,
       };
+      if (!dobLocked && dob.length > 0) {
+        inputData.dob = new Date(dob).toISOString();
+      }
       const res = await fetchWithAuth(() =>
         sdk.UpdateCustomerDetails({ input: inputData }),
       );
       if (res.updateCustomerDetails) {
+        if (!dobLocked && dob.length > 0) {
+          setDobLocked(true);
+        }
         setToastData({ type: "success", message: "Account details updated!" });
       }
     } catch (error) {
@@ -652,13 +713,28 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({
           >
             Date of Birth
           </label>
-          <DatePicker
-            selectedDate={
-              (profile?.dob ?? "").length === 0 ? null : new Date(profile.dob)
-            }
-            setDateFn={(date) => setDob(date.toISOString())}
-            endYear={getYear(new Date()) - 18}
-          />
+          {dobLocked ? (
+            <input
+              id="dob"
+              name="dob"
+              value={
+                dob.length === 0 ? "" : format(new Date(dob), "MMMM do, yyyy")
+              }
+              readOnly
+              className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 shadow-sm focus:ring-opacity-50 py-2 px-3 text-sm font-body-oo"
+            />
+          ) : (
+            <div className="mt-1">
+              <DatePicker
+                selectedDate={dob.length === 0 ? null : new Date(dob)}
+                setDateFn={(date) => setDob(date.toISOString())}
+                endYear={getYear(new Date()) - 18}
+              />
+              <p className="mt-1 text-xs text-gray-500 font-body-oo">
+                Your date of birth can only be set once.
+              </p>
+            </div>
+          )}
         </div>
         <div>
           <label
@@ -797,14 +873,16 @@ export interface Modifier {
   modifierName: string;
   modifierPrice: number;
   qty: number;
-  selectedNestedGroups?: {
-    nmgName: string;
-    selectedNestedModifiers: {
-      nestedModifierName: string;
-      nestedModifierPrice: number;
-      qty: number;
-    }[];
-  }[];
+  selectedNestedGroups?:
+    | {
+        nmgName: string;
+        selectedNestedModifiers: {
+          nestedModifierName: string;
+          nestedModifierPrice: number;
+          qty: number;
+        }[];
+      }[]
+    | null;
 }
 
 export interface ModifierGroup {
@@ -965,7 +1043,7 @@ export const OrdersContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<OrderById | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const { setToastData } = ToastStore();
   const { restaurantData } = RestaurantStore();
@@ -1000,23 +1078,8 @@ export const OrdersContent: React.FC = () => {
     )
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-  const fetchOrderById = async (orderId: string) => {
-    try {
-      setModalLoading(true);
-      const res = await fetchWithAuth(() =>
-        sdk.fetchOrderById({ id: orderId }),
-      );
-      setSelectedOrder(res.fetchCustomerOrderById);
-    } catch (error) {
-      console.error("Error fetching order details:", error);
-      setToastData({ message: extractErrorMessage(error), type: "error" });
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
   const openModal = (orderId: string) => {
-    fetchOrderById(orderId);
+    setSelectedOrderId(orderId);
     setShowModal(true);
   };
 
@@ -1045,10 +1108,6 @@ export const OrdersContent: React.FC = () => {
     } finally {
       setModalLoading(false);
     }
-  };
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedOrder(null);
   };
 
   // Pagination calculations
@@ -1208,533 +1267,7 @@ export const OrdersContent: React.FC = () => {
     );
   }
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only close if the click is directly on the overlay
-    if (e.target === e.currentTarget) {
-      closeModal();
-    }
-  };
 
-  const calcDiscountAmt = (): number => {
-    if (!selectedOrder) {
-      return 0;
-    }
-
-    if (selectedOrder.discountAmount && selectedOrder.discountAmount !== 0) {
-      return selectedOrder.discountAmount;
-    }
-
-    return 0;
-  };
-
-  const OrderDetailsCardComponent: React.FC = () => {
-    return (
-      <div
-        className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50"
-        onClick={handleOverlayClick}
-      >
-        <div className="bg-white p-8 rounded-lg shadow-lg w-[90%] mx-auto md:w-full max-w-lg relative max-h-[90vh] overflow-y-scroll">
-          <button
-            className="absolute top-4 right-2 text-gray-600 hover:text-gray-900 border rounded-full p-1 bg-gray-200"
-            onClick={closeModal}
-          >
-            <FiX size={16} />
-          </button>
-          {modalLoading ? (
-            <div className="w-full flex justify-center items-center h-64">
-              <FaSpinner className="animate-spin text-3xl text-gray-600" />
-            </div>
-          ) : selectedOrder ? (
-            <div className="font-body-oo text-sm">
-              <div className="text-center mb-4">
-                <h3 className="text-xl md:text-2xl font-semibold font-subheading-oo">
-                  {selectedOrder.restaurantInfo.name}
-                </h3>
-                <p className="text-sm text-gray-700">
-                  {selectedOrder.restaurantInfo.address.addressLine1}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Phone: +1{" "}
-                  {formattedNumber(selectedOrder.restaurantInfo.phone)}
-                </p>
-
-                <hr className="my-4" />
-
-                <div className="flex flex-row justify-between items-center">
-                  <p className="text-gray-500">Order ID:</p>
-                  <p className="text-gray-500">{selectedOrder.orderId}</p>
-                </div>
-                <div className="flex flex-row justify-between items-center">
-                  <p className="text-gray-500 text-left">Order Time:</p>
-                  <p className="text-gray-500 text-right">
-                    {convertToRestoTimezone(
-                      restaurantData?.timezone?.timezoneName?.split(" ")[0] ??
-                        "",
-                      new Date(selectedOrder.createdAt),
-                    )}
-                  </p>
-                </div>
-                <div className="flex flex-row justify-between items-center">
-                  <p className="text-gray-500 text-left">
-                    {selectedOrder.orderType === OrderType.Pickup
-                      ? "Pickup Time"
-                      : "Delivery Time"}
-                    :
-                  </p>
-                  <p className="text-gray-500 text-right">
-                    {convertToRestoTimezone(
-                      restaurantData?.timezone?.timezoneName?.split(" ")[0] ??
-                        "",
-                      selectedOrder.orderType === OrderType.Pickup &&
-                        selectedOrder.pickUpDateAndTime
-                        ? new Date(selectedOrder.pickUpDateAndTime)
-                        : new Date(selectedOrder.deliveryDateAndTime ?? ""),
-                    )}
-                  </p>
-                </div>
-                <div className="flex flex-row justify-between items-center">
-                  <p className="text-gray-500 text-left">Payment Method:</p>
-                  <p className="text-gray-500 text-right capitalize">
-                    {selectedOrder.paymentMethod ?? "N/A"}
-                  </p>
-                </div>
-                {/* <div className="flex flex-row justify-between items-center">
-                  <p className="text-gray-500 text-left">Status:</p>
-                  <span
-                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      getOrderStatusDisplay(selectedOrder.status).color
-                    }`}
-                  >
-                    {getOrderStatusDisplay(selectedOrder.status).text}
-                  </span>
-                </div> */}
-              </div>
-              {/* Failure Reason in Modal */}
-              {/* {selectedOrder.status === OrderStatus.Failed &&
-                selectedOrder.systemRemark !== "" && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                    <div className="text-sm font-medium text-red-800 mb-1">
-                      Order Failed
-                    </div>
-                    <div className="text-sm text-red-700">
-                      {selectedOrder.systemRemark}
-                    </div>
-                  </div>
-                )} */}
-
-              <div className="border-t border-b py-2 mb-4">
-                <div className="grid grid-cols-12 font-semibold font-subheading-oo">
-                  <span className="col-span-9">Item</span>
-                  {/* <span className="col-span-3 text-center">Qty</span> */}
-                  <span className="col-span-3 text-right">Total</span>
-                </div>
-              </div>
-
-              <ul className="space-y-4">
-                {selectedOrder.appliedDiscount?.loyaltyData?.redeemItem ? (
-                  <li>
-                    <div className="grid grid-cols-12">
-                      <span className="col-span-9">
-                        {
-                          selectedOrder.appliedDiscount?.loyaltyData?.redeemItem
-                            ?.itemName
-                        }{" "}
-                        x 1
-                      </span>
-                      {/* <span className="col-span-3 text-center">{1}</span> */}
-                      <span className="col-span-3 text-right">
-                        $
-                        {selectedOrder.appliedDiscount?.loyaltyData?.redeemItem?.itemPrice?.toFixed(
-                          2,
-                        )}
-                      </span>
-                    </div>
-                  </li>
-                ) : null}
-
-                {selectedOrder.appliedDiscount?.promoData?.discountItemName ? (
-                  <li>
-                    <div className="grid grid-cols-12">
-                      <span className="col-span-9">
-                        {
-                          selectedOrder.appliedDiscount?.promoData
-                            ?.discountItemName
-                        }{" "}
-                        x 1
-                      </span>
-                      {/* <span className="col-span-3 text-center">{1}</span> */}
-                      <span className="col-span-3 text-right">
-                        $
-                        {selectedOrder.appliedDiscount?.promoData?.discountValue?.toFixed(
-                          2,
-                        ) || "0.00"}
-                      </span>
-                    </div>
-                  </li>
-                ) : null}
-
-                {selectedOrder.items.map((item, itemIndex) => (
-                  <li key={itemIndex}>
-                    <div className="grid grid-cols-12">
-                      <span className="col-span-9">
-                        {item.itemName} x {item.qty}
-                      </span>
-
-                      {/* <span className="col-span-3 text-center">{item.qty}</span> */}
-                      <span className="col-span-3 text-right">
-                        $
-                        {(
-                          (item.itemPrice +
-                            calculateTotalModifiersPrice(item.modifierGroups)) *
-                          item.qty
-                        ).toFixed(2)}
-                      </span>
-                    </div>
-                    {(() => {
-                      const PORTION_RE = /^---(.+?)---(.*)/i;
-                      const normalizePortionLabel = (raw: string) => {
-                        const s = raw.trim().toLowerCase();
-                        if (s === "whole") return "whole";
-                        if (s === "1st half") return "1half";
-                        if (s === "2nd half") return "2half";
-                        return s.replace(/\s+/g, "");
-                      };
-                      const portionMap: Record<string, string[]> = {};
-                      const normalMods: {
-                        name: string;
-                        qty: number;
-                        nestedNames: string[];
-                      }[] = [];
-                      item.modifierGroups.forEach((group) => {
-                        group.selectedModifiers.forEach((modifier) => {
-                          const nestedNames = (
-                            modifier.selectedNestedGroups ?? []
-                          ).flatMap((nmgSel) =>
-                            nmgSel.selectedNestedModifiers.map((nm) =>
-                              nm.qty > 1
-                                ? `${nm.nestedModifierName} x${nm.qty}`
-                                : nm.nestedModifierName,
-                            ),
-                          );
-                          const portionMatch =
-                            modifier.modifierName.match(PORTION_RE);
-                          if (portionMatch) {
-                            const label = normalizePortionLabel(
-                              portionMatch[1],
-                            );
-                            const inlineName = portionMatch[2].trim();
-                            const toppings = inlineName
-                              ? [
-                                  inlineName +
-                                    (modifier.qty > 1
-                                      ? ` x${modifier.qty}`
-                                      : ""),
-                                ]
-                              : nestedNames;
-                            portionMap[label] = [
-                              ...(portionMap[label] ?? []),
-                              ...toppings,
-                            ];
-                          } else {
-                            normalMods.push({
-                              name: modifier.modifierName,
-                              qty: modifier.qty,
-                              nestedNames,
-                            });
-                          }
-                        });
-                      });
-                      const portionOrder = ["whole", "1half", "2half"];
-                      const portionDisplayLabel: Record<string, string> = {
-                        whole: "Whole",
-                        "1half": "1st Half",
-                        "2half": "2nd Half",
-                      };
-                      const filteredPortions = portionOrder.filter(
-                        (k) => portionMap[k]?.length,
-                      );
-                      return (
-                        <div className="ml-2 text-xs text-gray-600">
-                          {normalMods.map((mod, i) => (
-                            <div key={i} className="grid grid-cols-12">
-                              <span className="col-span-6">
-                                {mod.qty > 1
-                                  ? `${mod.name} x ${mod.qty}`
-                                  : mod.name}
-                                {mod.nestedNames.length > 0 && (
-                                  <span className="text-gray-400 ml-1">
-                                    ({mod.nestedNames.join(", ")})
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-                          ))}
-                          {filteredPortions.length > 0 && (
-                            <div
-                              className={
-                                normalMods.length > 0 ? "mt-1" : undefined
-                              }
-                            >
-                              {filteredPortions.map((k) => (
-                                <div key={k} className="grid grid-cols-12">
-                                  <span className="col-span-6">
-                                    {portionDisplayLabel[k] ?? k}
-                                    <span className="text-gray-400 ml-1">({portionMap[k].join(", ")})</span>
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                    {item.itemRemarks && (
-                      <p className="text-gray-600  text-[12px] max-w-[300px]">
-                        Remarks: {item.itemRemarks}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="border-t mt-4 pt-4 space-y-2">
-                <div className="flex justify-between">
-                  <span>Gross Amount</span>
-                  <span>${selectedOrder.subTotalAmount?.toFixed(2)}</span>
-                </div>
-                {selectedOrder.discountAmount &&
-                selectedOrder.discountAmount !== 0 ? (
-                  <div className="flex justify-between">
-                    <span>Discount</span>
-                    <span>-${selectedOrder.discountAmount.toFixed(2)}</span>
-                  </div>
-                ) : null}
-
-                {calcDiscountAmt() > 0 ? (
-                  <div className="flex justify-between">
-                    <span>Net Amount</span>
-                    <span>
-                      $
-                      {(
-                        (selectedOrder.subTotalAmount ?? 0) - calcDiscountAmt()
-                      ).toFixed(2)}
-                    </span>
-                  </div>
-                ) : null}
-
-                {selectedOrder.taxAmount &&
-                (selectedOrder.platformFees !== null ||
-                  selectedOrder.platformFees !== undefined) ? (
-                  <div className="flex justify-between">
-                    <span>Taxes & Fees</span>
-                    <span>
-                      $
-                      {(
-                        parseFloat((selectedOrder.taxAmount ?? 0).toFixed(2)) +
-                        parseFloat((selectedOrder.platformFees ?? 0).toFixed(2))
-                      ).toFixed(2)}
-                    </span>
-                  </div>
-                ) : null}
-
-                {selectedOrder.tipAmount !== null ||
-                selectedOrder.tipAmount !== undefined ? (
-                  <div className="flex justify-between">
-                    {/* <span>{`Tip (${
-                      selectedOrder.thirdPartyTip ? "3rd Party" : "In House"
-                    })`}</span> */}
-                    <span>{`Tip`}</span>
-                    <span>
-                      $
-                      {selectedOrder.tipAmount !== null &&
-                      selectedOrder.tipAmount !== undefined
-                        ? selectedOrder.tipAmount.toFixed(2)
-                        : Number(0).toFixed(2)}
-                    </span>
-                  </div>
-                ) : null}
-
-                {(selectedOrder.deliveryAmount ?? 0) > 0 ? (
-                  <div className="flex justify-between">
-                    <span>Delivery Fees</span>
-                    <span>
-                      ${(selectedOrder.deliveryAmount ?? 0).toFixed(2)}
-                    </span>
-                  </div>
-                ) : null}
-
-                {selectedOrder.appliedGiftCard?.amountUsed ? (
-                  <>
-                    <div className="flex justify-between font-semibold font-subheading-oo text-lg border-t pt-2">
-                      <span>Subtotal</span>
-                      <span>
-                        $
-                        {(
-                          (selectedOrder.subTotalAmount ?? 0) -
-                          calcDiscountAmt() +
-                          (selectedOrder.taxAmount ?? 0) +
-                          (selectedOrder.platformFees ?? 0) +
-                          (selectedOrder.tipAmount ?? 0) +
-                          (selectedOrder.deliveryAmount ?? 0)
-                        ).toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-green-600">
-                      <span>
-                        Gift Card ({selectedOrder.appliedGiftCard.giftCardCode})
-                      </span>
-                      <span>
-                        -${selectedOrder.appliedGiftCard.amountUsed.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between font-semibold font-subheading-oo text-lg">
-                      <span>Total</span>
-                      <span>
-                        $
-                        {(
-                          (selectedOrder?.finalAmount ?? 0) -
-                          (selectedOrder?.appliedGiftCard.amountUsed ?? 0)
-                        )?.toFixed(2)}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex justify-between font-semibold font-subheading-oo text-lg">
-                    <span>Total</span>
-                    <span>${selectedOrder?.finalAmount?.toFixed(2)}</span>
-                  </div>
-                )}
-
-                {(selectedOrder?.refundAmount ?? 0) > 0 ? (
-                  <div className="flex justify-between text-green-600">
-                    <span>Refund</span>
-                    <span>${selectedOrder?.refundAmount?.toFixed(2)}</span>
-                  </div>
-                ) : null}
-              </div>
-
-              {selectedOrder.appliedDiscount &&
-                selectedOrder.appliedDiscount.discountType ===
-                  OrderDiscountType.Promo && (
-                  <div className="mt-4 bg-blue-50 p-4 rounded-md">
-                    <p>
-                      You used code{" "}
-                      {selectedOrder.appliedDiscount.promoData?.code} for{" "}
-                      {selectedOrder.appliedDiscount.promoData?.discountValue &&
-                      selectedOrder.appliedDiscount.promoData.discountType ===
-                        PromoDiscountType.Free
-                        ? `$${selectedOrder.appliedDiscount?.promoData?.discountValue} off`
-                        : selectedOrder.appliedDiscount.promoData
-                              ?.discountValue &&
-                            selectedOrder.appliedDiscount.promoData
-                              .discountType === PromoDiscountType.FreeDelivery
-                          ? "free delivery"
-                          : selectedOrder.appliedDiscount.promoData
-                                ?.discountValue &&
-                              selectedOrder.appliedDiscount.promoData
-                                .discountType === PromoDiscountType.FixedAmount
-                            ? `Discount: $${selectedOrder.appliedDiscount.promoData.discountValue.toFixed(
-                                2,
-                              )} off`
-                            : selectedOrder.appliedDiscount.promoData
-                                  ?.discountValue &&
-                                selectedOrder.appliedDiscount.promoData
-                                  .discountType === PromoDiscountType.Percentage
-                              ? `$${selectedOrder.appliedDiscount.discountAmount?.toFixed(
-                                  2,
-                                )} off`
-                              : selectedOrder.appliedDiscount.promoData
-                                  ?.discountItemName &&
-                                `Item: ${selectedOrder.appliedDiscount.promoData.discountItemName}`}
-                    </p>
-                  </div>
-                )}
-
-              {selectedOrder.appliedDiscount &&
-                selectedOrder.appliedDiscount.discountType ===
-                  OrderDiscountType.Loyalty && (
-                  <div className="mt-4 bg-blue-50 p-4 rounded-md">
-                    <p>
-                      You used your{" "}
-                      {
-                        selectedOrder.appliedDiscount.loyaltyData
-                          ?.loyaltyPointsRedeemed
-                      }{" "}
-                      points for{" "}
-                      {selectedOrder.appliedDiscount.loyaltyData
-                        ?.redeemItem && (
-                        <>
-                          Item:{" "}
-                          {
-                            selectedOrder.appliedDiscount.loyaltyData
-                              ?.redeemItem.itemName
-                          }{" "}
-                          (Value: $
-                          {selectedOrder.appliedDiscount.loyaltyData?.redeemItem.itemPrice.toFixed(
-                            2,
-                          )}
-                          )
-                        </>
-                      )}
-                      {selectedOrder.appliedDiscount.loyaltyData?.redeemDiscount
-                        ?.discountValue &&
-                        (selectedOrder.appliedDiscount.loyaltyData
-                          ?.redeemDiscount.discountType ===
-                          DiscountType.FixedAmount ||
-                          selectedOrder.appliedDiscount.loyaltyData
-                            ?.redeemDiscount.discountType ===
-                            DiscountType.Percentage) && (
-                          <>
-                            Discount: $
-                            {selectedOrder.appliedDiscount.loyaltyData?.redeemDiscount.discountValue.toFixed(
-                              2,
-                            )}{" "}
-                            off
-                          </>
-                        )}
-                    </p>
-                  </div>
-                )}
-
-              {selectedOrder?.loyaltyTransactions &&
-                selectedOrder.loyaltyTransactions.length > 0 && (
-                  <div>
-                    {selectedOrder.loyaltyTransactions.map(
-                      (transaction, index) => (
-                        <div key={index}>
-                          {transaction.transactionType ===
-                            TransactionType.Earn && (
-                            <p className="mt-4 bg-green-50 p-4 rounded-md">
-                              You earned {transaction.points} points for this
-                              order
-                            </p>
-                          )}
-                        </div>
-                      ),
-                    )}
-                  </div>
-                )}
-
-              {selectedOrder.specialRemark && (
-                <div className="mt-4 bg-yellow-50 p-4 rounded-md">
-                  <h4 className="font-semibold font-subheading-oo mb-2">
-                    Restaurant Remarks
-                  </h4>
-                  <p>{selectedOrder.specialRemark}</p>
-                </div>
-              )}
-
-              <div className="mt-6 text-center text-gray-500 text-xs">
-                <p>Thank you for your order!</p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-red-500">Failed to load order details.</p>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="lg:px-12 xl:px-20">
@@ -1968,7 +1501,14 @@ export const OrdersContent: React.FC = () => {
         </div>
       </div>
       <PaginationControls />
-      {showModal && <OrderDetailsCardComponent />}
+      <OrderDetailsModal
+        open={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setSelectedOrderId(null);
+        }}
+        orderId={selectedOrderId}
+      />
     </div>
   );
 };

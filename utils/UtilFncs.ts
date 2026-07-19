@@ -21,6 +21,39 @@ export const extractErrorMessage = (error: any): string => {
   }
 };
 
+/**
+ * The server appends this to every error caused by the cart changing under the
+ * customer (prices moved, items removed, promo no longer qualifies) — see the
+ * createOrder / createOrderWithoutPayment throws in order.service.ts. Those get
+ * routed to the cart review modal instead of being shown as a payment failure.
+ */
+export const CART_MISMATCH_MESSAGE_SENTINEL =
+  "Please review your cart before continuing with your order";
+
+// Appended by the server to a PRICE-ONLY change error (createOrderFixed /
+// createOrderWithoutPayment). Stripped for display like the mismatch sentinel.
+export const PRICE_UPDATED_RETRY_SENTINEL =
+  "Please review the updated total and place your order again";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isCartPriceMismatchError = (error: any): boolean =>
+  extractErrorMessage(error).includes(CART_MISMATCH_MESSAGE_SENTINEL);
+
+
+// Trim the server's appended "next action" instructions from an error before
+// showing it, so the customer only sees the actual reason (the sync message).
+export const stripCartMismatchSentinel = (message: string): string => {
+  let cleaned = message;
+  for (const sentinel of [
+    CART_MISMATCH_MESSAGE_SENTINEL,
+    PRICE_UPDATED_RETRY_SENTINEL,
+  ]) {
+    const idx = cleaned.indexOf(sentinel);
+    if (idx !== -1) cleaned = cleaned.slice(0, idx);
+  }
+  return cleaned.replace(/\s+/g, " ").trim();
+};
+
 export const extractFreeDiscountItemDetails = (
   message: string,
 ): { name: string; price: string } | null => {
@@ -107,12 +140,19 @@ export function isRewardApplied(
   points: number,
   type: LoyaltyRedeemType,
   cartDetails: FetchCartDetails | null,
+  itemName?: string | null,
 ): boolean {
   if (!cartDetails) return false;
-  return (
+  const baseMatch =
     cartDetails.loyaltyRedeemPoints === points &&
-    cartDetails.loyaltyType === type
-  );
+    cartDetails.loyaltyType === type;
+  if (!baseMatch) return false;
+  if (type === LoyaltyRedeemType.Item && itemName) {
+    return (cartDetails.discountString ?? "")
+      .toLowerCase()
+      .includes(itemName.toLowerCase());
+  }
+  return true;
 }
 
 export function setCookie(name: string, value: string, ttlSeconds: number) {
