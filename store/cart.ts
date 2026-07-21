@@ -31,9 +31,15 @@ interface CartStore {
   incrementCartCountInfo: (data: number) => void;
   fetchTrigger: number;
   setFetchTrigger: (data: number) => void;
+  cartNotice: { message: string; target: "cart" | "menu" } | null;
+  setCartNotice: (
+    notice: { message: string; target: "cart" | "menu" } | null,
+  ) => void;
 }
 
 export const useCartStore = create<CartStore>((set) => ({
+  cartNotice: null,
+  setCartNotice: (notice) => set({ cartNotice: notice }),
   specialRemarks: "",
   setSpecialRemarks: (remarks) => set({ specialRemarks: remarks }),
 

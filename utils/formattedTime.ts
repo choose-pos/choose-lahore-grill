@@ -195,8 +195,16 @@ export const getTimeSlots = (
   });
 
   // Parse selected day label
-  const [dayLabel, , dayDate] = selectedDayLabel.split(" ");
-  const selectedDate = restaurantNowLuxon.set({ day: Number(dayDate) });
+ const monthMap: Record<string, number> = {
+    Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+    Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12,
+  };
+  const [dayLabel, monthStr, dayDate] = selectedDayLabel.split(" ");
+  const month = monthMap[monthStr] ?? restaurantNowLuxon.month;
+  let selectedDate = restaurantNowLuxon.set({ month, day: Number(dayDate) });
+  if (selectedDate < restaurantNowLuxon.startOf("day")) {
+    selectedDate = selectedDate.plus({ years: 1 }); // Dec -> Jan rollover
+  }
 
   // Get the day name
   const dayName = selectedDate.weekdayLong ?? "";

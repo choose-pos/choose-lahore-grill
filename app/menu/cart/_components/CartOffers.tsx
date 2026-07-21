@@ -102,9 +102,16 @@ const CartOffers = ({
       points: number;
       type: LoyaltyRedeemType;
       image?: string | null;
+      itemRedemptionId?: string;
+      itemName?: string;
     }[]
   >([]);
-  const [applyLoyaltyLoading, setApplyLoyaltyLoading] = useState(false);
+  const [loadingOfferKey, setLoadingOfferKey] = useState<string | null>(null);
+
+  // Unique key per offer so offers sharing a points threshold don't all show
+  // the loading state together (item offers key by their redemption id).
+  const offerKey = (o: { points: number; itemRedemptionId?: string }) =>
+    o.itemRedemptionId ?? `discount-${o.points}`;
   const [loyaltyError, setLoyaltyError] = useState<string>();
 
   // UseEffects
@@ -115,6 +122,8 @@ const CartOffers = ({
         points: number;
         type: LoyaltyRedeemType;
         image?: string | null;
+        itemRedemptionId?: string;
+        itemName?: string;
       }[] = [];
       loyaltyOffers.itemRedemptions.forEach((i) => {
         arr.push({
@@ -122,6 +131,8 @@ const CartOffers = ({
           points: i.pointsThreshold,
           type: LoyaltyRedeemType.Item,
           image: i.item.image ?? null,
+          itemRedemptionId: i._id,
+          itemName: i.item.name,
         });
       });
 
@@ -224,13 +235,18 @@ const CartOffers = ({
   const handleApplyLoyalty = async (
     points: number,
     type: LoyaltyRedeemType,
+    itemRedemptionId?: string,
   ) => {
     setLoyaltyError(undefined);
-    setApplyLoyaltyLoading(true);
+    setLoadingOfferKey(offerKey({ points, itemRedemptionId }));
     try {
       const res = await fetchWithAuth(() =>
         sdk.validateLoyaltyRedemptionOnCart({
-          input: { loyaltyPointsRedeemed: points, redeemType: type },
+          input: {
+            loyaltyPointsRedeemed: points,
+            redeemType: type,
+            itemRedemptionId,
+          },
         }),
       );
 
@@ -241,7 +257,7 @@ const CartOffers = ({
     } catch (error) {
       setLoyaltyError(extractErrorMessage(error));
     } finally {
-      setApplyLoyaltyLoading(false);
+      setLoadingOfferKey(null);
     }
   };
 
@@ -595,12 +611,13 @@ const CartOffers = ({
                                       handleApplyLoyalty(
                                         offer.points,
                                         offer.type,
+                                        offer.itemRedemptionId,
                                       )
                                     }
-                                    disabled={applyLoyaltyLoading}
+                                    disabled={loadingOfferKey === offerKey(offer)}
                                     className={`inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-md bg-white text-primary border border-primary disabled:opacity-50 disabled:bg-gray-300`}
                                   >
-                                    {applyLoyaltyLoading ? (
+                                    {loadingOfferKey === offerKey(offer) ? (
                                       <div className="text-black flex items-center">
                                         <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                                         <p>Applying...</p>

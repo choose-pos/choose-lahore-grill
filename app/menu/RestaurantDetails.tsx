@@ -44,7 +44,7 @@ import { OrderTypeData } from "@/store/orderType";
 
 interface RestaurantDetailsProps {
   restaurant: CustomerRestaurant;
-  categories: CustomerCategoryItem[];
+  categories: CustomerCategoryItem[] | null;
   loyaltyRule: { value: number; name: string; signUpValue: number } | null;
   loyaltyOffers: RestaurantRedeemOffers | null;
   mismatch: boolean | null;
@@ -64,7 +64,7 @@ export default function RestaurantDetails({
 RestaurantDetailsProps) {
   const [filteredCategories, setFilteredCategories] = useState<
     CustomerCategoryItem[] | null
-  >(null);
+  >(categories);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCategoriesPopupOpen, setIsCategoriesPopupOpen] =
@@ -84,7 +84,8 @@ RestaurantDetailsProps) {
     setCartCountInfo,
     setCartDetails,
     fetchTrigger,
-    setFetchTrigger,
+    cartNotice,
+    setCartNotice,
   } = useCartStore();
   const searchParams = useSearchParams();
   // const { cartCountInfo } = useCartStore();
@@ -120,6 +121,14 @@ RestaurantDetailsProps) {
       setShowMenu(false);
     }
   }, [mismatch]);
+
+
+  useEffect(() => {
+    if (cartNotice) {
+      setToastData({ type: "error", message: cartNotice.message });
+      setCartNotice(null);
+    }
+  }, [cartNotice]);
 
   useEffect(() => {
     const queryParam = searchParams.get("delivery");
@@ -187,6 +196,15 @@ RestaurantDetailsProps) {
   // Fetching cart count and cart details
   useEffect(() => {
     const fetchCartDets = async () => {
+      try {
+        const res = await sdk.SyncCart();
+        if (res.syncCart?.changed && res.syncCart.message) {
+          setToastData({ type: "error", message: res.syncCart.message });
+        }
+      } catch (error) {
+        console.log("Cart sync failed on menu load:", error);
+      }
+
       const [cartCountReq, cartStoreReq] = await Promise.all([
         sdk.fetchCartCount(),
         sdk.fetchCartDetails(),
@@ -252,7 +270,7 @@ RestaurantDetailsProps) {
       }
     };
     fetchCartDets();
-  }, [setCartCountInfo, setCartDetails, setShowMenu]);
+  }, [setCartCountInfo, setCartDetails, setShowMenu, setToastData]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

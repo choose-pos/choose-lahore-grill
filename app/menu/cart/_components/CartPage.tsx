@@ -27,6 +27,8 @@ import {
 import {
   extractErrorMessage,
   extractFreeDiscountItemDetails,
+  isCartPriceMismatchError,
+  stripCartMismatchSentinel,
 } from "@/utils/UtilFncs";
 import { AnimatePresence, motion } from "framer-motion";
 import { fadeIn } from "@/utils/motion";
@@ -80,6 +82,8 @@ const CartPage = ({
     setSpecialRemarks,
     setTotalAmount,
     setFreeItemImage,
+    cartNotice,
+    setCartNotice,
   } = useCartStore();
   const { meCustomerData, setMeCustomerData } = meCustomerStore();
 
@@ -99,6 +103,9 @@ const CartPage = ({
   const [isTotalVisible, setIsTotalVisible] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [promoRemovedMsg, setPromoRemovedMsg] = useState<string | null>(null);
+  const [showPriceUpdatedModal, setShowPriceUpdatedModal] =
+    useState<boolean>(false);
+  const [cartSyncMessage, setCartSyncMessage] = useState<string | null>(null);
   useAnalytics("cart_visited");
 
   useEffect(() => {
@@ -141,8 +148,6 @@ const CartPage = ({
   }, [restaurantInfo, setRestaurantData]);
 
   useEffect(() => {
-    // If user changes or removes promo code, reset their otp verified status
-    // so they are prompted to verify guest details again
     setIsOtpVerified(false);
   }, [cartDetails?.discountCode, cartDetails?.discountString]);
 
@@ -150,7 +155,25 @@ const CartPage = ({
     // Fetching cart details and setting in store
     const fetchCartDets = async () => {
       setIsCartLoading(true);
+      //only call sync cart on cart page when its not redirected from somewhere else
+      const hasIncomingCartNotice = cartNotice?.target === "cart";
+      let removalMessage: string | null = hasIncomingCartNotice
+        ? cartNotice!.message
+        : null;
       try {
+        try {
+          const sync = await sdk.SyncCart();
+          if (sync.syncCart?.changed) {
+            if (!hasIncomingCartNotice) {
+              setShowPriceUpdatedModal(true);
+              setCartSyncMessage(sync.syncCart.message ?? null);
+            }
+            removalMessage = sync.syncCart.message ?? removalMessage;
+          }
+        } catch (syncError) {
+          console.log("Cart sync failed on cart load:", syncError);
+        }
+
         const [
           cartCountReq,
           cartStoreReq,
@@ -168,6 +191,8 @@ const CartPage = ({
         const cartCount0 = cartCountReq.fetchCartCount;
         const cartStore0 = cartStoreReq.fetchCartDetails;
 
+        let promoWasRemoved = false;
+
         if (!checkDeliveryAvailable.checkDeliveryAvailable && cartCount0 > 0) {
           // Only remove if a discount-type promo is applied (not a free item promo)
           const hasFreeItem0 = !!extractFreeDiscountItemDetails(
@@ -181,6 +206,7 @@ const CartPage = ({
 
           if (!isOnlyLoyaltyFreeItem) {
             if (hasDiscountPromo0) {
+              promoWasRemoved = true;
               sdk
                 .updateCartDetails({
                   input: {
@@ -211,6 +237,7 @@ const CartPage = ({
             message: cartItemsReq.message,
             type: "error",
           });
+          removalMessage = cartItemsReq.message ?? removalMessage;
 
           const [
             updatedCartCountReq,
@@ -241,21 +268,20 @@ const CartPage = ({
             delivery: cartStore.delivery,
             amounts: {
               subTotalAmount: cartStore.amounts.subTotalAmount,
-              discountAmount: cartStore.amounts.discountAmount,
-              discountPercent: cartStore.amounts.discountPercent,
-              discountUpto: cartStore.amounts.discountUpto,
+              discountAmount: promoWasRemoved ? 0 : cartStore.amounts.discountAmount,
+              discountPercent: promoWasRemoved ? null : cartStore.amounts.discountPercent,
+              discountUpto: promoWasRemoved ? null : cartStore.amounts.discountUpto,
               tipPercent: cartStore.amounts.tipPercent,
             },
             pickUpDateAndTime: cartStore.pickUpDateAndTime,
             deliveryDateAndTime: cartStore.deliveryDateAndTime,
-            discountString: cartStore.discountString,
-            discountCode: cartStore.discountCode ?? "",
+            discountString: promoWasRemoved ? null : cartStore.discountString,
+            discountCode: promoWasRemoved ? "" : cartStore.discountCode ?? "",
             giftCardCode: cartStore.giftCardCode ?? null,
             giftCardDiscountAmount: cartStore.giftCardDiscountAmount ?? null,
             loyaltyRedeemPoints: cartStore.loyaltyRedeemPoints ?? 0,
             loyaltyType: cartStore.loyaltyType ?? LoyaltyRedeemType.Discount,
-            discountItemImage: cartStore.discountItemImage ?? null,
-          };
+            discountItemImage: promoWasRemoved ? null : (cartStore.discountItemImage ?? null),          };
           setCartDetails(groupedCart);
 
           // Check if we have a free item
@@ -295,6 +321,11 @@ const CartPage = ({
                   "Your free item promo was removed as there are no qualifying items in your cart.",
               });
             }
+            setCartNotice(
+              removalMessage
+                ? { message: removalMessage, target: "menu" }
+                : null,
+            );
 
             replace("/menu");
           }
@@ -323,6 +354,14 @@ const CartPage = ({
     setTotalAmount,
     stateChange,
   ]);
+
+  useEffect(() => {
+    if (!isCartLoading && cartNotice?.target === "cart") {
+      setShowPriceUpdatedModal(true);
+      setCartSyncMessage(cartNotice.message);
+      setCartNotice(null);
+    }
+  }, [isCartLoading, cartNotice]);
 
   useEffect(() => {
     // Calculating amounts
@@ -488,16 +527,28 @@ const CartPage = ({
           replace(`/menu/redirect/free-order?orderId=${orderId}`);
         }
       } catch (error) {
-        setToastData({
-          type: "error",
-          message: extractErrorMessage(error),
-        });
+        if (isCartPriceMismatchError(error)) {
+          setCartSyncMessage(
+            stripCartMismatchSentinel(extractErrorMessage(error)),
+          );
+          setShowPriceUpdatedModal(true);
+        } else {
+          setToastData({
+            type: "error",
+            message: extractErrorMessage(error),
+          });
+        }
       } finally {
         setActionLoading(false);
       }
     } else {
       push("/menu/checkout");
     }
+  };
+
+  const handleReviewCartAfterPriceUpdate = () => {
+    setShowPriceUpdatedModal(false);
+    setCartSyncMessage(null);
   };
 
   const handleCloseGuestModal = async () => {
@@ -769,15 +820,15 @@ const CartPage = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 sm:p-4"
             onClick={() => setPromoRemovedMsg(null)}
           >
             <motion.div
-              variants={fadeIn("up", "tween", 0, 0.25)}
-              initial="hidden"
-              animate="show"
-              exit="hidden"
-              className="bg-white w-full sm:max-w-md rounded-md shadow-xl flex flex-col overflow-hidden"
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "tween", duration: 0.25 }}
+              className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-md shadow-xl flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center p-5 border-b shrink-0">
@@ -822,6 +873,74 @@ const CartPage = ({
                     }}
                   >
                     Okay
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Price Updated Modal */}
+      <AnimatePresence>
+        {showPriceUpdatedModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 sm:p-4"
+            onClick={handleReviewCartAfterPriceUpdate}
+          >
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "tween", duration: 0.25 }}
+              className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-md shadow-xl flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center p-5 border-b shrink-0">
+                <h3 className="text-xl font-semibold text-gray-900 font-subheading-oo">
+                  Your Cart Has Been Updated
+                </h3>
+                <button
+                  onClick={handleReviewCartAfterPriceUpdate}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                  aria-label="Close modal"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-700 font-body-oo text-base leading-relaxed">
+                  {cartSyncMessage}
+                </p>
+                <div className="mt-8 flex justify-end">
+                  <button
+                    onClick={handleReviewCartAfterPriceUpdate}
+                    className="bg-primary text-white font-subheading-oo font-semibold py-2 px-6 rounded-md hover:bg-opacity-90 transition-all cursor-pointer"
+                    style={{
+                      color: isContrastOkay(
+                        Env.NEXT_PUBLIC_PRIMARY_COLOR,
+                        Env.NEXT_PUBLIC_BACKGROUND_COLOR,
+                      )
+                        ? Env.NEXT_PUBLIC_BACKGROUND_COLOR
+                        : Env.NEXT_PUBLIC_TEXT_COLOR,
+                    }}
+                  >
+                    Review My Cart
                   </button>
                 </div>
               </div>

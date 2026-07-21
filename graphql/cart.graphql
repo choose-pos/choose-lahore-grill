@@ -1,5 +1,8 @@
 mutation AddToCart($items: [CartItemInput!]!) {
-  addToCart(items: $items)
+  addToCart(items: $items) {
+    addedItemId
+    message
+  }
 }
 
 mutation DeleteCartItem($id: String!) {
@@ -16,6 +19,14 @@ mutation DecreaseItemQty($id: String!) {
 
 mutation UpdateCartItem($input: UpdateCartItemInput!) {
   updateCartItem(input: $input)
+}
+
+mutation SyncCart {
+  syncCart {
+    changed
+    requiresReview
+    message
+  }
 }
 
 mutation ClearCart {

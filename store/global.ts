@@ -3,7 +3,12 @@ import { create } from "zustand";
 
 type ClickState =
   | { type: "view" | "add"; id: string }
-  | { type: "loyalty"; points: number; redeemType: LoyaltyRedeemType };
+   | {
+      type: "loyalty";
+      points: number;
+      redeemType: LoyaltyRedeemType;
+      itemRedemptionId?: string;
+    };
 
 type ModalStore = {
   showMenu: boolean;

@@ -130,7 +130,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
       });
 
       if (res.addToCart) {
-        const cartItemId = res.addToCart;
+        const cartItemId = res.addToCart.addedItemId;
 
         // Track event
         const userHash = getOrCreateUserHash(); // Generate or retrieve persistent user hash
@@ -161,6 +161,10 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
         const res2 = await refreshCartDetails();
         if (res2?.CartDetails) {
           setCartDetails(res2.CartDetails);
+        }
+        
+        if (res.addToCart.message) {
+          setToastData({ type: "error", message: res.addToCart.message });
         }
         // setToastData({
         //   type: "success",
@@ -255,7 +259,7 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
       });
 
       if (res.addToCart) {
-        const newCartItemId = res.addToCart;
+        const newCartItemId = res.addToCart.addedItemId;
         setCartItemIds((prev) => ({ ...prev, [itemId]: newCartItemId }));
         setOriginalQuantities((prev) => ({
           ...prev,
@@ -265,6 +269,9 @@ const ItemOptions: React.FC<ItemOptionsProps> = ({ upsellItem }) => {
         const res2 = await refreshCartDetails();
         if (res2?.CartDetails) {
           setCartDetails(res2.CartDetails);
+        }
+        if (res.addToCart.message) {
+          setToastData({ type: "error", message: res.addToCart.message });
         }
         // setToastData({
         //   type: "success",
